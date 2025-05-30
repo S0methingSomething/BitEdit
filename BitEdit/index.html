@@ -216,7 +216,8 @@
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <button id="download-encrypted-button" class="w-full sm:w-auto px-4 py-3 sm:px-6 font-semibold rounded-md shadow-lg focus:outline-none transition duration-150 order-1 button button-action-green">
-                    Download Encrypted "MonetizationVars" </button>
+                    Download Encrypted "MonetizationVars"
+                </button>
                 <div class="flex flex-col xs:flex-row gap-2 order-2 sm:order-3 mt-2 sm:mt-0 w-full sm:w-auto">
                     <button id="copy-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium rounded-md shadow-sm button button-action-indigo w-full xs:w-auto">Copy JSON</button>
                     <button id="download-decrypted-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium rounded-md shadow-sm button button-action-sky w-full xs:w-auto">Download Decrypted JSON</button>
@@ -277,9 +278,10 @@
         </ul>
     </div>
 </div> <footer class="app-footer w-full">
-    <p class="version">v1.0.8</p> </footer>
+    <p class="version">v1.0.9</p> </footer>
 
     <script>
+        // This script is placed at the end of the body for optimal loading performance.
         const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
         const B64_NET_BOOLEAN_TRUE_STANDARD = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs=";
         const B64_NET_BOOLEAN_TRUE_VARIANT  = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAs=";
@@ -290,7 +292,7 @@
 
         const obfCharMap = {0x61:0x7a,0x62:0x6d,0x63:0x79,0x64:0x6c,0x65:0x78,0x66:0x6b,0x67:0x77,0x68:0x6a,0x69:0x76,0x6a:0x69,0x6b:0x75,0x6c:0x68,0x6d:0x74,0x6e:0x67,0x6f:0x73,0x70:0x66,0x71:0x72,0x72:0x65,0x73:0x71,0x74:0x64,0x75:0x70,0x76:0x63,0x77:0x6f,0x78:0x62,0x79:0x6e,0x7a:0x61};
 
-        const ui = {
+        const ui = { // Cached DOM elements for performance
             tabDecrypt: document.getElementById('tab-decrypt'),
             tabEncrypt: document.getElementById('tab-encrypt'),
             toolContent: document.getElementById('tool-content'),
@@ -324,18 +326,18 @@
 
         // --- State Management for Tabs ---
         let activeMode = 'decrypt';
-        let currentJsonObject = null; // Reflects the JSON of the active tab's processed data
-        let currentInputFileName = 'file'; // Reflects the input filename of the active tab's selected file
+        let currentJsonObject = null;
+        let currentInputFileName = 'file';
 
         let stateForDecrypt = {
-            fileObject: null, // The actual File object selected for decryption
-            jsonObject: null, // The decrypted JSON object for this tab
-            inputFileName: 'file' // Name of the file selected in this tab
+            fileObject: null,
+            jsonObject: null,
+            inputFileName: 'file'
         };
         let stateForEncrypt = {
-            fileObject: null, // The .json File object selected for loading in encrypt tab
-            jsonObject: null, // The JSON object loaded/used in this tab
-            inputFileName: 'file' // Name of the file selected in this tab
+            fileObject: null,
+            jsonObject: null,
+            inputFileName: 'file'
         };
         // --- End State Management ---
 
@@ -363,8 +365,8 @@
                 { title: "Step Details: Decrypted JSON Ready", body: `<p>The decrypted JSON is now available in the textarea.</p><p>You can copy it, download it as a <code>.json</code> file (<code>${PLACEHOLDERS.DECRYPTED_FILENAME}</code>), or modify it (e.g., with 'Unlock All') and then download the re-encrypted version named <code>${PLACEHOLDERS.ENCRYPTED_FILENAME}</code>.</p>` }
             ],
             encrypt: [
-                { title: "Step Details: Receiving JSON Data", body: `<p>The tool is waiting for you to select a file to load its JSON content, or to use the JSON data currently in the textarea (e.g., manually entered or modified).</p><p>If a file is selected, its name (<code>${PLACEHOLDERS.CURRENT_INPUT_FILENAME}</code>) is noted. Click 'Load JSON' to process the file. The content will be parsed as JSON.</p>` },
-                { title: "Step Details: Preparing for Encryption", body: `<p>The JSON data (from processed file or textarea) is parsed into <code>currentJsonObject</code> if not already an object.</p><p>The cipher key (from Advanced Options) is prepared using <code>getObfuscatedKey()</code>.</p><p>For each key-value pair in the JSON object:</p><ul><li>The key is processed by <code>xorAndBase64Encode()</code>.</li><li>If the value is <code>true</code> or <code>false</code>, it's converted to its corresponding .NET serialized Base64 string.</li><li>If the value is already a known .NET boolean Base64 string, it's used as is.</li><li>Otherwise, the value is stringified, then its UTF-8 bytes are Base64 encoded (<code>utf8StringToBase64()</code>).</li><li>This final Base64 string is then processed by <code>xorAndBase64Encode()</code>.</li></ul><p>Core logic in 'Download Encrypted MonetizationVars' button's event listener, or <code>handleFileProcessing()</code> for 'Load JSON'.</p>` },
+                { title: "Step Details: Receiving JSON Data", body: `<p>The tool is waiting for you to select a file to load its JSON content, or to use the JSON data currently in the textarea (e.g., manually entered or modified).</p><p>If a file is selected, its name (<code>${PLACEHOLDERS.CURRENT_INPUT_FILENAME}</code>) is noted. Click 'Load JSON from File' to process the file. The content will be parsed as JSON.</p>` },
+                { title: "Step Details: Preparing for Encryption", body: `<p>The JSON data (from processed file or textarea) is parsed into <code>currentJsonObject</code> if not already an object.</p><p>The cipher key (from Advanced Options) is prepared using <code>getObfuscatedKey()</code>.</p><p>For each key-value pair in the JSON object:</p><ul><li>The key is processed by <code>xorAndBase64Encode()</code>.</li><li>If the value is <code>true</code> or <code>false</code>, it's converted to its corresponding .NET serialized Base64 string.</li><li>If the value is already a known .NET boolean Base64 string, it's used as is.</li><li>Otherwise, the value is stringified, then its UTF-8 bytes are Base64 encoded (<code>utf8StringToBase64()</code>).</li><li>This final Base64 string is then processed by <code>xorAndBase64Encode()</code>.</li></ul><p>Core logic in 'Download Encrypted MonetizationVars' button's event listener, or <code>handleFileProcessing()</code> for 'Load JSON from File'.</p>` },
                 { title: "Step Details: Encryption Successful", body: `<p>All key-value pairs have been processed and formatted into the <code>encryptedKey:encryptedValue</code> structure.</p><p>The lines are joined to form the final encrypted file content.</p>` },
                 { title: "Step Details: Encrypted File Ready", body: `<p>The encrypted content is ready for download.</p><p>Clicking 'Download Encrypted MonetizationVars' will package this content into a file named <code>${PLACEHOLDERS.ENCRYPTED_FILENAME}</code>.</p>` }
             ]
@@ -489,8 +491,7 @@
         function clearCurrentDisplayAndWorkingState() {
             ui.jsonOutputTextarea.value = '';
             ui.outputControls.classList.add('hidden');
-            // currentJsonObject and currentInputFileName are reset when switching tabs or selecting new file
-            // This function primarily clears the visible output.
+            // currentJsonObject and currentInputFileName are managed by setupUIForMode or file selection.
         }
 
 
@@ -544,14 +545,14 @@
                         else {itemMap[decKey] = decValB64;}
                     }
                     processedJsonObject = itemMap;
-                    stateForDecrypt.jsonObject = processedJsonObject; // Update specific tab state
-                } else { // 'encrypt' mode
+                    stateForDecrypt.jsonObject = processedJsonObject;
+                } else {
                     processedJsonObject = JSON.parse(fileContent);
-                    stateForEncrypt.jsonObject = processedJsonObject; // Update specific tab state
+                    stateForEncrypt.jsonObject = processedJsonObject;
                 }
 
-                currentJsonObject = processedJsonObject; // Update global current state
-                // currentInputFileName is already set by the file input change listener for the active tab
+                currentJsonObject = processedJsonObject;
+                // currentInputFileName is already set for the active tab by its file selection
 
                 ui.jsonOutputTextarea.value = JSON.stringify(currentJsonObject, null, 2);
                 ui.outputControls.classList.remove('hidden');
@@ -576,7 +577,8 @@
             ui.tabDecrypt.classList.toggle('active', newMode === 'decrypt');
             ui.tabEncrypt.classList.toggle('active', newMode === 'encrypt');
 
-            const fileAccept = newMode === 'decrypt' ? '*/*' : '*/*'; // Allow any file for encrypt tab
+            // Allow any file type for encrypt tab, specific for decrypt
+            const fileAccept = newMode === 'decrypt' ? '*/*' : '*/*';
             const fileLabelText = newMode === 'decrypt' ? `Select '${TARGET_ENCRYPTED_FILENAME}' File:` : 'Select File to Load as JSON:';
             const buttonText = newMode === 'decrypt' ? 'Start Decryption' : 'Load JSON from File';
 
@@ -601,10 +603,10 @@
 
             let modeState = (newMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
 
-            currentInputFileName = modeState.inputFileName; // Reflects the file selected in this tab
-            currentJsonObject = modeState.jsonObject;   // Reflects the processed JSON for this tab
+            currentInputFileName = modeState.inputFileName;
+            currentJsonObject = modeState.jsonObject;
 
-            if (modeState.fileObject) { // A file is selected for this tab
+            if (modeState.fileObject) {
                 if (fileNameDisplay) {
                     fileNameDisplay.textContent = `Selected: ${modeState.inputFileName}`;
                     fileNameDisplay.style.color = 'var(--accent-green)';
@@ -613,7 +615,7 @@
                 if (fileNameDisplay) fileNameDisplay.textContent = 'No file selected.';
             }
 
-            if (modeState.jsonObject) { // JSON has been processed for this tab
+            if (modeState.jsonObject) {
                 ui.jsonOutputTextarea.value = JSON.stringify(modeState.jsonObject, null, 2);
                 ui.outputControls.classList.remove('hidden');
                 showProgress(false); updateFlowchart(3);
@@ -638,7 +640,7 @@
                         } else {
                             stateForEncrypt = { fileObject: selectedFile, jsonObject: null, inputFileName: selectedFileName };
                         }
-                        currentInputFileName = selectedFileName; // Update global to reflect selection in current tab
+                        currentInputFileName = selectedFileName; // Reflects selected file for the current tab
 
                         if (fileNameDisplay) {
                             fileNameDisplay.textContent = `Selected: ${selectedFileName}`;
@@ -646,10 +648,9 @@
                             fileNameDisplay.classList.add('file-selected-text-anim');
                             setTimeout(() => fileNameDisplay.classList.remove('file-selected-text-anim'), 500);
                         }
-                        // Clear previous output, but don't process yet
                         ui.jsonOutputTextarea.value = '';
                         ui.outputControls.classList.add('hidden');
-                        showProgress(false); updateFlowchart(0); // Ready to process
+                        showProgress(false); updateFlowchart(0);
 
                     } else {
                         if(activeMode === 'decrypt') stateForDecrypt = { fileObject: null, jsonObject: null, inputFileName: 'file' };
@@ -696,9 +697,8 @@
 
 
         ui.unlockAllButton.addEventListener('click', () => {
-            // currentJsonObject should reflect the active tab's processed data
             if (!currentJsonObject) {
-                try { // As a fallback, try parsing textarea if currentJsonObject is somehow null
+                try {
                     if (ui.jsonOutputTextarea.value) currentJsonObject = JSON.parse(ui.jsonOutputTextarea.value);
                     else { showError("No JSON data to unlock."); return; }
                 } catch (e) { showError("Invalid JSON in textarea. Cannot unlock."); return; }
@@ -715,9 +715,8 @@
                     }
                 }
                 if (changed) {
-                    currentJsonObject = tempJson; // Update working copy
+                    currentJsonObject = tempJson;
                     ui.jsonOutputTextarea.value = JSON.stringify(currentJsonObject, null, 2);
-                    // Persist change to the active tab's state
                     if (activeMode === 'decrypt') stateForDecrypt.jsonObject = currentJsonObject;
                     else stateForEncrypt.jsonObject = currentJsonObject;
                     showToast("All applicable 'false' values set to 'true'.", "success");
@@ -736,7 +735,7 @@
             if (!jsonToEncrypt) { showError("No data available to encrypt and download."); return; }
 
             const originalActiveModeForFlowchart = activeMode;
-            activeMode = 'encrypt'; // Simulate encrypt mode for flowchart visuals
+            activeMode = 'encrypt';
             showProgress(true); updateFlowchart(0);
             new Promise(resolve => setTimeout(resolve, 50)).then(() => {
                 updateFlowchart(1);
@@ -774,7 +773,7 @@
                     updateFlowchart(3); checkAndShowFinalDownloadWarning();
                 } catch (e) { showError("Error preparing encrypted file: " + e.message); updateFlowchart(0); }
                 finally {
-                    activeMode = originalActiveModeForFlowchart; // Restore actual activeMode
+                    activeMode = originalActiveModeForFlowchart;
                     const currentModeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
                     if (!currentModeState.jsonObject) {
                        showProgress(false);
@@ -808,7 +807,6 @@
                 const jsonString = ui.jsonOutputTextarea.value; JSON.parse(jsonString);
                 const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
                 let baseDlFilename = 'decrypted_data';
-                // Use currentInputFileName as it reflects the active tab's selected file name
                 if (currentInputFileName && currentInputFileName !== 'file') {
                     baseDlFilename = currentInputFileName;
                 }
