@@ -66,4 +66,5 @@ jobs:
           echo "Updating LATEST_BITLIFE_VERSION variable to ${{ steps.scrape.outputs.current_version }}"
           gh variable set LATEST_BITLIFE_VERSION --body "${{ steps.scrape.outputs.current_version }}"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use the Personal Access Token (PAT) you created to guarantee permissions
+          GH_TOKEN: ${{ secrets.PAT }}
