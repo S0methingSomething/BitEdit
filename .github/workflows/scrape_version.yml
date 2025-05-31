@@ -7,12 +7,14 @@ on:
     - cron: '0 2 * * 0'
   workflow_dispatch: # Allows manual runs from the Actions tab
 
-permissions:
-  contents: write # Needed to commit the version.txt file AND to update repository variables via gh CLI
-
 jobs:
   check-and-update: # This is the name of our job
     runs-on: ubuntu-latest # Use the latest available Ubuntu runner
+    
+    # Grant permissions to this specific job
+    permissions:
+      contents: write   # Needed to commit the version.txt file
+      actions: write    # Needed to update the repository variable via the API
     
     env:
       # Load the last known version from the repository variable we created
@@ -34,45 +36,34 @@ jobs:
         run: pip install -r BitEdit/Get_Bitlife_Version/requirements.txt
 
       # Step 4: Run your Python script to get the current version
-      # The output of this script (the version number) is captured.
       - name: Scrape for current version
         id: scrape # Give this step an ID so we can refer to its output
         run: echo "current_version=$(python BitEdit/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
 
       # Step 5: A debug step to print the version captured by the script
-      # This helps us see what the script actually outputted.
       - name: Debug Print Scraped Version
         run: echo "Scraped version output by script is --->${{ steps.scrape.outputs.current_version }}<---"
 
-      # Step 6: Create the version.txt file, but ONLY if a new version is found
+      # Step 6: Create the version.txt file if a new version is found
       - name: Create file if new version is found
-        # This 'if' condition checks:
-        # 1. If the scraped version is not empty (steps.scrape.outputs.current_version)
-        # 2. AND if the scraped version is different from the last known version
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
-        run: | # The '|' allows for a multi-line script here
+        run: |
           echo "New version found: ${{ steps.scrape.outputs.current_version }}. Creating file..."
           echo "${{ steps.scrape.outputs.current_version }}" > BitEdit/Get_Bitlife_Version/version.txt
 
       # Step 7: Commit the new version.txt file to your repository
-      # This step also only runs if a new version was found.
       - name: Commit new version file
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
-        uses: stefanzweifel/git-auto-commit-action@v5 # A pre-made action for auto-commits
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "🚀 Update BitLife version to ${{ steps.scrape.outputs.current_version }}"
-          # Tell the action to only commit changes to this specific file
           file_pattern: 'BitEdit/Get_Bitlife_Version/version.txt'
           
       # Step 8: Update the repository variable with the new version number
-      # This also only runs if a new version was found.
       - name: Update repository variable with new version
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
         run: |
           echo "Updating LATEST_BITLIFE_VERSION variable to ${{ steps.scrape.outputs.current_version }}"
-          # Use the GitHub CLI (gh) to update the variable
           gh variable set LATEST_BITLIFE_VERSION --body "${{ steps.scrape.outputs.current_version }}"
         env:
-          # The GH_TOKEN is a special secret automatically provided to workflows
-          # by GitHub, allowing it to interact with your repository.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
