@@ -1,0 +1,143 @@
+# sync_monetization_vars.yml
+
+name: Sync MonetizationVars to Root
+
+# Controls when the workflow will run
+on:
+  release:
+    types: [published] # Triggers when a new release is published
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+    inputs:
+      release_tag:
+        description: 'Release tag to get MonetizationVars from (e.g., v1.0.0, Latest). If empty, uses latest release.'
+        required: false
+        default: 'latest' # Default to 'latest' if no tag is provided
+
+jobs:
+  sync_monetizationvars_file:
+    runs-on: ubuntu-latest # Specifies the runner environment
+
+    # These permissions are needed for the action to checkout code and push changes
+    permissions:
+      contents: write # Allows writing to the repository (for commit/push)
+      # pull-requests: read # Not strictly needed for this specific workflow
+
+    steps:
+      # Step 1: Checkout the repository's code
+      # This allows the workflow to access your repository's content
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # GITHUB_TOKEN is automatically created by GitHub for each workflow run
+          # It has permissions to push to the repository that triggered the action
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 2: Determine Release and Download URL
+      - name: Determine Release and Download URL
+        id: get_release_info
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token for API requests
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        shell: bash
+        run: |
+          RELEASE_TAG_INPUT="${{ github.event.inputs.release_tag || 'latest' }}" # Use input or default to 'latest'
+          echo "Input release tag: $RELEASE_TAG_INPUT"
+
+          if [[ "$RELEASE_TAG_INPUT" == "latest" ]]; then
+            # Get the latest release information using GitHub API
+            RELEASE_API_URL="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest"
+            echo "Fetching latest release from API: $RELEASE_API_URL"
+          else
+            # Get a specific release by tag using GitHub API
+            RELEASE_API_URL="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/tags/$RELEASE_TAG_INPUT"
+            echo "Fetching release by tag '$RELEASE_TAG_INPUT' from API: $RELEASE_API_URL"
+          fi
+
+          # Fetch release data using curl and GitHub API
+          # -H "Authorization: Bearer $GITHUB_TOKEN" for authentication
+          # -H "Accept: application/vnd.github.v3+json" specifies API version
+          RELEASE_DATA=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" "$RELEASE_API_URL")
+
+          # Check if release data was fetched successfully
+          if echo "$RELEASE_DATA" | jq -e '.message == "Not Found"' > /dev/null; then
+            echo "Error: Release '$RELEASE_TAG_INPUT' not found."
+            echo "asset_exists=false" >> $GITHUB_OUTPUT
+            exit 1 # Exit if release not found
+          fi
+
+          # Extract the release tag name (useful if 'latest' was used)
+          ACTUAL_RELEASE_TAG=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
+          echo "Actual release tag being processed: $ACTUAL_RELEASE_TAG"
+          echo "release_tag_name=$ACTUAL_RELEASE_TAG" >> $GITHUB_OUTPUT
+
+          # Use jq to find the download URL of the "MonetizationVars" asset from the fetched release data
+          ASSET_DOWNLOAD_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name=="MonetizationVars") | .browser_download_url')
+
+          if [ -z "$ASSET_DOWNLOAD_URL" ]; then
+            echo "MonetizationVars asset not found in release $ACTUAL_RELEASE_TAG."
+            echo "asset_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found MonetizationVars asset in release $ACTUAL_RELEASE_TAG. Download URL: $ASSET_DOWNLOAD_URL"
+            echo "asset_download_url=$ASSET_DOWNLOAD_URL" >> $GITHUB_OUTPUT
+            echo "asset_exists=true" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 3: Download the "MonetizationVars" asset
+      - name: Download MonetizationVars asset
+        id: download_asset
+        if: steps.get_release_info.outputs.asset_exists == 'true'
+        shell: bash
+        run: |
+          ASSET_DOWNLOAD_URL="${{ steps.get_release_info.outputs.asset_download_url }}"
+          echo "Downloading MonetizationVars from $ASSET_DOWNLOAD_URL"
+          if curl -LsfS -o MonetizationVars_downloaded "$ASSET_DOWNLOAD_URL"; then
+            echo "MonetizationVars downloaded successfully to MonetizationVars_downloaded."
+            echo "download_successful=true" >> $GITHUB_OUTPUT
+          else
+            echo "Failed to download MonetizationVars from $ASSET_DOWNLOAD_URL."
+            echo "download_successful=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 4: Process the downloaded file and commit it to the repository root
+      # This step only runs if the asset was found and downloaded successfully
+      - name: Process and commit MonetizationVars.txt
+        if: steps.download_asset.outputs.download_successful == 'true'
+        shell: bash
+        run: |
+          ACTUAL_RELEASE_TAG="${{ steps.get_release_info.outputs.release_tag_name }}"
+          echo "MonetizationVars asset was downloaded from release $ACTUAL_RELEASE_TAG. Proceeding to rename and commit."
+
+          # Rename the downloaded file to MonetizationVars.txt
+          mv MonetizationVars_downloaded MonetizationVars.txt
+          echo "Renamed downloaded file to MonetizationVars.txt"
+
+          # Configure git user details for the commit
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+          # Add the new/modified file to git staging area
+          git add MonetizationVars.txt
+
+          # Check if there are any changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to MonetizationVars.txt, or file is identical. Nothing to commit."
+          else
+            # Commit the file
+            git commit -m "Add/Update MonetizationVars.txt from release $ACTUAL_RELEASE_TAG"
+            echo "Committed MonetizationVars.txt"
+
+            # Push the changes back to the repository
+            git push
+            echo "Pushed MonetizationVars.txt to the repository root."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 5: Handle cases where the asset was not found or download failed
+      - name: Asset not processed
+        if: steps.get_release_info.outputs.asset_exists == 'false' || steps.download_asset.outputs.download_successful == 'false'
+        run: |
+          ACTUAL_RELEASE_TAG="${{ steps.get_release_info.outputs.release_tag_name || github.event.inputs.release_tag || 'N/A' }}"
+          echo "Skipping commit as MonetizationVars asset was not found or download failed for release $ACTUAL_RELEASE_TAG."
+
