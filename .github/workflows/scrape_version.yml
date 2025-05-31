@@ -2,8 +2,8 @@ name: Get BitLife version
 
 on:
   schedule:
-    # Runs at 2 AM UTC every Sunday.
-    - cron: '0 2 * * 0'
+    # Runs at 2 AM UTC every day.
+    - cron: '0 2 * * *'
   workflow_dispatch: # Allows manual runs
 
 permissions:
@@ -43,14 +43,12 @@ jobs:
 
           if [ -z "$scraped_version" ]; then
             echo "Scraped version is blank. No update."
-            # --- UPDATED LINE ---
             echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
             exit 0 
           fi
 
           if ! echo "$scraped_version" | grep -q "[0-9]"; then
             echo "Scraped version '$scraped_version' does not contain numbers. No update."
-            # --- UPDATED LINE ---
             echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -73,7 +71,6 @@ jobs:
             fi
           fi
           
-          # --- UPDATED LINE ---
           echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
 
       - name: Create or Update version.txt
