@@ -8,8 +8,7 @@ on:
   workflow_dispatch: # Allows manual runs from the Actions tab
 
 permissions:
-  contents: write # Needed to commit the version.txt file
-  variables: write # Needed to update the LATEST_BITLIFE_VERSION variable
+  contents: write # Needed to commit the version.txt file AND to update repository variables via gh CLI
 
 jobs:
   check-and-update: # This is the name of our job
@@ -77,4 +76,3 @@ jobs:
           # The GH_TOKEN is a special secret automatically provided to workflows
           # by GitHub, allowing it to interact with your repository.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
