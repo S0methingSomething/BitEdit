@@ -40,7 +40,7 @@
         }
         .content-wrapper { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center;}
         .main-container { background-color: var(--bg-primary-dark); width: 100%;}
-        .page-title-container { text-align: center; margin-bottom: 1.5rem; margin-top: 0.5rem; }
+        .page-title-container { text-align: center; margin-bottom: 1rem; margin-top: 1rem; }
         .page-title { font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; color: var(--text-primary-light); }
         .ai-attribution-top { font-size: 0.75rem; line-height: 1rem; color: var(--text-secondary-light); margin-top: 0.25rem; }
 
@@ -71,29 +71,6 @@
         textarea::-webkit-scrollbar-track { background: var(--bg-secondary-dark); border-radius: 10px; }
         textarea::-webkit-scrollbar-thumb { background: var(--bg-tertiary-dark); border-radius: 10px; }
         textarea::-webkit-scrollbar-thumb:hover { background: #4a4a4a; }
-
-        .flowchart-container-outer { margin-top: 1.5rem; margin-bottom: 1.5rem; }
-        .flowchart { border: 1px solid var(--bg-tertiary-dark); padding: 1rem; sm:padding: 1.5rem; border-radius: 0.75rem; background-color: var(--bg-secondary-dark); }
-        .flowchart-step {
-            display: flex; align-items: center; margin-bottom: 1rem; opacity: 0.6;
-            transition: opacity 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease, padding-left 0.3s ease;
-            cursor: pointer; border-left: 3px solid transparent; padding-left: calc(1rem - 3px);
-        }
-        .flowchart-step.active {
-            opacity: 1; font-weight: 600;
-            background-color: rgba(var(--accent-primary-rgb), 0.15);
-            border-left: 3px solid var(--accent-primary);
-        }
-        .flowchart-step.completed .step-icon { color: var(--accent-green); }
-        .flowchart-step.active .step-icon { animation: pulse 1.5s infinite; }
-        .step-icon { width: 2rem; height: 2rem; margin-right: 0.75rem; sm:margin-right: 1rem; color: var(--text-secondary-light); flex-shrink: 0; }
-        .step-text-main { font-size: 0.875rem; sm:font-size: 1rem; color: var(--text-primary-light); word-break: break-word; }
-        .step-text-explanation { font-size: 0.75rem; sm:font-size: 0.875rem; color: var(--text-secondary-light); margin-top: 0.25rem; word-break: break-word; }
-        .flowchart-arrow { text-align: center; color: var(--bg-tertiary-dark); font-size: 1.5rem; line-height: 0.6; margin-bottom: 0.75rem; margin-left: 0.85rem; }
-
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
-        .spinner-icon { animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .modal {
             position: fixed;
@@ -159,6 +136,12 @@
             margin-right: 1rem;
             border: 2px solid var(--accent-primary);
             flex-shrink: 0;
+            overflow: hidden; /* To ensure image corners are rounded */
+        }
+        .source-pfp img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensure image covers the circle */
         }
         #source-name, #source-url-display {
             overflow-wrap: break-word;
@@ -265,6 +248,7 @@
              background-color: var(--accent-primary);
              color: white;
              border: 1px solid var(--accent-primary-hover);
+             line-height: 1.4;
         }
         #open-source-manager-button:hover:not(:disabled) {
             background-color: var(--accent-primary-hover);
@@ -275,18 +259,19 @@
 <body class="flex flex-col items-center p-2 sm:p-4">
 <div class="content-wrapper w-full flex flex-col items-center">
     <div class="main-container p-4 sm:p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
-        <div id="top-info-bar" class="rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center shadow-md">
-             <button id="open-source-manager-button" class="button text-sm font-semibold py-2 px-4 w-full sm:w-auto mb-2 sm:mb-0 text-center">
-                Get & Auto-Patch MonetizationVars
-            </button>
-            <p class="text-xs text-right w-full sm:w-auto" style="color: var(--text-secondary-light);">
-                Latest BitLife Ver: <span id="bitlife-version" class="font-semibold" style="color: var(--text-primary-light);">Loading...</span>
-            </p>
-        </div>
-
         <div class="page-title-container">
             <h1 class="page-title">BitEdit</h1>
             <p class="ai-attribution-top">Made with AI (Gemini)</p>
+        </div>
+
+        <div id="top-info-bar" class="rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center shadow-md p-3 sm:p-4">
+             <button id="open-source-manager-button" class="button py-2 px-3 sm:px-4 w-full sm:w-auto mb-2 sm:mb-0 text-left sm:text-center">
+                <span class="block text-sm sm:text-base font-bold">Don't have a MonetizationVars?</span>
+                <span class="block text-xs sm:text-sm">Download or auto patch MonetizationVars</span>
+            </button>
+            <p class="text-xs text-right w-full sm:w-auto mt-2 sm:mt-0" style="color: var(--text-secondary-light);">
+                Latest BitLife Ver: <span id="bitlife-version" class="font-semibold" style="color: var(--text-primary-light);">Loading...</span>
+            </p>
         </div>
 
         <div class="mb-6 border-b" style="border-color: var(--bg-tertiary-dark);">
@@ -321,7 +306,7 @@
          <div id="error-message" class="mt-4 p-3 rounded-md hidden" style="background-color: var(--accent-red); color: white; border: 1px solid rgba(var(--accent-red-rgb), 0.7);"></div>
 
         <div id="progress-flowchart-container" class="flowchart-container-outer flowchart mt-4 hidden">
-            </div>
+        </div>
     </div>
 
     <div id="flowchart-modal" class="modal hidden">
@@ -380,11 +365,16 @@
 
             <div class="mt-8 pt-6 border-t" style="border-color: var(--bg-tertiary-dark);">
                 <h3 class="text-lg font-semibold mb-3 text-center" style="color: var(--text-primary-light);">Actions</h3>
-                 <button id="download-original-button" class="w-full button button-secondary py-2 text-sm font-semibold mb-3"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                 <button id="download-original-button" class="w-full button button-secondary py-2 text-sm font-semibold mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Download Original Untouched MonetizationVars
                 </button>
-                <div class="flex justify-center"> <button id="auto-patch-button" class="button button-action-green py-2 text-sm font-semibold mt-2 px-6"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1.5" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                <div class="flex justify-center">
+                    <button id="auto-patch-button" class="button button-action-green py-2 text-sm font-semibold mt-2 px-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
                         Auto-Patch & Download (from Current Source)
                     </button>
@@ -412,7 +402,7 @@
     </div>
 </div>
 <footer class="app-footer w-full">
-    <p class="version">v1.3.3</p>
+    <p class="version">v1.3.5</p>
 </footer>
 
     <script>
@@ -430,7 +420,8 @@
         // Source Info
         const DEFAULT_SOURCE_INFO = {
             name: "S0methingSomething/BitEdit (Default Raw)",
-            pfpText: "S0",
+            pfpImageUrl: "https://avatars.githubusercontent.com/S0methingSomething?v=4&s=64", // Attempt to load GitHub PFP
+            pfpFallbackText: "S0", // Fallback text if image fails
             url: DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL
         };
         let currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
@@ -512,7 +503,13 @@
             if(ui.autoPatchLog) ui.autoPatchLog.innerHTML = '';
         }
         function updateSourceInfoDisplay(sourceInfo) {
-            if(ui.sourcePfp) ui.sourcePfp.textContent = sourceInfo.pfpText || 'URL';
+            if(ui.sourcePfp) {
+                if (sourceInfo.pfpImageUrl) {
+                    ui.sourcePfp.innerHTML = `<img src="${sourceInfo.pfpImageUrl}" alt="${sourceInfo.name.substring(0,2)}" class="w-full h-full rounded-full object-cover" onerror="this.onerror=null; this.parentElement.textContent='${sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase()}';">`;
+                } else {
+                    ui.sourcePfp.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase() || 'URL';
+                }
+            }
             if(ui.sourceName) ui.sourceName.textContent = sourceInfo.name;
             if(ui.sourceUrlDisplay) {
                 ui.sourceUrlDisplay.href = sourceInfo.url;
@@ -756,7 +753,7 @@
                         currentMonetizationVarsSourceURL = parsedUrl.href;
                         currentSourceInfo = {
                             name: parsedUrl.hostname,
-                            pfpText: "URL",
+                            pfpFallbackText: parsedUrl.hostname.substring(0,2).toUpperCase(), // Use initials from hostname
                             url: parsedUrl.href
                         };
                         updateSourceInfoDisplay(currentSourceInfo);
@@ -765,7 +762,7 @@
                         showToast("Invalid URL entered. Please enter a valid URL.", "error");
                     }
                 } else {
-                    currentMonetizationVarsSourceURL = DEFAULT_SOURCE_INFO.url;
+                    currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
                     currentSourceInfo = {...DEFAULT_SOURCE_INFO};
                     updateSourceInfoDisplay(currentSourceInfo);
                     showToast("URL cleared. Source reverted to default.", "info");
