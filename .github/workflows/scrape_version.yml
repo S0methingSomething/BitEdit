@@ -1,69 +1,63 @@
-# scrape_version.yml
-
 name: Check BitLife Version and Update File
 
 on:
   schedule:
-    # Runs at 2 AM UTC every Sunday. You can adjust this cron schedule.
+    # Runs at 2 AM UTC every Sunday. 
+    # Note: 2 AM UTC on Sunday is 10 AM on Sunday in the Philippines (PHT).
     - cron: '0 2 * * 0'
-  # Allows you to run this workflow manually from the Actions tab for testing.
   workflow_dispatch:
 
-# Grant permissions for the workflow to commit files and update variables.
 permissions:
   contents: write
   variables: write
 
 jobs:
+  # This line must be indented with two spaces.
   check-and-update:
+    # These lines must be indented with four spaces.
     runs-on: ubuntu-latest
-
+    
     env:
-      # Load our "memory" from the variable we created in Step 1.
       LAST_KNOWN_VERSION: ${{ vars.LATEST_BITLIFE_VERSION }}
 
     steps:
-      # 1. Checks out your repository so the workflow can access its files.
+      # Each of these '-' lines must be indented with six spaces.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Sets up a Python environment.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # 3. Installs dependencies from the specified requirements.txt file.
       - name: Install dependencies from specific path
         run: pip install -r BitEdit/Get_Bitlife_Version/requirements.txt
 
-      # 4. Runs the Python script from its specific path.
       - name: Scrape for current version
         id: scrape
         run: echo "current_version=$(python BitEdit/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
 
-      # 5. Creates the version.txt file, but only if a new version is found.
+      - name: Debug - Print Scraped Version
+        run: echo "The version captured from the Python script was: ►${{ steps.scrape.outputs.current_version }}◄"
+
       - name: Create file if new version is found
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
         run: |
           echo "New version found: ${{ steps.scrape.outputs.current_version }}. Creating file..."
           echo "${{ steps.scrape.outputs.current_version }}" > BitEdit/Get_Bitlife_Version/version.txt
 
-      # 6. Commits the new version.txt file to your repository.
       - name: Commit new version file
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "🚀 Update BitLife version to ${{ steps.scrape.outputs.current_version }}"
-          # Specifies the exact file to commit.
           file_pattern: 'BitEdit/Get_Bitlife_Version/version.txt'
-
-      # 7. Updates the repository variable with the new version number for the next run.
+          
       - name: Update repository variable with new version
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
         run: |
           echo "Updating LATEST_BITLIFE_VERSION variable to ${{ steps.scrape.outputs.current_version }}"
           gh variable set LATEST_BITLIFE_VERSION --body "${{ steps.scrape.outputs.current_version }}"
         env:
-          # The GH_TOKEN is a special secret automatically provided to workflows.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
