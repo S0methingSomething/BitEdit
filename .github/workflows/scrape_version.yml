@@ -10,7 +10,7 @@ permissions:
   contents: write # Required to commit files
 
 jobs:
-  Get Bitlife latest version:
+  Get_Bitlife_latest_version:
     runs-on: ubuntu-latest
 
     steps:
