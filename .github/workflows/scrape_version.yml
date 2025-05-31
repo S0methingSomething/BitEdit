@@ -2,8 +2,7 @@ name: Check BitLife Version and Update File
 
 on:
   schedule:
-    # Runs at 2 AM UTC every Sunday. 
-    # Note: 2 AM UTC on Sunday is 10 AM on Sunday in the Philippines (PHT).
+    # Runs at 2 AM UTC every Sunday, which is 10 AM on Sunday in the Philippines (PHT).
     - cron: '0 2 * * 0'
   workflow_dispatch:
 
@@ -12,16 +11,13 @@ permissions:
   variables: write
 
 jobs:
-  # This line must be indented with two spaces.
   check-and-update:
-    # These lines must be indented with four spaces.
     runs-on: ubuntu-latest
     
     env:
       LAST_KNOWN_VERSION: ${{ vars.LATEST_BITLIFE_VERSION }}
 
     steps:
-      # Each of these '-' lines must be indented with six spaces.
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -38,7 +34,7 @@ jobs:
         run: echo "current_version=$(python BitEdit/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
 
       - name: Debug - Print Scraped Version
-        run: echo "The version captured from the Python script was: ►${{ steps.scrape.outputs.current_version }}◄"
+        run: echo "The captured version is: ${{ steps.scrape.outputs.current_version }}"
 
       - name: Create file if new version is found
         if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
@@ -60,4 +56,3 @@ jobs:
           gh variable set LATEST_BITLIFE_VERSION --body "${{ steps.scrape.outputs.current_version }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
