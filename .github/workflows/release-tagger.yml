@@ -1,0 +1,60 @@
+name: Release Tagger
+
+on:
+  release:
+    types: [published, unpublished, deleted]
+
+jobs:
+  tag-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get all releases
+        id: get_releases
+        uses: "cardinalby/git-get-release-action@v1"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prefix: ''
+          latestFirst: true
+
+      - name: Tag latest release
+        if: steps.get_releases.outputs.id != '' && github.event.action != 'deleted'
+        uses: "cardinalby/git-tag-and-push@v1"
+        with:
+          tagName: "latest"
+          tagMessage: "The latest release"
+          target: ${{ steps.get_releases.outputs.id }}
+          force: true
+
+      - name: Tag previous releases as outdated
+        if: steps.get_releases.outputs.id != '' && github.event.action != 'deleted'
+        run: |
+          releases='${{ steps.get_releases.outputs.releases }}'
+          latest_id='${{ steps.get_releases.outputs.id }}'
+
+          for release in $(echo "$releases" | jq -c '.[]'); do
+            release_id=$(echo "$release" | jq -r '.id')
+            if [ "$release_id" != "$latest_id" ]; then
+              gh release edit $(echo "$release" | jq -r '.tag_name') --prerelease=true --title "$(echo "$release" | jq -r '.name') [Outdated]"
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Handle deleted release
+        if: github.event.action == 'deleted'
+        run: |
+          releases='${{ steps.get_releases.outputs.releases }}'
+          if [ "$(echo "$releases" | jq 'length')" -gt 0 ]; then
+            latest_release=$(echo "$releases" | jq '.[0]')
+            git tag -f latest $(echo "$latest_release" | jq -r '.tag_name')
+            git push -f origin latest
+          else
+            git tag -d latest
+            git push origin :latest
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
