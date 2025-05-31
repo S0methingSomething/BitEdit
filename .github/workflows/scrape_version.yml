@@ -43,13 +43,15 @@ jobs:
 
           if [ -z "$scraped_version" ]; then
             echo "Scraped version is blank. No update."
-            echo "::set-output name=should_write::$should_write_new_version"
+            # --- UPDATED LINE ---
+            echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
             exit 0 
           fi
 
           if ! echo "$scraped_version" | grep -q "[0-9]"; then
             echo "Scraped version '$scraped_version' does not contain numbers. No update."
-            echo "::set-output name=should_write::$should_write_new_version"
+            # --- UPDATED LINE ---
+            echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -71,7 +73,8 @@ jobs:
             fi
           fi
           
-          echo "::set-output name=should_write::$should_write_new_version"
+          # --- UPDATED LINE ---
+          echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
 
       - name: Create or Update version.txt
         if: steps.validation.outputs.should_write == 'true'
