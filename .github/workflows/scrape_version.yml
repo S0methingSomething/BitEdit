@@ -1,86 +1,88 @@
-name: Check BitLife Version and Update File
+name: Get BitLife version
 
 on:
   schedule:
     # Runs at 2 AM UTC every Sunday.
-    # For Cordon, Cagayan Valley, Philippines (PHT), this is 10 AM on Sunday.
     - cron: '0 2 * * 0'
-  workflow_dispatch: # Allows manual runs from the Actions tab
+  workflow_dispatch: # Allows manual runs
+
+permissions:
+  contents: write # Required to commit files
 
 jobs:
-  check-and-update:
+  Get Bitlife latest version:
     runs-on: ubuntu-latest
-    
-    # Permissions for the GITHUB_TOKEN
-    permissions:
-      contents: write   # Needed to commit the version.txt file
-      variables: write  # Needed to update repository variables via the API
-    
-    env:
-      # Load the last known version from the repository variable
-      LAST_KNOWN_VERSION: ${{ vars.LATEST_BITLIFE_VERSION }}
 
     steps:
-      # Step 1: Check out your repository's code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up the Python version
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # Step 3: Install Python dependencies
-      - name: Install dependencies from specific path
+      - name: Install dependencies
         run: pip install -r BitEdit/Get_Bitlife_Version/requirements.txt
 
-      # Step 4: Run your Python script to get the current version
       - name: Scrape for current version
-        id: scrape
+        id: scrape # ID to reference output in later steps
         run: echo "current_version=$(python BitEdit/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
 
-      # Step 5: A debug step to print the version captured by the script
       - name: Debug Print Scraped Version
-        run: echo "Scraped version output by script is --->${{ steps.scrape.outputs.current_version }}<---"
+        run: echo "Raw scraped version output by script is --->${{ steps.scrape.outputs.current_version }}<---"
 
-      # Step 6: Create the version.txt file if a new version is found
-      - name: Create file if new version is found
-        if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
+      - name: Validate and Compare Versions
+        id: validation # ID to reference output in later steps
         run: |
-          echo "New version found: ${{ steps.scrape.outputs.current_version }}. Creating file..."
+          scraped_version="${{ steps.scrape.outputs.current_version }}"
+          version_file="BitEdit/Get_Bitlife_Version/version.txt"
+          should_write_new_version="false" # Default: do not update file
+
+          echo "Starting validation for scraped version: '$scraped_version'"
+
+          if [ -z "$scraped_version" ]; then
+            echo "Scraped version is blank. No update."
+            echo "::set-output name=should_write::$should_write_new_version"
+            exit 0 
+          fi
+
+          if ! echo "$scraped_version" | grep -q "[0-9]"; then
+            echo "Scraped version '$scraped_version' does not contain numbers. No update."
+            echo "::set-output name=should_write::$should_write_new_version"
+            exit 0
+          fi
+
+          echo "Scraped version '$scraped_version' is valid."
+
+          if [ ! -f "$version_file" ]; then
+            echo "'$version_file' does not exist. Will create."
+            should_write_new_version="true"
+          else
+            existing_version=$(cat "$version_file")
+            echo "Existing version in '$version_file' is '$existing_version'."
+            
+            # Use dpkg for robust version string comparison
+            if dpkg --compare-versions "$scraped_version" gt "$existing_version"; then
+              echo "Scraped version '$scraped_version' is NEWER. Will update."
+              should_write_new_version="true"
+            else
+              echo "Scraped version '$scraped_version' is NOT NEWER. No update."
+            fi
+          fi
+          
+          echo "::set-output name=should_write::$should_write_new_version"
+
+      - name: Create or Update version.txt
+        if: steps.validation.outputs.should_write == 'true'
+        run: |
+          echo "Writing version ${{ steps.scrape.outputs.current_version }} to BitEdit/Get_Bitlife_Version/version.txt"
           echo "${{ steps.scrape.outputs.current_version }}" > BitEdit/Get_Bitlife_Version/version.txt
 
-      # Step 7: Commit the new version.txt file to your repository
-      - name: Commit new version file
-        if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
+      - name: Commit version.txt
+        if: steps.validation.outputs.should_write == 'true' 
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "🚀 Update BitLife version to ${{ steps.scrape.outputs.current_version }}"
+          commit_message: "Update BitLife version to ${{ steps.scrape.outputs.current_version }}"
           file_pattern: 'BitEdit/Get_Bitlife_Version/version.txt'
-          
-      # Step 8: Update the repository variable using the gh CLI (will likely fail)
-      - name: Update repository variable with gh CLI
-        if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
-        continue-on-error: true # Allow workflow to continue to the curl step even if this fails
-        run: |
-          echo "Updating LATEST_BITLIFE_VERSION variable to ${{ steps.scrape.outputs.current_version }} with gh CLI"
-          gh variable set LATEST_BITLIFE_VERSION --body "${{ steps.scrape.outputs.current_version }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Step 9: THE NEW DEBUGGING STEP
-      # This step makes a direct API call to get a more detailed error message.
-      - name: Debug API call with curl
-        if: steps.scrape.outputs.current_version && steps.scrape.outputs.current_version != env.LAST_KNOWN_VERSION
-        run: |
-          echo "Attempting to update variable with curl"
-          # The -v flag below provides verbose output which is critical for debugging
-          curl -L -v \
-            -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/actions/variables/LATEST_BITLIFE_VERSION \
-            -d '{"name":"LATEST_BITLIFE_VERSION","value":"${{ steps.scrape.outputs.current_version }}"}'
 
