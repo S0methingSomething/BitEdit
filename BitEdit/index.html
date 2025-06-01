@@ -518,7 +518,7 @@
                  <p class="text-xs mt-1" style="color: var(--text-secondary-light);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
             </div>
 
-            <div class="mt-auto pt-6 border-t" style="border-color: var(--bg-tertiary-dark);">
+            <div class="mt-8 pt-6 border-t" style="border-color: var(--bg-tertiary-dark);">
                 <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--text-primary-light);">Actions</h3>
                 <div class="space-y-3 sm:space-y-0 sm:flex sm:space-x-3 sm:justify-center">
                     <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-3 text-base font-semibold">
@@ -603,7 +603,7 @@
 
         // --- Source Info ---
         const DEFAULT_SOURCE_INFO = {
-            name: "S0methingSomething/BitEdit (Default Raw)",
+            name: "S0methingSomething", // UPDATED NAME
             pfpImageUrl: "https://avatars.githubusercontent.com/S0methingSomething?v=4&s=128",
             pfpFallbackText: "S0",
             url: DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL,
@@ -696,8 +696,6 @@
                 }
                 const releaseData = await response.json();
                 const releaseBody = releaseData.body || "";
-                // Regex to find a version number like "for BitLife vX.Y.Z", "compatible with vX.Y.Z", or "BitLife version X.Y.Z"
-                // Made it slightly more flexible: optional "v", space or no space before version.
                 const versionRegex = /(?:for BitLife\s*v?|compatible with BitLife\s*v?|BitLife version\s*v?)(\d+\.\d+(?:\.\d+)?)/i;
                 const match = releaseBody.match(versionRegex);
 
@@ -794,7 +792,7 @@
             if(ui.sourceStatusLabelLarge) {
                  ui.sourceStatusLabelLarge.textContent = sourceInfo.statusMessage || "(Status N/A)";
                  ui.sourceStatusLabelLarge.classList.remove('hidden', 'potentially-newer', 'outdated', 'neutral');
-                 ui.sourceStatusLabelLarge.classList.add('status-label'); // Base class for consistent styling if any
+                 ui.sourceStatusLabelLarge.classList.add('status-label');
 
                  if (sourceInfo.statusMessage) {
                      ui.sourceStatusLabelLarge.classList.remove('hidden');
@@ -803,7 +801,7 @@
                          ui.sourceStatusLabelLarge.classList.add('potentially-newer');
                      } else if (lowerStatus.includes("outdated")) {
                          ui.sourceStatusLabelLarge.classList.add('outdated');
-                     } else { // Compatible, Unknown, N/A, Error messages
+                     } else {
                         ui.sourceStatusLabelLarge.classList.add('neutral');
                      }
                  } else {
