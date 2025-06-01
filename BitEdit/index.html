@@ -136,12 +136,12 @@
             margin-right: 1rem;
             border: 2px solid var(--accent-primary);
             flex-shrink: 0;
-            overflow: hidden; /* To ensure image corners are rounded */
+            overflow: hidden;
         }
         .source-pfp img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensure image covers the circle */
+            object-fit: cover;
         }
         #source-name, #source-url-display {
             overflow-wrap: break-word;
@@ -151,6 +151,16 @@
         #source-info-text-container {
              min-width: 0;
         }
+        .status-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 0.25rem;
+            display: inline;
+        }
+        .status-label.potentially-newer { color: var(--accent-green); }
+        .status-label.outdated { color: var(--accent-yellow); }
+        .status-label.neutral { color: var(--text-secondary-light); }
+
 
         #auto-patch-log {
             background-color: var(--bg-secondary-dark);
@@ -348,7 +358,10 @@
                 <div class="flex items-center">
                     <div id="source-pfp" class="source-pfp">S0</div>
                     <div id="source-info-text-container" class="flex-grow ml-4">
-                        <p id="source-name" class="text-md font-semibold" style="color: var(--text-primary-light);">S0methingSomething/BitEdit (Default)</p>
+                        <div class="flex items-baseline">
+                            <p id="source-name" class="text-md font-semibold" style="color: var(--text-primary-light);"></p>
+                            <span id="source-status-label" class="status-label hidden"></span>
+                        </div>
                         <a id="source-url-display" href="#" target="_blank" rel="noopener noreferrer" class="text-xs mt-1 inline-block" style="color: var(--accent-primary); text-decoration: underline;">View Raw File</a>
                     </div>
                 </div>
@@ -402,11 +415,11 @@
     </div>
 </div>
 <footer class="app-footer w-full">
-    <p class="version">v1.3.5</p>
+    <p class="version">v1.3.9</p>
 </footer>
 
     <script>
-        // Constants
+        // --- Constants ---
         const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
         const B64_NET_BOOLEAN_TRUE_STANDARD = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs=";
         const B64_NET_BOOLEAN_TRUE_VARIANT  = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAs=";
@@ -414,32 +427,34 @@
         const TARGET_ENCRYPTED_FILENAME = "MonetizationVars";
         const HIDE_FINAL_DOWNLOAD_WARNING_KEY = 'bitEditHideFinalDownloadWarning';
         const DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL = "https://raw.githubusercontent.com/S0methingSomething/BitEdit/refs/heads/main/MonetizationVars.txt";
+        const GITHUB_API_LATEST_TAG_URL = "https://api.github.com/repos/S0methingSomething/BitEdit/releases/tags/Latest";
         const ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL = "https://github.com/S0methingSomething/BitEdit/releases/download/Latest/MonetizationVars";
 
-
-        // Source Info
+        // --- Source Info ---
         const DEFAULT_SOURCE_INFO = {
             name: "S0methingSomething/BitEdit (Default Raw)",
-            pfpImageUrl: "https://avatars.githubusercontent.com/S0methingSomething?v=4&s=64", // Attempt to load GitHub PFP
-            pfpFallbackText: "S0", // Fallback text if image fails
-            url: DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL
+            pfpImageUrl: "https://avatars.githubusercontent.com/S0methingSomething?v=4&s=64",
+            pfpFallbackText: "S0",
+            url: DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL,
+            statusMessage: ""
         };
         let currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
-        let currentSourceInfo = {...DEFAULT_SOURCE_INFO};
+        let currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO));
 
-        // Obfuscation Map
+        // --- Obfuscation Map ---
         const obfCharMap = {0x61:0x7a,0x62:0x6d,0x63:0x79,0x64:0x6c,0x65:0x78,0x66:0x6b,0x67:0x77,0x68:0x6a,0x69:0x76,0x6a:0x69,0x6b:0x75,0x6c:0x68,0x6d:0x74,0x6e:0x67,0x6f:0x73,0x70:0x66,0x71:0x72,0x72:0x65,0x73:0x71,0x74:0x64,0x75:0x70,0x76:0x63,0x77:0x6f,0x78:0x62,0x79:0x6e,0x7a:0x61};
 
-        // UI Elements Cache - To be populated in DOMContentLoaded
+        // --- UI Elements Cache (Populated in DOMContentLoaded) ---
         const ui = {};
 
-        // State Variables
+        // --- State Variables ---
         let activeMode = 'decrypt';
         let currentJsonObject = null;
         let currentInputFileName = 'file';
         let stateForDecrypt = { fileObject: null, jsonObject: null, inputFileName: 'file' };
         let stateForEncrypt = { fileObject: null, jsonObject: null, inputFileName: 'file' };
         let showFinalDownloadWarningPreference;
+        let versionFromTxt = null;
 
         // --- Utility Functions (Defined globally for access) ---
         function escapeRegExp(string) { return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
@@ -449,18 +464,86 @@
         function xorAndBase64Encode(txt, key) { let x = ""; for (let i=0; i<txt.length; i++) {x += String.fromCharCode(txt.charCodeAt(i) ^ key.charCodeAt(i % key.length));} return utf8StringToBase64(x); }
         function base64DecodeAndXOR(b64, key) { let dec; try { dec = base64ToUtf8String(b64); } catch (e) { throw e; } let x = ""; for (let i=0; i<dec.length; i++) {x += String.fromCharCode(dec.charCodeAt(i) ^ key.charCodeAt(i % key.length));} return x; }
 
+        function compareVersions(v1, v2) {
+            if (!v1 || !v2) return 0;
+            const parts1 = v1.split('.').map(p => parseInt(p, 10));
+            const parts2 = v2.split('.').map(p => parseInt(p, 10));
+            const len = Math.max(parts1.length, parts2.length);
+            for (let i = 0; i < len; i++) {
+                const p1 = parts1[i] || 0;
+                const p2 = parts2[i] || 0;
+                if (Number.isNaN(p1) || Number.isNaN(p2)) return 0;
+                if (p1 > p2) return 1;
+                if (p1 < p2) return -1;
+            }
+            return 0;
+        }
+
         async function fetchBitLifeVersion() {
-            if (!ui.bitlifeVersionSpan) { console.error("ui.bitlifeVersionSpan not ready for fetchBitLifeVersion"); return; }
+            if (!ui.bitlifeVersionSpan) { console.error("ui.bitlifeVersionSpan not defined when fetchBitLifeVersion called."); return null; }
             try {
                 const response = await fetch('https://raw.githubusercontent.com/S0methingSomething/BitEdit/Latest/BitEdit/Get_Bitlife_Version/version.txt');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const versionText = await response.text();
-                ui.bitlifeVersionSpan.textContent = versionText.trim();
+                const versionText = (await response.text()).trim();
+                ui.bitlifeVersionSpan.textContent = versionText;
+                versionFromTxt = versionText;
+                return versionText;
             } catch (error) {
-                console.error('Failed to fetch BitLife version:', error);
+                console.error('Failed to fetch BitLife version.txt:', error);
                 ui.bitlifeVersionSpan.textContent = 'Error';
+                versionFromTxt = null;
+                return null;
             }
         }
+
+        async function checkSourceOutdatedStatus() {
+            if (!versionFromTxt) {
+                console.log("version.txt not fetched yet, skipping outdated check for now.");
+                currentSourceInfo.statusMessage = "";
+                updateSourceInfoDisplay(currentSourceInfo);
+                return;
+            }
+            if (currentMonetizationVarsSourceURL !== DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) {
+                currentSourceInfo.statusMessage = ""; // No status message for custom URLs
+                updateSourceInfoDisplay(currentSourceInfo);
+                return;
+            }
+
+            try {
+                const response = await fetch(GITHUB_API_LATEST_TAG_URL);
+                if (!response.ok) {
+                    console.warn(`GitHub API request for release notes failed: ${response.status}`);
+                    currentSourceInfo.statusMessage = "(Could not verify release notes version)";
+                    updateSourceInfoDisplay(currentSourceInfo);
+                    return;
+                }
+                const releaseData = await response.json();
+                const releaseBody = releaseData.body || "";
+                const versionRegex = /(?:version\s*|v)?(\d+\.\d+\.\d+)/i;
+                const match = releaseBody.match(versionRegex);
+
+                if (match && match[1]) {
+                    const versionFromReleaseNotes = match[1];
+                    const comparisonResult = compareVersions(versionFromTxt, versionFromReleaseNotes);
+
+                    if (comparisonResult === 1) { // versionFromTxt is newer
+                        currentSourceInfo.statusMessage = `(Auto-patch source [v${versionFromReleaseNotes}] might be older than Latest BitLife Ver [v${versionFromTxt}])`;
+                    } else if (comparisonResult === -1) { // versionFromReleaseNotes is newer
+                        currentSourceInfo.statusMessage = `(Auto-patch source [v${versionFromReleaseNotes}] might be newer than Latest BitLife Ver [v${versionFromTxt}])`;
+                    } else {
+                        currentSourceInfo.statusMessage = ""; // Versions are equal
+                    }
+                } else {
+                    console.warn("Could not parse version from release notes.");
+                    currentSourceInfo.statusMessage = "(Could not verify release notes version)";
+                }
+            } catch (error) {
+                console.error("Error fetching or parsing release notes for outdated check:", error);
+                currentSourceInfo.statusMessage = "(Error checking release notes)";
+            }
+            updateSourceInfoDisplay(currentSourceInfo);
+        }
+
 
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
@@ -504,13 +587,37 @@
         }
         function updateSourceInfoDisplay(sourceInfo) {
             if(ui.sourcePfp) {
+                ui.sourcePfp.innerHTML = '';
                 if (sourceInfo.pfpImageUrl) {
-                    ui.sourcePfp.innerHTML = `<img src="${sourceInfo.pfpImageUrl}" alt="${sourceInfo.name.substring(0,2)}" class="w-full h-full rounded-full object-cover" onerror="this.onerror=null; this.parentElement.textContent='${sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase()}';">`;
+                    const img = document.createElement('img');
+                    img.src = sourceInfo.pfpImageUrl;
+                    img.alt = sourceInfo.name.substring(0,2);
+                    img.className = "w-full h-full rounded-full object-cover";
+                    img.onerror = () => { ui.sourcePfp.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase(); };
+                    ui.sourcePfp.appendChild(img);
                 } else {
                     ui.sourcePfp.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase() || 'URL';
                 }
             }
             if(ui.sourceName) ui.sourceName.textContent = sourceInfo.name;
+
+            if(ui.sourceStatusLabel) {
+                 ui.sourceStatusLabel.textContent = sourceInfo.statusMessage || "";
+                 ui.sourceStatusLabel.className = "status-label ml-2"; // Ensure base classes
+                 if (sourceInfo.statusMessage) {
+                     ui.sourceStatusLabel.classList.remove('hidden');
+                     if (sourceInfo.statusMessage.includes("newer")) { // Check for "newer"
+                         ui.sourceStatusLabel.classList.add('potentially-newer');
+                     } else if (sourceInfo.statusMessage.includes("older") || sourceInfo.statusMessage.includes("outdated")) { // Check for "older" or "outdated"
+                         ui.sourceStatusLabel.classList.add('outdated');
+                     } else { // For other messages like "Could not verify..."
+                         ui.sourceStatusLabel.classList.add('neutral');
+                     }
+                 } else {
+                     ui.sourceStatusLabel.classList.add('hidden');
+                 }
+            }
+
             if(ui.sourceUrlDisplay) {
                 ui.sourceUrlDisplay.href = sourceInfo.url;
                 const displayUrl = sourceInfo.url.length > 60 ? sourceInfo.url.substring(0, 57) + "..." : sourceInfo.url;
@@ -694,7 +801,7 @@
 
 
         // --- DOMContentLoaded ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Populate UI cache
             ui.tabDecrypt = document.getElementById('tab-decrypt');
             ui.tabEncrypt = document.getElementById('tab-encrypt');
@@ -720,6 +827,7 @@
             ui.sourceManagerModalCloseButton = document.getElementById('source-manager-modal-close-button');
             ui.sourcePfp = document.getElementById('source-pfp');
             ui.sourceName = document.getElementById('source-name');
+            ui.sourceStatusLabel = document.getElementById('source-status-label');
             ui.sourceUrlDisplay = document.getElementById('source-url-display');
             ui.newSourceUrlInput = document.getElementById('new-source-url');
             ui.loadNewSourceButton = document.getElementById('load-new-source-button');
@@ -736,16 +844,17 @@
                 showFinalDownloadWarningPreference = true;
             }
 
-            fetchBitLifeVersion();
+            await fetchBitLifeVersion();
+            await checkSourceOutdatedStatus();
+
             setupUIForMode('decrypt');
-            updateSourceInfoDisplay(DEFAULT_SOURCE_INFO);
 
             ui.tabDecrypt.addEventListener('click', () => setupUIForMode('decrypt'));
             ui.tabEncrypt.addEventListener('click', () => setupUIForMode('encrypt'));
 
             ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
             ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
-            ui.loadNewSourceButton.addEventListener('click', () => {
+            ui.loadNewSourceButton.addEventListener('click', async () => {
                 const newUrl = ui.newSourceUrlInput.value.trim();
                 if (newUrl) {
                     try {
@@ -753,18 +862,19 @@
                         currentMonetizationVarsSourceURL = parsedUrl.href;
                         currentSourceInfo = {
                             name: parsedUrl.hostname,
-                            pfpFallbackText: parsedUrl.hostname.substring(0,2).toUpperCase(), // Use initials from hostname
-                            url: parsedUrl.href
+                            pfpFallbackText: parsedUrl.hostname.substring(0,2).toUpperCase(),
+                            url: parsedUrl.href,
+                            statusMessage: ""
                         };
-                        updateSourceInfoDisplay(currentSourceInfo);
+                        await checkSourceOutdatedStatus();
                         showToast(`Source updated to: ${parsedUrl.hostname}`, "success");
                     } catch (e) {
                         showToast("Invalid URL entered. Please enter a valid URL.", "error");
                     }
                 } else {
                     currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
-                    currentSourceInfo = {...DEFAULT_SOURCE_INFO};
-                    updateSourceInfoDisplay(currentSourceInfo);
+                    currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO));
+                    await checkSourceOutdatedStatus();
                     showToast("URL cleared. Source reverted to default.", "info");
                 }
             });
