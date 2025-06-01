@@ -20,7 +20,6 @@
  * the C# bitlife-edit project by yntha (https://github.com/yntha/bitlife-edit),
  * which is also licensed under GPLv3.
  */
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,6 +65,10 @@
         .page-title-container { text-align: center; margin-bottom: 1rem; margin-top: 1rem; }
         .page-title { font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; color: var(--text-primary-light); }
         .ai-attribution-top { font-size: 0.75rem; line-height: 1rem; color: var(--text-secondary-light); margin-top: 0.25rem; }
+        .derivative-attribution-top { font-size: 0.75rem; line-height: 1rem; color: var(--text-secondary-light); margin-top: 0.1rem; }
+        .derivative-attribution-top a { color: var(--accent-sky); text-decoration: underline; }
+        .derivative-attribution-top a:hover { color: var(--accent-sky-rgb); }
+
 
         .tab-button {
             transition: background-color 0.25s ease-in-out, color 0.25s ease-in-out, transform 0.15s ease-in-out;
@@ -271,6 +274,10 @@
 
         .app-footer { text-align: center; padding: 1.5rem 1rem; color: var(--text-secondary-light); font-size: 0.875rem; border-top: 1px solid var(--bg-tertiary-dark); margin-top: auto; }
         .app-footer .version { font-size: 0.75rem; color: #6b7280; }
+        .app-footer .derivative-work { font-size: 0.75rem; margin-top: 0.5rem; }
+        .app-footer .derivative-work a { color: var(--accent-primary); text-decoration: underline; }
+        .app-footer .derivative-work a:hover { color: var(--accent-primary-hover); }
+
 
         #top-info-bar {
             background-color: var(--bg-secondary-dark);
@@ -295,6 +302,9 @@
         <div class="page-title-container">
             <h1 class="page-title">BitEdit</h1>
             <p class="ai-attribution-top">Made with AI (Gemini)</p>
+            <p class="derivative-attribution-top">
+                Based on <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">yntha's bitlife-edit</a> (GPLv3).
+            </p>
         </div>
 
         <div id="top-info-bar" class="rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center shadow-md p-3 sm:p-4">
@@ -434,14 +444,38 @@
             <li>When **encrypting**, <code>true</code>/<code>false</code> in JSON become .NET boolean Base64. Other values are stringified, then Base64 encoded. The output filename will be "MonetizationVars".</li>
             <li>"Unlock All" sets boolean <code>false</code> to <code>true</code> and .NET false Base64 to .NET true Base64 in the JSON textarea.</li>
             <li>Default cipher key: <code>com.wtfapps.apollo16</code>. Access via "Advanced Options" in the manual processing tabs. The auto-patcher uses this key unless changed via manual tab's advanced options *before* auto-patching.</li>
+            <li class="derivative-work">This tool is a derivative work based on the C# project <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer" class="text-[color:var(--accent-primary)] hover:text-[color:var(--accent-primary-hover)] underline">bitlife-edit by yntha</a>. All original logic credits go to yntha. Both projects are licensed under GPLv3.</li>
         </ul>
     </div>
 </div>
 <footer class="app-footer w-full">
-    <p class="version">v1.3.9</p>
-</footer>
+    <p class="version">v1.3.10</p>
+    </footer>
 
     <script>
+        /*
+         * BitEdit - MonetizationVars Editor
+         * Copyright (C) 2025 S0methingSomething
+         *
+         * This program is free software: you can redistribute it and/or modify
+         * it under the terms of the GNU General Public License as published by
+         * the Free Software Foundation, either version 3 of the License, or
+         * (at your option) any later version.
+         *
+         * This program is distributed in the hope that it will be useful,
+         * but WITHOUT ANY WARRANTY; without even the implied warranty of
+         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+         * GNU General Public License for more details.
+         *
+         * You should have received a copy of the GNU General Public License
+         * along with this program (in the LICENSE file). If not,
+         * see <https://www.gnu.org/licenses/>.
+         *
+         * This project is a JavaScript/HTML reimplementation of the logic from
+         * the C# bitlife-edit project by yntha (https://github.com/yntha/bitlife-edit),
+         * which is also licensed under GPLv3.
+         */
+
         // --- Constants ---
         const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
         const B64_NET_BOOLEAN_TRUE_STANDARD = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs=";
@@ -527,7 +561,7 @@
                 return;
             }
             if (currentMonetizationVarsSourceURL !== DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) {
-                currentSourceInfo.statusMessage = ""; // No status message for custom URLs
+                currentSourceInfo.statusMessage = "";
                 updateSourceInfoDisplay(currentSourceInfo);
                 return;
             }
@@ -554,7 +588,7 @@
                     } else if (comparisonResult === -1) { // versionFromReleaseNotes is newer
                         currentSourceInfo.statusMessage = `(Auto-patch source [v${versionFromReleaseNotes}] might be newer than Latest BitLife Ver [v${versionFromTxt}])`;
                     } else {
-                        currentSourceInfo.statusMessage = ""; // Versions are equal
+                        currentSourceInfo.statusMessage = "";
                     }
                 } else {
                     console.warn("Could not parse version from release notes.");
@@ -629,11 +663,11 @@
                  ui.sourceStatusLabel.className = "status-label ml-2"; // Ensure base classes
                  if (sourceInfo.statusMessage) {
                      ui.sourceStatusLabel.classList.remove('hidden');
-                     if (sourceInfo.statusMessage.includes("newer")) { // Check for "newer"
+                     if (sourceInfo.statusMessage.includes("newer")) {
                          ui.sourceStatusLabel.classList.add('potentially-newer');
-                     } else if (sourceInfo.statusMessage.includes("older") || sourceInfo.statusMessage.includes("outdated")) { // Check for "older" or "outdated"
+                     } else if (sourceInfo.statusMessage.includes("older") || sourceInfo.statusMessage.includes("outdated")) {
                          ui.sourceStatusLabel.classList.add('outdated');
-                     } else { // For other messages like "Could not verify..."
+                     } else {
                          ui.sourceStatusLabel.classList.add('neutral');
                      }
                  } else {
