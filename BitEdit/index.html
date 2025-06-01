@@ -45,7 +45,7 @@
         .ai-attribution-top { font-size: 0.75rem; line-height: 1rem; color: var(--text-secondary-light); margin-top: 0.25rem; }
         .derivative-attribution-top { font-size: 0.75rem; line-height: 1rem; color: var(--text-secondary-light); margin-top: 0.1rem; }
         .derivative-attribution-top a { color: var(--accent-sky); text-decoration: underline; }
-        .derivative-attribution-top a:hover { color: var(--accent-sky-rgb); }
+        .derivative-attribution-top a:hover { color: #38bdf8; } /* Lighter sky for hover */
 
 
         .tab-button {
@@ -252,9 +252,9 @@
 
         .app-footer { text-align: center; padding: 1.5rem 1rem; color: var(--text-secondary-light); font-size: 0.875rem; border-top: 1px solid var(--bg-tertiary-dark); margin-top: auto; }
         .app-footer .version { font-size: 0.75rem; color: #6b7280; }
-        .app-footer .derivative-work { font-size: 0.75rem; margin-top: 0.5rem; }
-        .app-footer .derivative-work a { color: var(--accent-primary); text-decoration: underline; }
-        .app-footer .derivative-work a:hover { color: var(--accent-primary-hover); }
+        .app-footer .derivative-work-footer { font-size: 0.75rem; margin-top: 0.5rem; } /* Renamed for clarity */
+        .app-footer .derivative-work-footer a { color: var(--accent-primary); text-decoration: underline; }
+        .app-footer .derivative-work-footer a:hover { color: var(--accent-primary-hover); }
 
 
         #top-info-bar {
@@ -428,7 +428,7 @@
 </div>
 <footer class="app-footer w-full">
     <p class="version">v1.3.10</p>
-    </footer>
+</footer>
 
     <script>
         /*
@@ -566,7 +566,7 @@
                     } else if (comparisonResult === -1) { // versionFromReleaseNotes is newer
                         currentSourceInfo.statusMessage = `(Auto-patch source [v${versionFromReleaseNotes}] might be newer than Latest BitLife Ver [v${versionFromTxt}])`;
                     } else {
-                        currentSourceInfo.statusMessage = "";
+                        currentSourceInfo.statusMessage = ""; // Versions are equal
                     }
                 } else {
                     console.warn("Could not parse version from release notes.");
