@@ -39,8 +39,9 @@ jobs:
       - name: Install HTML Validator
         run: npm install -g html-validator-cli
 
-      - name: Validate HTML
-        run: html-validator --path ./BitEdit --verbose
+      - name: Validate HTML # <-- THIS STEP IS CORRECTED
+        # Find all HTML files in the BitEdit directory and run the validator on each one.
+        run: find ./BitEdit -name "*.html" -exec html-validator --file={} --verbose \;
 
       - name: Install and run a local server for testing
         run: |
@@ -51,8 +52,8 @@ jobs:
       - name: Test if the site is renderable with cURL
         run: curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080 | grep 200
 
-      - name: Check for broken links # <-- THIS STEP IS REPLACED
-        uses: lycheeverse/lychee-action@v1.10.0 # Using a well-maintained action
+      - name: Check for broken links
+        uses: lycheeverse/lychee-action@v1.10.0
         with:
           # This scans all HTML files recursively in the BitEdit directory
           args: --verbose --no-progress './BitEdit/**/*.html'
@@ -87,4 +88,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
