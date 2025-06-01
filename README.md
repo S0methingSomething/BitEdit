@@ -32,7 +32,7 @@ BitEdit is a specialized web tool that allows you to decrypt, analyze, and modif
 
 ## 🚀 Quick Start
 
-1. **Visit the Live Application**: [BitEdit Web App](https://s0methingsomething.github.io/BitEdit/)
+1. **Visit the Live Application**: [BitEdit](https://s0methingsomething.github.io/BitEdit/)
 2. **Choose your workflow**:
    - Have a MonetizationVars file? Use the decrypt/encrypt tabs
    - Need a file? Click "Don't have a MonetizationVars?" for auto-download options
