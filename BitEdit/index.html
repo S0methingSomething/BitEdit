@@ -99,23 +99,23 @@
             position: fixed;
             left: 0; top: 0; width: 100%; height: 100%;
             overflow: auto; background-color: rgba(0,0,0,0.85);
-            display: flex; align-items: center; justify-content: center; padding: 0; /* Adjusted for full screen */
+            display: flex; align-items: center; justify-content: center; padding: 0;
             opacity: 0; transform: scale(0.90) translateY(15px);
             pointer-events: none; transition: opacity 0.25s ease-out, transform 0.25s ease-out;
-            z-index: 50; /* Base z-index for modals */
+            z-index: 50;
         }
-        #flowchart-modal { z-index: 110; } /* Higher for specific modals if needed */
+        #flowchart-modal { z-index: 110; }
         #download-final-warning-modal { z-index: 150; }
 
         .modal.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-        .modal-content { /* General modal content styling, will be overridden by source manager for large screens */
+        .modal-content {
             background-color: var(--bg-primary-dark);
             margin: auto;
-            padding: 1.5rem; /* sm:padding: 2rem */
+            padding: 1.5rem;
             border: 1px solid var(--bg-tertiary-dark);
-            border-radius: 0.75rem; /* 12px */
+            border-radius: 0.75rem;
             width: 100%;
-            max-width: 600px; /* Default max-width */
+            max-width: 600px;
             color: var(--text-primary-light);
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2);
         }
@@ -132,39 +132,36 @@
         .modal-footer input[type="checkbox"]:checked { background-color: var(--accent-primary); }
 
 
-        /* Source Manager Modal - Full Screen Inspired */
         #source-manager-modal {
-            z-index: 100; /* Ensure it's above other elements */
-            padding: 0; /* Remove padding for full screen effect on small screens */
+            z-index: 100;
+            padding: 0;
         }
         .source-manager-modal-content {
             background-color: var(--bg-primary-dark);
             width: 100%;
             height: 100%;
-            min-height: 100vh; /* Ensure it takes full viewport height on small screens */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            border-radius: 0; /* No border radius for small screen full view */
-            border: none; /* No border for small screen full view */
-            box-shadow: none; /* No shadow for small screen full view */
-            padding: 1rem; /* Base padding for content inside */
-            overflow-y: auto; /* Allow content to scroll */
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            padding: 1rem; /* p-4 for small screens */
+            overflow-y: auto;
         }
-        /* On medium screens and up, revert to a more traditional modal style */
-        @media (min-width: 768px) { /* md breakpoint in Tailwind */
+        @media (min-width: 768px) { /* md breakpoint */
             #source-manager-modal {
-                padding: 1rem; /* Restore padding for the overlay to be visible */
+                padding: 1rem;
             }
             .source-manager-modal-content {
-                width: 100%;
-                max-width: 768px; /* lg:max-w-3xl or similar */
-                height: auto; /* Auto height based on content */
+                max-width: 768px;
+                height: auto;
                 min-height: 0;
-                max-height: 90vh; /* Max height */
-                border-radius: 0.75rem; /* Restore border radius */
-                border: 1px solid var(--bg-tertiary-dark); /* Restore border */
-                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); /* Restore shadow */
-                padding: 1.5rem; /* Restore padding */
+                max-height: 90vh;
+                border-radius: 0.75rem;
+                border: 1px solid var(--bg-tertiary-dark);
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                padding: 1.5rem; /* p-6 for medium screens and up */
             }
         }
 
@@ -173,43 +170,47 @@
             color: var(--text-secondary-light); font-size: 2rem;
             font-weight: bold; cursor: pointer; line-height: 1;
             transition: color 0.2s ease-in-out, transform 0.15s ease;
-            z-index: 10; /* Ensure close button is above content */
+            z-index: 10;
         }
         .source-manager-modal-close:hover { color: var(--text-primary-light); transform: scale(1.1); }
 
         .source-manager-header {
             text-align: center;
-            margin-bottom: 1.5rem; /* mb-6 */
-            padding-bottom: 1rem; /* pb-4 */
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid var(--bg-tertiary-dark);
         }
         .source-manager-title {
-            font-size: 1.5rem; /* text-2xl */
-            font-weight: 700; /* font-bold */
+            font-size: 1.5rem;
+            font-weight: 700;
             color: var(--text-primary-light);
         }
 
         .current-source-info-card {
             background-color: var(--bg-secondary-dark);
             border: 1px solid var(--bg-tertiary-dark);
-            border-radius: 0.5rem; /* rounded-lg */
-            padding: 1.5rem; /* p-6 */
-            margin-bottom: 1.5rem; /* mb-6 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem; /* Reduced */
             text-align: center;
+        }
+         @media (min-width: 768px) {
+            .current-source-info-card {
+                padding: 1.5rem;
+            }
         }
         .current-source-pfp-container {
             display: flex;
             justify-content: center;
-            margin-bottom: 1rem; /* mb-4 */
+            margin-bottom: 1rem;
         }
-        #source-pfp-large { /* New ID for the larger PFP in modal */
-            width: 100px; height: 100px; /* Larger PFP */
-            md:width: 128px; md:height: 128px;
+        #source-pfp-large {
+            width: 100px; height: 100px;
             border-radius: 50%;
             background-color: var(--bg-tertiary-dark);
             color: var(--text-primary-light);
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.5rem; md:font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 600;
             border: 3px solid var(--accent-primary);
             overflow: hidden;
@@ -217,12 +218,17 @@
         }
         #source-pfp-large img { width: 100%; height: 100%; object-fit: cover; }
 
-        #source-name-large { /* New ID for source name in modal */
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600; /* font-semibold */
+        #source-name-large {
+            font-size: 1.125rem;
+            font-weight: 600;
             color: var(--text-primary-light);
-            margin-bottom: 0.25rem; /* mb-1 */
+            margin-bottom: 0.25rem;
             word-break: break-all;
+        }
+        @media (min-width: 768px) {
+            #source-name-large {
+                font-size: 1.25rem;
+            }
         }
         #source-status-label-large {
             font-size: 0.875rem;
@@ -249,32 +255,47 @@
             font-weight: 500;
         }
 
-        .source-pfp {
-            width: 64px; height: 64px;
-            border-radius: 50%;
-            background-color: var(--bg-tertiary-dark);
+        .advanced-options-toggle {
+            display: flex; align-items: center; cursor: pointer;
+            padding: 0.5rem 0.5rem;
+            color: var(--text-secondary-light);
+            margin-bottom: 0.25rem;
+            border-radius: 0.375rem;
+            transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+        .advanced-options-toggle:hover {
             color: var(--text-primary-light);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-right: 1rem;
-            border: 2px solid var(--accent-primary);
-            flex-shrink: 0;
-            overflow: hidden;
+            background-color: var(--bg-secondary-dark);
         }
-        .source-pfp img { width: 100%; height: 100%; object-fit: cover; }
-        #source-name, #source-url-display { overflow-wrap: break-word; word-break: break-all; min-width: 0; }
-        #source-info-text-container { min-width: 0; }
+        .advanced-options-toggle svg { width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; transition: transform 0.2s ease-in-out; }
 
-        .status-label {
-            font-size: 0.8rem;
-            font-weight: 500;
-            margin-left: 0.25rem;
-            display: inline;
+        .advanced-options-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease-out, padding 0.35s ease-out, margin-top 0.35s ease-out, opacity 0.35s ease-out, border-color 0.35s ease-out;
+            background-color: var(--bg-secondary-dark);
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            opacity: 0;
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
-        .status-label.potentially-newer { color: var(--accent-green); }
-        .status-label.outdated { color: var(--accent-yellow); }
-        .status-label.neutral { color: var(--text-secondary-light); }
+        .advanced-options-content.expanded {
+            max-height: 500px; /* Generous default max-height */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            margin-top: 0.5rem;
+            border-color: var(--bg-tertiary-dark);
+            opacity: 1;
+            overflow: visible; /* Changed to visible, parent will scroll */
+        }
+        #advanced-options-content-area.expanded { /* For main page cipher key */
+             max-height: 250px; /* Specific max-height */
+        }
+        #source-manager-advanced-content.expanded { /* For modal URL input */
+            margin-bottom: 1rem; /* Space below when expanded */
+             /* max-height: none; /* Allow to grow based on content, parent handles scroll */
+        }
 
 
         #auto-patch-log {
@@ -302,11 +323,6 @@
             border-radius: 0.25rem;
         }
 
-        .advanced-options-toggle { display: flex; align-items: center; cursor: pointer; padding: 0.5rem 0; color: var(--text-secondary-light); margin-top: 0.75rem; margin-bottom: 0.5rem; border-bottom: 1px dashed var(--bg-tertiary-dark); padding-bottom: 0.75rem; transition: color 0.2s ease-in-out;}
-        .advanced-options-toggle:hover { color: var(--text-primary-light); }
-        .advanced-options-toggle svg { width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; transition: transform 0.2s ease-in-out; }
-        .advanced-options-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out, margin-top 0.3s ease-out, border 0.3s ease-out; background-color: var(--bg-primary-dark); padding: 0; border-radius: 0.375rem; }
-        .advanced-options-content.expanded { max-height: 200px; padding: 1rem; margin-top: 0.5rem; border: 1px solid var(--bg-tertiary-dark); }
 
         .button {
             padding: 0.625rem 1rem; border-radius: 0.375rem; font-weight: 500; text-align: center;
@@ -509,18 +525,22 @@
                 <p id="modal-bitlife-version-info" class="mt-2">Latest BitLife Ver: <span id="modal-bitlife-version-dynamic">Loading...</span></p>
             </div>
 
-            <div class="mb-6">
-                <label for="new-source-url" class="block text-sm font-medium mb-1" style="color: var(--text-secondary-light);">Change Source (Enter Raw File URL):</label>
-                <div class="flex flex-col sm:flex-row gap-2">
+            <div id="source-manager-advanced-options-toggle" class="advanced-options-toggle">
+                <svg id="source-manager-advanced-icon" class="transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                <span>Advanced: Change Source URL</span>
+            </div>
+            <div id="source-manager-advanced-content" class="advanced-options-content">
+                 <label for="new-source-url" class="block text-sm font-medium mb-1" style="color: var(--text-secondary-light);">New Source (Raw File URL):</label>
+                <div class="flex flex-col sm:flex-row gap-2 w-full">
                     <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="w-full p-2.5 rounded-md flex-grow">
-                    <button id="load-new-source-button" class="button button-primary px-4 py-2.5 w-full sm:w-auto">Load</button>
+                    <button id="load-new-source-button" class="button button-primary px-4 py-2.5 w-full sm:w-auto sm:flex-shrink-0">Load</button>
                 </div>
-                 <p class="text-xs mt-1" style="color: var(--text-secondary-light);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
+                 <p class="text-xs mt-2" style="color: var(--text-secondary-light);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
             </div>
 
-            <div class="mt-8 pt-6 border-t" style="border-color: var(--bg-tertiary-dark);">
-                <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--text-primary-light);">Actions</h3>
-                <div class="space-y-3 sm:space-y-0 sm:flex sm:space-x-3 sm:justify-center">
+            <div class="mt-4 pt-4 border-t" style="border-color: var(--bg-tertiary-dark);">
+                <h3 class="text-lg font-semibold mb-2 text-center" style="color: var(--text-primary-light);">Actions</h3>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-3 text-base font-semibold">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -603,7 +623,7 @@
 
         // --- Source Info ---
         const DEFAULT_SOURCE_INFO = {
-            name: "S0methingSomething", // UPDATED NAME
+            name: "S0methingSomething",
             pfpImageUrl: "https://avatars.githubusercontent.com/S0methingSomething?v=4&s=128",
             pfpFallbackText: "S0",
             url: DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL,
@@ -755,6 +775,9 @@
         function openSourceManagerModal() {
             updateSourceManagerDisplay(currentSourceInfo);
             if(ui.newSourceUrlInput) ui.newSourceUrlInput.value = '';
+            if(ui.sourceManagerAdvancedContent) ui.sourceManagerAdvancedContent.classList.remove('expanded');
+            if(ui.sourceManagerAdvancedIcon) ui.sourceManagerAdvancedIcon.style.transform = 'rotate(0deg)';
+
             if(ui.autoPatchLog) ui.autoPatchLog.innerHTML = '';
             if(ui.autoPatchLogContainer) ui.autoPatchLogContainer.classList.add('hidden');
             if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden');
@@ -1030,6 +1053,9 @@
             ui.sourceUrlDisplayLarge = document.getElementById('source-url-display-large');
             ui.sourceFetchedVersionMessage = document.getElementById('source-fetched-version-message');
             ui.modalBitlifeVersionDynamic = document.getElementById('modal-bitlife-version-dynamic');
+            ui.sourceManagerAdvancedToggle = document.getElementById('source-manager-advanced-options-toggle');
+            ui.sourceManagerAdvancedContent = document.getElementById('source-manager-advanced-content');
+            ui.sourceManagerAdvancedIcon = document.getElementById('source-manager-advanced-icon');
             ui.newSourceUrlInput = document.getElementById('new-source-url');
             ui.loadNewSourceButton = document.getElementById('load-new-source-button');
             ui.downloadOriginalButton = document.getElementById('download-original-button');
@@ -1054,6 +1080,14 @@
 
             ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
             ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
+
+            if (ui.sourceManagerAdvancedToggle && ui.sourceManagerAdvancedContent && ui.sourceManagerAdvancedIcon) {
+                ui.sourceManagerAdvancedToggle.addEventListener('click', () => {
+                    const isExpanded = ui.sourceManagerAdvancedContent.classList.toggle('expanded');
+                    ui.sourceManagerAdvancedIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+                });
+            }
+
             ui.loadNewSourceButton.addEventListener('click', async () => {
                 const newUrl = ui.newSourceUrlInput.value.trim();
                 if (newUrl) {
