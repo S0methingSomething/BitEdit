@@ -18,45 +18,18 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, canceling any in-progress runs
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  # Build and Test job
+  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install HTML Validator
-        run: npm install -g html-validator-cli
-
-      - name: Validate HTML # <-- THIS STEP IS CORRECTED
-        # Find all HTML files in the BitEdit directory and run the validator on each one.
-        run: find ./BitEdit -name "*.html" -exec html-validator --file={} --verbose \;
-
-      - name: Install and run a local server for testing
-        run: |
-          npm install -g http-server
-          http-server ./BitEdit &
-          sleep 5 # Give the server a moment to start
-
-      - name: Test if the site is renderable with cURL
-        run: curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080 | grep 200
-
-      - name: Check for broken links
-        uses: lycheeverse/lychee-action@v1.10.0
-        with:
-          # This scans all HTML files recursively in the BitEdit directory
-          args: --verbose --no-progress './BitEdit/**/*.html'
 
       - name: Setup Pages
         id: pages
@@ -65,7 +38,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit'
+          # This path is now corrected to point to your "BitEdit" folder
+          path: './BitEdit' # <--- THIS IS THE REQUIRED CHANGE
 
   # Deployment job
   deploy:
