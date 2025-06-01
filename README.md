@@ -8,13 +8,12 @@ A web-based editor for viewing, modifying, and patching MonetizationVars files f
 
 ## 🎯 Overview
 
-BitEdit is a specialized web tool that allows you to decrypt, analyze, and modify MonetizationVars files from BitLife. Built entirely in the browser, it provides an intuitive interface for understanding game monetization configurations and simplifying common modifications like unlocking in-app purchases (IAPs).
+BitEdit is a specialized web tool that allows you to decrypt, analyze, and modify MonetizationVars files from BitLife. Built entirely in the browser
 
 **Key Benefits:**
 - No installation required - runs entirely in your browser
 - Simple drag-and-drop interface
 - Automatic patching capabilities
-- Educational insight into game monetization structures
 
 ## ✨ Features
 
