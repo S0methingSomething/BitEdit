@@ -1,7 +1,7 @@
 // sw.js - Service Worker for BitEdit
 
 // GITHUB_ACTION_MARKER_SW_CACHE_NAME (Do not remove or alter this line)
-const CACHE_NAME = '1.4.3'; // Increment version to force update
+const CACHE_NAME = '1.4.4'; // Increment version to force update
 const PRECACHE_ASSETS = [
     './', // Alias for index.html
     './index.html',
