@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/**' # Trigger if anything in the BitEdit directory changes
+      - 'BitEdit/index.html' # More specific path for the versioned index.html
   workflow_dispatch:
 
 permissions:
@@ -36,11 +36,15 @@ jobs:
             exit 1
           fi
           VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
-          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION = "\(v\?[0-9]\+\.[0-9]\+\.[0-9]\+\(\.[0-9]\+\)?\)".*/\1/p')
+          
+          # Robust sed command to extract content between quotes after "CURRENT_APP_VERSION = "
+          # Allows for spaces around '=' and captures anything within the quotes.
+          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
+          
           if [ -z "$VERSION_STRING" ]; then
             echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
-            echo "Expected format: const CURRENT_APP_VERSION = \"[v]x.x.x[.x]\";"
-            echo "Found line: $VERSION_LINE"
+            echo "Searched for pattern: const CURRENT_APP_VERSION = \"...version...\""
+            echo "Line processed by sed: $VERSION_LINE"
             exit 1
           fi
           echo "Extracted version: $VERSION_STRING"
