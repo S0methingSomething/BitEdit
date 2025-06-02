@@ -1,0 +1,167 @@
+---
+name: "\U0001F41E Bug report"
+about: Report a bug or issue in BitEdit.
+title: ''
+labels: bug
+assignees: ''
+
+---
+
+name: 🐞 Bug Report
+description: Report a bug or issue in BitEdit.
+title: "[BUG] Short description of the problem"
+labels: ["bug", "needs-triage", "Website-issues", "Processing-issues", "misc"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐞 BitEdit Bug Report
+        Thanks for taking the time to fill out this bug report! 
+        Please select the most relevant category for your bug and provide as much detail as possible to help us fix it.
+
+  - type: checkboxes
+    id: bug-type
+    attributes:
+      label: Type of Bug
+      description: Please select all categories that apply to the bug you are reporting.
+      options:
+        - label: "UI / Layout / General Website Bug (Visual or functional problems with the website itself)"
+          required: false
+        - label: "Processing Bug (Issues with Encryption, Decryption, File Output, or specific parameter values)"
+          required: false
+        - label: "Other Bug (Please describe in detail below)"
+          required: false
+    validations:
+      required: true # Ensures at least one checkbox is selected.
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Detailed Bug Description
+      description: Describe the issue clearly. What happened? What went wrong?
+      placeholder: A clear and concise description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: List the exact steps to trigger the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Clicked on '....'
+        3. Scrolled to '....'
+        4. Observed the issue...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: A clear and concise description of what you expected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: A clear and concise description of what occurred.
+    validations:
+      required: true
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshot or Video (Recommended)
+      description: Add visual evidence of the bug. Screenshots, GIFs, or short videos are very helpful.
+      placeholder: Drag and drop or paste screenshots/GIFs here. You can also link to a video.
+
+  - type: textarea
+    id: monetizationvars
+    attributes:
+      label: MonetizationVars File or JSON Snippet
+      description: >
+        **Crucial for 'Processing Bug' type.** Paste relevant content. 
+        **IMPORTANT: Anonymize or remove any sensitive personal data or identifiers from your game save before pasting.**
+      placeholder: |
+        If decrypting, paste the raw content of your MonetizationVars file here.
+        ---OR---
+        If encrypting, paste the JSON you used here:
+        ```json
+        {
+          "ExampleKey": "ExampleValue",
+          "ProblematicKey": "ProblematicValueCausingTheBug"
+        }
+        ```
+      render: markdown
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      placeholder: e.g., Windows 11, macOS Sonoma 14.2, Android 14, iOS 17.2
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Which browser and version are you using? (If applicable for website issues)
+      placeholder: e.g., Chrome 121, Firefox 120, Safari 17.1
+
+  - type: input
+    id: bitedit-version
+    attributes:
+      label: BitEdit Version
+      description: You can find this at the bottom of the BitEdit page.
+      placeholder: e.g., v1.3.13
+    validations:
+      required: true
+  
+  - type: input
+    id: monetizationvars-source
+    attributes:
+      label: MonetizationVars Source (if using Source Manager)
+      description: Where did you get the MonetizationVars file from?
+      placeholder: e.g., Default (S0methingSomething), Custom URL
+
+  - type: input
+    id: game-version
+    attributes:
+      label: Game & Version
+      description: Specify the game and its version if the issue is related to a specific game's file.
+      placeholder: e.g., BitLife - Life Simulator vX.Y.Z, BitLife Francais vX.Y.Z
+
+  - type: textarea
+    id: console-logs
+    attributes:
+      label: Browser Console Logs (Highly Recommended)
+      description: If you see any errors in your browser's developer console (usually F12 -> Console tab), please paste them here.
+      placeholder: |
+        ```
+        (Paste console error messages here)
+        ```
+      render: markdown
+
+  - type: textarea
+    id: extra-context
+    attributes:
+      label: Additional Context
+      description: Add any other relevant details about the problem.
+      placeholder: e.g., Did this happen after a specific action? Is it a new bug? Are you using a custom cipher key, VPN, or proxy?
+
+  - type: textarea
+    id: possible-solution
+    attributes:
+      label: Possible Cause or Fix (Optional)
+      description: If you have an idea of what might be causing the bug or how to fix it, please share.
+      placeholder: e.g., "I think this might be related to..." or "A possible fix could be..."
