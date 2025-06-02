@@ -4,14 +4,13 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'index.html'        # For version extraction from root
-      - 'BitEdit/**'        # For deployment content
+      - 'BitEdit/**' # Trigger if anything in the BitEdit directory changes
   workflow_dispatch:
 
 permissions:
-  contents: write   # Needed to push the updated BitEdit_version.txt
-  pages: write      # Needed to deploy to GitHub Pages
-  id-token: write   # Needed for OIDC token for GitHub Pages deployment
+  contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
@@ -28,13 +27,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract version from index.html
+      - name: Extract version from BitEdit/index.html
         id: get_version
         run: |
-          VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 index.html | tail -n1)
+          INDEX_FILE_PATH="BitEdit/index.html"
+          if [ ! -f "$INDEX_FILE_PATH" ]; then
+            echo "Error: $INDEX_FILE_PATH not found."
+            exit 1
+          fi
+          VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
           VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION = "\(v\?[0-9]\+\.[0-9]\+\.[0-9]\+\(\.[0-9]\+\)?\)".*/\1/p')
           if [ -z "$VERSION_STRING" ]; then
-            echo "Error: Version string not found or invalid format in index.html."
+            echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
             echo "Expected format: const CURRENT_APP_VERSION = \"[v]x.x.x[.x]\";"
             echo "Found line: $VERSION_LINE"
             exit 1
@@ -71,12 +75,11 @@ jobs:
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit' # This directory now contains the locally modified BitEdit_version.txt
+          path: './BitEdit'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        # This action implicitly uses the artifact uploaded by upload-pages-artifact
 
       - name: Commit and push BitEdit_version.txt if changed
         if: success() && steps.update_txt.outputs.changed == 'true'
