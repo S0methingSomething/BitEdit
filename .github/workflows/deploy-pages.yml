@@ -1,13 +1,14 @@
-# .github/workflows/deploy-pages.yml
-
 # Name of the workflow
 name: Deploy BitEdit to GitHub Pages
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push events but only for the "main" branch
+  # Triggers the workflow on push events for the "main" branch
+  # but only when a file inside the './BitEdit' directory changes
   push:
     branches: ["main"]
+    paths:
+      - 'BitEdit/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -39,7 +40,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # This path is now corrected to point to your "BitEdit" folder
-          path: './BitEdit' # <--- THIS IS THE REQUIRED CHANGE
+          path: './BitEdit'
 
   # Deployment job
   deploy:
