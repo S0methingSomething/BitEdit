@@ -1,12 +1,3 @@
----
-name: "\U0001F41E Bug report"
-about: Report a bug or issue in BitEdit.
-title: ''
-labels: bug
-assignees: ''
-
----
-
 name: 🐞 Bug Report
 description: Report a bug or issue in BitEdit.
 title: "[BUG] Short description of the problem"
