@@ -1,65 +1,89 @@
-# Name of the workflow
-name: Deploy BitEdit to GitHub Pages
+name: Deploy BitEdit and Update Version File
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push events for the "main" branch
-  # but only when a file inside the './BitEdit' directory changes
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/**'
-
-  # Allows you to run this workflow manually from the Actions tab
+      - 'index.html'        # For version extraction from root
+      - 'BitEdit/**'        # For deployment content
   workflow_dispatch:
 
-# Sets the permissions for the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write   # Needed to push the updated BitEdit_version.txt
+  pages: write      # Needed to deploy to GitHub Pages
+  id-token: write   # Needed for OIDC token for GitHub Pages deployment
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Build job
-  build:
+  build_deploy_and_commit_version:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract version from index.html
+        id: get_version
+        run: |
+          VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 index.html | tail -n1)
+          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION = "\(v\?[0-9]\+\.[0-9]\+\.[0-9]\+\(\.[0-9]\+\)?\)".*/\1/p')
+          if [ -z "$VERSION_STRING" ]; then
+            echo "Error: Version string not found or invalid format in index.html."
+            echo "Expected format: const CURRENT_APP_VERSION = \"[v]x.x.x[.x]\";"
+            echo "Found line: $VERSION_LINE"
+            exit 1
+          fi
+          echo "Extracted version: $VERSION_STRING"
+          echo "version=$VERSION_STRING" >> "$GITHUB_OUTPUT"
+
+      - name: Create/Update BitEdit_version.txt locally
+        id: update_txt
+        run: |
+          VERSION_TO_WRITE="${{ steps.get_version.outputs.version }}"
+          VERSION_FILE_PATH="BitEdit/BitEdit_version.txt" 
+          
+          mkdir -p "$(dirname "$VERSION_FILE_PATH")"
+          
+          CURRENT_CONTENT=""
+          if [ -f "$VERSION_FILE_PATH" ]; then
+            CURRENT_CONTENT=$(cat "$VERSION_FILE_PATH")
+          fi
+
+          if [ "$CURRENT_CONTENT" != "$VERSION_TO_WRITE" ]; then
+            echo "Version changed. Writing '$VERSION_TO_WRITE' to '$VERSION_FILE_PATH'"
+            echo "$VERSION_TO_WRITE" > "$VERSION_FILE_PATH"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "BitEdit_version.txt is already up to date with '$VERSION_TO_WRITE'."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          # This path is now corrected to point to your "BitEdit" folder
-          path: './BitEdit'
+          path: './BitEdit' # This directory now contains the locally modified BitEdit_version.txt
 
-  # Deployment job
-  deploy:
-    # Requires the build job to have completed successfully
-    needs: build
-
-    # Grant GITHUB_TOKEN the permissions required to deploy to Pages
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        # This action implicitly uses the artifact uploaded by upload-pages-artifact
+
+      - name: Commit and push BitEdit_version.txt if changed
+        if: success() && steps.update_txt.outputs.changed == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add BitEdit/BitEdit_version.txt
+          git commit -m "docs: Update BitEdit_version.txt to ${{ steps.get_version.outputs.version }} [skip ci]"
+          git push
+          echo "BitEdit_version.txt updated and pushed to repository."
