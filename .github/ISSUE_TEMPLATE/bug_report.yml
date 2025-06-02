@@ -98,7 +98,7 @@ body:
     attributes:
       label: Operating System
       description: What operating system are you using?
-      placeholder: e.g., Windows 11, macOS Sonoma 14.2, Android 14, iOS 17.2
+      placeholder: e.g., Android
     validations:
       required: true
 
@@ -107,7 +107,7 @@ body:
     attributes:
       label: Browser
       description: Which browser and version are you using? (If applicable for website issues)
-      placeholder: e.g., Chrome 121, Firefox 120, Safari 17.1
+      placeholder: e.g., Chrome, Firefox, Safari
 
   - type: input
     id: bitedit-version
@@ -123,7 +123,7 @@ body:
     attributes:
       label: MonetizationVars Source (if using Source Manager)
       description: Where did you get the MonetizationVars file from?
-      placeholder: e.g., Default (S0methingSomething), Custom URL
+      placeholder: e.g., Default (S0methingSomething)
 
   - type: input
     id: game-version
