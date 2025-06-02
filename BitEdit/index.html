@@ -10,125 +10,125 @@
         :root {
             /* Vercel-inspired Dark Theme Palette */
             --bg-canvas: #000000;
-            --bg-primary: #111111; 
-            --bg-secondary: #1C1C1C; 
-            --bg-tertiary: #2A2A2A; 
+            --bg-primary: #0A0A0A; /* Vercel: Very dark gray for content */
+            --bg-secondary: #1C1C1C;
+            --bg-tertiary: #2A2A2A;
 
-            --border-color-primary: #333333; 
-            --border-color-secondary: #444444; 
+            --border-color-primary: #333333;
+            --border-color-secondary: #444444;
 
             --text-primary: #FFFFFF;
-            --text-secondary: #888888; 
-            --text-tertiary: #666666;
+            --text-secondary: #888888;
+            --text-tertiary: #666666; /* Vercel: Lighter gray for less emphasis */
 
-            --accent-primary: #8B5CF6; 
-            --accent-primary-hover: #7C3AED;
-            --accent-primary-focus-ring: rgba(139, 92, 246, 0.4); 
-            --accent-primary-rgb: 139, 92, 246;
+            --accent-focus: #0070F3; /* Vercel Blue for focus rings and key accents */
+            --accent-focus-rgb: 0, 112, 243;
+            --accent-focus-shadow: rgba(0, 112, 243, 0.3);
 
+            /* Semantic colors for status, logs etc. */
             --accent-green: #10b981;
             --accent-green-rgb: 16, 185, 129;
             --accent-yellow: #f59e0b;
             --accent-yellow-rgb: 245, 158, 11;
             --accent-red: #ef4444;
             --accent-red-rgb: 239, 68, 68;
-            --accent-indigo: #6366f1;
+            --accent-indigo: #6366f1; /* Retained for existing specific buttons */
             --accent-indigo-rgb: 99, 102, 241;
-            --accent-sky: #0ea5e9; 
-            --accent-sky-hover: #38bdf8; 
+            --accent-sky: #0ea5e9;  /* Retained for existing specific buttons */
             --accent-sky-rgb: 14, 165, 233;
 
-            --transition-duration: 0.2s;
-            --transition-timing: ease-in-out;
+            --transition-duration: 0.15s;
+            --transition-timing: ease;
+            --border-radius-sm: 0.25rem; /* 4px */
+            --border-radius-md: 0.375rem; /* 6px - for modals, larger cards */
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-canvas); /* Vercel: Black canvas */
-            color: var(--text-primary); /* Vercel: White primary text */
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
         .content-wrapper { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center;}
-        .main-container { 
-            background-color: var(--bg-primary); /* Vercel: Slightly off-black for main content */
+        .main-container {
+            background-color: var(--bg-primary);
             width: 100%;
-            border: 1px solid var(--border-color-primary); /* Vercel: Subtle border */
-            border-radius: 0.5rem; /* Vercel: rounded-lg */
-            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1), 0px 2px 6px rgba(0,0,0,0.08); /* Vercel: Softer shadow */
+            border: 1px solid var(--border-color-primary);
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 0 0 1px var(--border-color-primary); /* Subtle border-like shadow */
         }
         .page-title-container { text-align: center; margin-bottom: 1.5rem; margin-top: 1rem; }
-        .page-title { 
-            font-size: 1.75rem; 
-            line-height: 2.25rem; 
-            font-weight: 600; /* Vercel: Semibold */
-            color: var(--text-primary); 
+        .page-title {
+            font-size: 2rem; /* 32px */
+            line-height: 1.2; /* Adjusted line height */
+            font-weight: 600; /* Semibold, Vercel also uses 700 */
+            color: var(--text-primary);
         }
-        .ai-attribution-top, .derivative-attribution-top { 
-            font-size: 0.875rem; 
-            color: var(--text-secondary); /* Vercel: Muted gray */
-            margin-top: 0.25rem; 
+        .ai-attribution-top, .derivative-attribution-top {
+            font-size: 0.75rem; /* 12px */
+            color: var(--text-tertiary); /* Lighter gray */
+            margin-top: 0.375rem; /* 6px */
         }
-        .derivative-attribution-top a { 
-            color: var(--text-secondary); 
-            text-decoration: none; 
-            transition: color 0.2s var(--transition-timing);
+        .derivative-attribution-top a {
+            color: var(--text-tertiary);
+            text-decoration: none;
+            transition: color var(--transition-duration) var(--transition-timing);
         }
-        .derivative-attribution-top a:hover { 
-            color: var(--text-primary); 
-            text-decoration: underline; 
+        .derivative-attribution-top a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
         }
 
 
         /* Vercel-inspired Tab Styling */
         .tab-navigation-container {
-            border-bottom: 1px solid var(--border-color-primary); /* Vercel: Subtle border */
+            border-bottom: 1px solid var(--border-color-primary);
         }
         .tab-button {
-            padding: 0.75rem 1rem; 
-            font-weight: 500; 
-            font-size: 0.875rem; 
-            color: var(--text-secondary); /* Vercel: Muted gray for inactive */
+            padding: 0.75rem 1rem; /* 12px 16px */
+            font-weight: 500; /* Medium */
+            font-size: 0.875rem; /* 14px */
+            color: var(--text-secondary);
             border-bottom: 2px solid transparent;
-            transition: color 0.2s var(--transition-timing), 
-                        border-color 0.2s var(--transition-timing), 
-                        background-color 0.2s var(--transition-timing);
-            margin-bottom: -1px; 
-            border-radius: 0; 
+            transition: color var(--transition-duration) var(--transition-timing),
+                        border-color var(--transition-duration) var(--transition-timing);
+            border-radius: 0; /* No radius for tabs */
+            background-color: transparent;
         }
         .tab-button.active {
-            color: var(--text-primary); /* Vercel: White/bright for active */
-            border-bottom-color: var(--text-primary); /* Vercel: White/bright line */
-            font-weight: 500; /* Vercel: Often keeps medium weight */
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary); /* Vercel: often uses accent or primary text color */
         }
         .tab-button:not(.active):hover {
             color: var(--text-primary);
-            border-bottom-color: var(--border-color-secondary); 
-            background-color: rgba(255, 255, 255, 0.03); /* Vercel: Very subtle hover */
+            border-bottom-color: var(--border-color-secondary); /* Subtle hover border */
+            background-color: transparent; /* Ensure no bg on hover */
         }
         .tab-button:focus {
             outline: none;
         }
-         .tab-button:focus-visible { /* Vercel: Clear focus ring */
-            outline: 2px solid var(--accent-primary);
-            outline-offset: -2px;
-            border-bottom-color: var(--accent-primary);
+         .tab-button:focus-visible {
+            outline: 2px solid var(--accent-focus);
+            outline-offset: 2px; /* Positive offset for better visibility */
+            border-bottom-color: transparent; /* Hide border if outline is present for clarity */
         }
 
 
+        /* Form Inputs */
         textarea, input[type="text"], input[type="url"] {
-            background-color: var(--bg-secondary); /* Vercel: Darker input bg */
-            border: 1px solid var(--border-color-primary); /* Vercel: Subtle border */
+            background-color: var(--bg-canvas); /* True black or very dark for inputs */
+            border: 1px solid var(--border-color-primary);
             color: var(--text-primary);
-            transition: border-color 0.2s var(--transition-timing), box-shadow 0.2s var(--transition-timing);
-            border-radius: 0.375rem; 
-            padding: 0.625rem 0.875rem; /* Adjusted padding */
+            transition: border-color var(--transition-duration) var(--transition-timing), box-shadow var(--transition-duration) var(--transition-timing);
+            border-radius: var(--border-radius-sm); /* 4px */
+            padding: 0.625rem 0.875rem; /* 10px 14px, Vercel-like padding */
         }
         textarea::placeholder, input[type="text"]::placeholder, input[type="url"]::placeholder { color: var(--text-secondary); }
         textarea:focus, input[type="text"]:focus, input[type="url"]:focus {
-            border-color: var(--accent-primary); /* Vercel: Accent focus border */
-            box-shadow: 0 0 0 1px var(--accent-primary); /* Vercel: Thin accent shadow */
+            border-color: var(--accent-focus);
+            box-shadow: 0 0 0 2px var(--accent-focus-shadow); /* Softer blue focus shadow */
             outline: none;
         }
         textarea::-webkit-scrollbar { width: 8px; }
@@ -136,82 +136,86 @@
         textarea::-webkit-scrollbar-thumb { background: var(--border-color-secondary); border-radius: 10px; }
         textarea::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
+        /* Modals */
         .modal {
             position: fixed;
             left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.75); /* Vercel: Darker backdrop */
+            overflow: auto; background-color: rgba(0,0,0,0.8); /* Darker backdrop */
             display: flex; align-items: center; justify-content: center; padding: 1rem;
-            opacity: 0; transform: scale(0.97) translateY(10px); /* Smoother entry */
-            pointer-events: none; transition: opacity 0.25s var(--transition-timing), transform 0.25s var(--transition-timing);
+            opacity: 0; transform: scale(0.97) translateY(10px);
+            pointer-events: none; transition: opacity 0.2s var(--transition-timing), transform 0.2s var(--transition-timing); /* Slightly faster modal transition */
             z-index: 50;
         }
         #flowchart-modal { z-index: 110; }
         #download-final-warning-modal { z-index: 150; }
 
         .modal.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-        .modal-content {
-            background-color: var(--bg-primary); /* Vercel: Consistent dark bg */
-            margin: auto;
+        .modal-content { /* General modal content style */
+            background-color: var(--bg-primary);
+            margin: auto; /* Centers the modal content */
             padding: 1.5rem;
             border: 1px solid var(--border-color-primary);
-            border-radius: 0.5rem;
-            width: 100%;
-            max-width: 500px; /* Vercel: Often tighter modals */
+            border-radius: var(--border-radius-md); /* 6px for modals */
+            width: 100%; /* Fill available space within parent's padding, up to max-width */
+            max-width: 500px; /* Default max width for modals */
             color: var(--text-primary);
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
+            max-height: calc(100vh - 4rem); /* Ensure it's scrollable within viewport */
+            overflow-y: auto;
+            display: flex; /* Added for flex children if needed, helps with structure */
+            flex-direction: column; /* Added for flex children if needed */
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color-primary); padding-bottom: 1rem;}
         .modal-title { font-size: 1.125rem; sm:font-size: 1.25rem; font-weight: 600; }
-        .modal-close { color: var(--text-secondary); font-size: 1.75rem; font-weight: bold; cursor: pointer; padding: 0.25rem; transition: color 0.2s var(--transition-timing), transform 0.2s var(--transition-timing); }
+        .modal-close { color: var(--text-secondary); font-size: 1.75rem; font-weight: bold; cursor: pointer; padding: 0.25rem; transition: color var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing); }
         .modal-close:hover, .modal-close:focus { color: var(--text-primary); transform: scale(1.1); }
         .modal-body p { margin-bottom: 0.75rem; line-height: 1.6; }
-        .modal-body code { background-color: var(--bg-secondary); padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-family: monospace; color: var(--text-primary); border: 1px solid var(--border-color-primary); word-break: break-all; }
+        .modal-body code { background-color: var(--bg-tertiary); padding: 0.1rem 0.4rem; border-radius: var(--border-radius-sm); font-family: monospace; color: var(--text-secondary); border: 1px solid var(--border-color-primary); word-break: break-all; }
         .modal-body ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.75rem;}
         .modal-footer { margin-top: 1.5rem; display: flex; flex-direction: column; sm:flex-row; justify-content: flex-end; align-items: center; gap: 0.75rem;}
         .modal-footer label { display: flex; align-items: center; font-size: 0.875rem; color: var(--text-secondary); margin-right:auto; }
-        .modal-footer input[type="checkbox"] { margin-right: 0.5rem; accent-color: var(--accent-primary); width: 1rem; height: 1rem; border: 1px solid var(--border-color-primary); border-radius: 0.125rem; cursor: pointer; background-color: var(--bg-secondary);}
-        .modal-footer input[type="checkbox"]:checked { background-color: var(--accent-primary); border-color: var(--accent-primary); }
+        .modal-footer input[type="checkbox"] { margin-right: 0.5rem; accent-color: var(--accent-focus); width: 1rem; height: 1rem; border: 1px solid var(--border-color-primary); border-radius: 0.125rem; cursor: pointer; background-color: var(--bg-secondary);}
+        .modal-footer input[type="checkbox"]:checked { background-color: var(--accent-focus); border-color: var(--accent-focus); }
 
 
         #source-manager-modal {
             z-index: 100;
-            padding: 0;
+            /* padding: 0; /* REMOVED: This was overriding .modal's padding: 1rem; */
+            /* It will now inherit padding: 1rem from .modal for mobile */
         }
         .source-manager-modal-content {
-            background-color: var(--bg-primary); /* Consistent with other modals */
-            width: 100%;
-            height: 100%;
-            min-height: 100vh;
+            background-color: var(--bg-primary);
+            width: 100%; /* Fill the padded area of #source-manager-modal */
+            max-width: 500px; /* Max width for mobile, consistent with other modals */
+            height: auto; /* Allow content to define height */
+            min-height: initial; /* Remove 100vh constraint */
+            max-height: calc(100vh - 4rem); /* Ensure scrollable within viewport, considering parent's padding */
             display: flex;
             flex-direction: column;
-            border-radius: 0;
-            border: none;
-            box-shadow: none;
-            padding: 1rem; 
+            border-radius: var(--border-radius-md); /* Add radius for mobile */
+            border: 1px solid var(--border-color-primary); /* Add border for mobile */
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2); /* Add shadow for mobile */
+            padding: 1.5rem; /* Consistent internal padding */
             overflow-y: auto;
+            margin: auto; /* Center in the flex container (#source-manager-modal) */
         }
-        @media (min-width: 768px) { 
+        @media (min-width: 768px) {
             #source-manager-modal {
-                padding: 2rem; /* Vercel: More padding around modal on desktop */
+                padding: 2rem; /* Desktop padding for the backdrop/container */
             }
             .source-manager-modal-content {
-                max-width: 640px; /* Consistent width */
-                height: auto;
-                min-height: 0;
-                max-height: 90vh;
-                border-radius: 0.5rem;
-                border: 1px solid var(--border-color-primary);
-                box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-                padding: 1.5rem; 
+                max-width: 640px; /* Desktop max-width */
+                /* height, min-height, border-radius, border, box-shadow, padding, overflow-y are fine or overridden */
+                max-height: 90vh; /* Desktop max-height */
             }
         }
 
          .source-manager-modal-close {
-            position: absolute; top: 1rem; right: 1rem;
+            position: absolute; top: 1rem; right: 1rem; /* Position relative to .source-manager-modal-content */
             color: var(--text-secondary); font-size: 2rem;
             font-weight: bold; cursor: pointer; line-height: 1;
-            transition: color 0.2s var(--transition-timing), transform 0.2s var(--transition-timing);
-            z-index: 10;
+            transition: color var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing);
+            z-index: 10; /* Ensure it's above content within the modal */
         }
         .source-manager-modal-close:hover { color: var(--text-primary); transform: scale(1.1); }
 
@@ -223,33 +227,33 @@
         }
         .source-manager-title {
             font-size: 1.5rem;
-            font-weight: 600; /* Semibold */
+            font-weight: 600;
             color: var(--text-primary);
         }
 
         .current-source-info-card {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color-primary);
-            border-radius: 0.5rem;
+            border-radius: var(--border-radius-md);
             padding: 1.5rem;
-            margin-bottom: 1.5rem; 
+            margin-bottom: 1.5rem;
             text-align: center;
         }
-        
+
         .current-source-pfp-container {
             display: flex;
             justify-content: center;
             margin-bottom: 1rem;
         }
         #source-pfp-large {
-            width: 80px; height: 80px; /* Slightly smaller */
+            width: 80px; height: 80px;
             border-radius: 50%;
             background-color: var(--bg-tertiary);
             color: var(--text-primary);
             display: flex; align-items: center; justify-content: center;
             font-size: 2rem;
-            font-weight: 500; /* Medium weight */
-            border: 2px solid var(--accent-primary);
+            font-weight: 500;
+            border: 2px solid var(--accent-focus); /* Use focus accent for pfp border */
             overflow: hidden;
             flex-shrink: 0;
         }
@@ -292,68 +296,66 @@
             font-weight: 500;
         }
 
+        /* Advanced Options Toggle (shared style) */
         .advanced-options-toggle {
             display: flex; align-items: center; cursor: pointer;
-            padding: 0.5rem; 
+            padding: 0.5rem;
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
-            border-radius: 0.375rem;
-            transition: color 0.2s var(--transition-timing), background-color 0.2s var(--transition-timing);
+            border-radius: var(--border-radius-sm);
+            transition: color var(--transition-duration) var(--transition-timing), background-color var(--transition-duration) var(--transition-timing);
         }
         .advanced-options-toggle:hover {
             color: var(--text-primary);
-            background-color: var(--bg-tertiary); /* Darker hover for toggle */
+            background-color: var(--bg-tertiary);
         }
-        .advanced-options-toggle svg { 
-            width: 1.25rem; height: 1.25rem; 
-            margin-right: 0.75rem; 
-            transition: transform 0.25s var(--transition-timing); /* Matched duration */
-            stroke: currentColor; 
+        .advanced-options-toggle svg {
+            width: 1.25rem; height: 1.25rem;
+            margin-right: 0.75rem;
+            transition: transform var(--transition-duration) var(--transition-timing);
+            stroke: currentColor;
         }
 
-        /* Reverted to original max-height animation for advanced options */
         .advanced-options-content {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.35s ease-out, padding-top 0.35s ease-out, padding-bottom 0.35s ease-out, margin-top 0.35s ease-out, opacity 0.35s ease-out, border-color 0.35s ease-out;
-            background-color: var(--bg-secondary); /* Vercel: Darker input bg */
-            border-radius: 0.375rem;
+            transition: max-height 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, opacity 0.3s ease-out, border-color 0.3s ease-out;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius-sm);
             border: 1px solid transparent;
             opacity: 0;
-            /* Padding will be applied when expanded */
-            padding-left: 0; 
+            padding-left: 0;
             padding-right: 0;
         }
         .advanced-options-content.expanded {
-            max-height: 500px; 
+            max-height: 500px; /* Generic large max-height */
             padding-top: 1rem;
             padding-bottom: 1rem;
-            padding-left: 1rem; /* Add padding back on expansion */
-            padding-right: 1rem; /* Add padding back on expansion */
+            padding-left: 1rem;
+            padding-right: 1rem;
             margin-top: 0.5rem;
-            border-color: var(--border-color-primary); /* Vercel: Subtle border */
+            border-color: var(--border-color-primary);
             opacity: 1;
-            overflow: visible; 
+            overflow: visible;
         }
-        #advanced-options-content-area.expanded { 
-             max-height: 120px; 
+        #advanced-options-content-area.expanded {
+             max-height: 120px; /* Specific for main tool advanced options */
         }
-        #source-manager-advanced-content.expanded { 
-            max-height: 200px; 
-            margin-bottom: 1rem; 
+        #source-manager-advanced-content.expanded {
+            max-height: 200px; /* Specific for source manager advanced options */
+            margin-bottom: 1rem;
         }
-        /* No inner wrapper needed for this animation style */
 
 
         #auto-patch-log {
-            background-color: var(--bg-secondary); 
+            background-color: var(--bg-secondary);
             border: 1px solid var(--border-color-primary);
-            border-radius: 0.375rem;
+            border-radius: var(--border-radius-sm);
             max-height: 150px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 0.8rem;
-            padding: 0.75rem; /* Increased padding */
+            padding: 0.75rem;
             width: 100%;
         }
         #auto-patch-log p { margin-bottom: 0.25rem; padding: 0.1rem 0.25rem; }
@@ -366,85 +368,96 @@
             margin-top: 0.75rem;
             padding: 0.75rem;
             background-color: rgba(var(--accent-yellow-rgb), 0.1);
-            border: 1px solid var(--accent-yellow); /* Solid border */
-            border-radius: 0.375rem;
+            border: 1px solid var(--accent-yellow);
+            border-radius: var(--border-radius-sm);
         }
 
-
+        /* General Button Styling */
         .button {
-            padding: 0.625rem 1.125rem; 
-            border-radius: 0.375rem; 
-            font-weight: 500; 
+            padding: 0.625rem 1.25rem; /* 10px 20px */
+            border-radius: var(--border-radius-sm); /* 4px */
+            font-weight: 500;
             text-align: center;
-            transition: background-color 0.2s var(--transition-timing), 
-                        border-color 0.2s var(--transition-timing), 
-                        color 0.2s var(--transition-timing), 
-                        opacity 0.2s var(--transition-timing), 
-                        box-shadow 0.2s var(--transition-timing), 
-                        transform 0.2s var(--transition-timing),
-                        filter 0.2s var(--transition-timing);
+            transition: background-color var(--transition-duration) var(--transition-timing),
+                        border-color var(--transition-duration) var(--transition-timing),
+                        color var(--transition-duration) var(--transition-timing),
+                        opacity var(--transition-duration) var(--transition-timing),
+                        transform var(--transition-duration) var(--transition-timing);
             border: 1px solid transparent;
             cursor: pointer;
-            display: inline-flex; 
-            align-items: center; 
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
         }
-        .button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(50%); transform: none !important; }
-        .button:hover:not(:disabled) { filter: brightness(1.15); }
-        .button:active:not(:disabled) { transform: scale(0.97); filter: brightness(0.9); }
+        .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+        .button:hover:not(:disabled) { opacity: 0.85; } /* Subtle opacity hover for most buttons */
+        .button:active:not(:disabled) { transform: scale(0.97); opacity: 0.7; }
         .button:focus { outline: none; }
         .button:focus-visible:not(:disabled) {
-            box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary); 
+            outline: 2px solid var(--accent-focus);
+            outline-offset: 2px;
+            box-shadow: none; /* Vercel often just uses the outline */
         }
 
-        .button-primary { background-color: var(--accent-primary); color: white; border-color: var(--accent-primary); }
-        .button-primary:hover:not(:disabled) { background-color: var(--accent-primary-hover); border-color: var(--accent-primary-hover); filter: brightness(1.1); }
-
-        .button-action-green { background-color: var(--accent-green); color: white; }
-        .button-action-green:hover:not(:disabled) { background-color: #059669; filter: brightness(1.1); }
-
-        .button-secondary { 
-            background-color: var(--bg-secondary); /* Vercel: Darker secondary button */
-            color: var(--text-primary); 
-            border: 1px solid var(--border-color-primary); /* Vercel: Subtle border */
+        /* Primary Button (Vercel: White button, black text on dark themes) */
+        .button-primary {
+            background-color: var(--text-primary); /* White BG */
+            color: var(--bg-canvas); /* Black text */
+            border-color: var(--text-primary); /* White border */
         }
-        .button-secondary:hover:not(:disabled) { 
-            background-color: var(--bg-tertiary); /* Vercel: Slightly lighter hover */
-            border-color: var(--border-color-secondary); 
-            filter: brightness(1.05);
-        }
-         input[type="file"].button-secondary { /* Specific for file input to ensure text is visible */
-            color: var(--text-secondary); 
+        .button-primary:hover:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+            border-color: rgba(255, 255, 255, 0.9);
+            opacity: 1; /* Override general opacity for bg change */
         }
 
-        .button-action-indigo { background-color: var(--accent-indigo); color: white; }
-        .button-action-indigo:hover:not(:disabled) { background-color: #4f46e5; filter: brightness(1.1); }
-
-        .button-action-sky { background-color: var(--accent-sky); color: white; }
-        .button-action-sky:hover:not(:disabled) { background-color: #0284c7; filter: brightness(1.1); }
-
-        .button-action-yellow { background-color: var(--accent-yellow); color: var(--bg-primary); } 
-        .button-action-yellow:hover:not(:disabled) { background-color: #d97706; filter: brightness(1.1); }
-
-
-        input[type="file"].button-secondary::file-selector-button {
-            padding: 0.625rem 1rem; 
-            margin-right: 0.75rem;
-            border-radius: 0.25rem; 
+        /* Secondary Button (Vercel: Subtle border, transparent/dark bg) */
+        .button-secondary {
+            background-color: transparent;
+            color: var(--text-secondary); /* Lighter text for secondary */
             border: 1px solid var(--border-color-primary);
-            background-color: var(--bg-tertiary);
+        }
+        .button-secondary:hover:not(:disabled) {
+            background-color: var(--bg-secondary); /* Darken bg on hover */
+            color: var(--text-primary); /* Text becomes primary on hover */
+            border-color: var(--border-color-secondary);
+            opacity: 1; /* Override general opacity for bg change */
+        }
+         input[type="file"].button-secondary {
+            color: var(--text-secondary);
+            padding: 0; /* Remove padding from the wrapper input */
+        }
+        input[type="file"].button-secondary::file-selector-button {
+            padding: 0.5rem 1rem; /* 8px 16px */
+            margin-right: 0.75rem;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color-primary);
+            background-color: var(--bg-secondary);
             color: var(--text-primary);
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.2s var(--transition-timing), border-color 0.2s var(--transition-timing);
+            transition: background-color var(--transition-duration) var(--transition-timing);
         }
         input[type="file"].button-secondary::file-selector-button:hover {
-            background-color: var(--border-color-secondary);
+            background-color: var(--bg-tertiary);
         }
+
+        /* Action Buttons (Green, Yellow, Indigo, Sky) */
+        .button-action-green { background-color: var(--accent-green); color: white; border-color: var(--accent-green); }
+        .button-action-green:hover:not(:disabled) { background-color: var(--accent-green); opacity: 0.85; } /* Consistent hover */
+
+        .button-action-yellow { background-color: var(--accent-yellow); color: var(--bg-primary); border-color: var(--accent-yellow); }
+        .button-action-yellow:hover:not(:disabled) { background-color: var(--accent-yellow); opacity: 0.85; }
+
+        .button-action-indigo { background-color: var(--accent-indigo); color: white; border-color: var(--accent-indigo); }
+        .button-action-indigo:hover:not(:disabled) { background-color: var(--accent-indigo); opacity: 0.85; }
+
+        .button-action-sky { background-color: var(--accent-sky); color: white; border-color: var(--accent-sky); }
+        .button-action-sky:hover:not(:disabled) { background-color: var(--accent-sky); opacity: 0.85; }
 
 
         #file-name-display.file-selected-text-anim { animation: fileNameAnim 0.3s var(--transition-timing); }
-        @keyframes fileNameAnim { 
+        @keyframes fileNameAnim {
             0% { opacity: 0.7; transform: translateY(2px);}
             100% { opacity: 1; transform: translateY(0); }
         }
@@ -452,46 +465,56 @@
         .app-footer { text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.875rem; border-top: 1px solid var(--border-color-primary); margin-top: auto; }
         .app-footer .version { font-size: 0.75rem; color: var(--text-tertiary); }
         .app-footer .derivative-work-footer { font-size: 0.75rem; margin-top: 0.5rem; }
-        
+
         #top-info-bar {
-            background-color: transparent; 
+            background-color: transparent; /* Vercel: often transparent or very subtle bg */
             border: 1px solid var(--border-color-primary);
-            padding: 0.75rem 1rem; 
+            padding: 0.75rem 1rem;
         }
-        
-        .important-notes-block {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color-primary);
-            padding: 1.5rem; border-radius: 0.5rem; margin-top: 2rem;
+
+        /* Collapsible Important Notes Section */
+        #important-notes-toggle-button {
+            /* Styles applied via Tailwind and inline style for bg/color/border */
+            transition: background-color var(--transition-duration) var(--transition-timing);
         }
-        .important-notes-block h2 {
-            font-size: 1.125rem; font-weight: 600; color: var(--text-primary);
-            margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color-primary);
+        #important-notes-toggle-button:hover {
+            background-color: var(--bg-tertiary) !important; /* Important to override inline style if needed */
         }
+        #important-notes-icon-svg {
+             /* transition handled by Tailwind 'transform transition-transform duration-150' */
+        }
+        #important-notes-content-wrapper .important-notes-block {
+            /* Styles applied via inline style for border, padding, radius, bg */
+        }
+        /* Styling for content within .important-notes-block */
         .important-notes-block ul { list-style-type: none; padding-left: 0; color: var(--text-secondary); }
-        .important-notes-block ul ul { list-style-type: circle; padding-left: 1.25rem; margin-top: 0.25rem;} 
+        .important-notes-block ul ul { list-style-type: circle; padding-left: 1.25rem; margin-top: 0.25rem;}
         .important-notes-block li {
             padding-left: 1.75rem; position: relative; margin-bottom: 0.75rem;
             line-height: 1.6; font-size: 0.875rem;
         }
         .important-notes-block li::before {
             content: "—"; position: absolute; left: 0.5rem; top: 1px;
-            color: var(--accent-primary); font-weight: bold;
+            color: var(--text-secondary); /* Neutral color for dash */
+            font-weight: bold;
         }
         .important-notes-block code {
-            background-color: rgba(var(--accent-primary-rgb), 0.15); 
-            padding: 0.2em 0.4em; margin: 0 0.1em; font-size: 0.9em; border-radius: 0.25rem;
+            background-color: var(--bg-tertiary);
+            padding: 0.2em 0.4em; margin: 0 0.1em; font-size: 0.9em;
+            border-radius: var(--border-radius-sm);
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-            word-break: break-word; border: 1px solid rgba(var(--accent-primary-rgb), 0.2);
+            word-break: break-word;
+            border: 1px solid var(--border-color-primary);
+            color: var(--text-secondary); /* Neutral color for inline code */
         }
         .important-notes-block strong { font-weight: 600; color: var(--text-primary); }
         .important-notes-block em { font-style: italic; color: var(--text-primary); }
 
     </style>
 </head>
-<body class="flex flex-col items-center p-4 md:p-8"> 
+<body class="flex flex-col items-center p-4 md:p-8">
 <div class="content-wrapper w-full flex flex-col items-center">
-    <div class="main-container p-4 sm:p-6 md:p-8 w-full max-w-2xl"> 
+    <div class="main-container p-4 sm:p-6 md:p-8 w-full max-w-2xl">
         <div class="page-title-container">
             <h1 class="page-title">BitEdit</h1>
             <p class="ai-attribution-top">Made with AI (Gemini)</p>
@@ -524,14 +547,14 @@
             </nav>
         </div>
 
-        <div id="tool-content" class="mt-6"></div> 
+        <div id="tool-content" class="mt-6"></div>
         <div id="output-controls" class="mt-6 hidden">
-             <button id="unlock-all-button" class="w-full mb-4 px-4 py-3 font-semibold button button-action-yellow text-base"> 
+             <button id="unlock-all-button" class="w-full mb-4 px-4 py-3 font-semibold button button-action-yellow text-base">
                 Unlock All / Set All to True
             </button>
             <div id="json-output-container" class="mb-4">
-                <label for="json-output" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">JSON Data:</label> 
-                <textarea id="json-output" rows="10" class="w-full p-3 resize-y"></textarea> 
+                <label for="json-output" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">JSON Data:</label>
+                <textarea id="json-output" rows="10" class="w-full p-3 resize-y"></textarea>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <button id="download-encrypted-button" class="w-full sm:w-auto px-4 py-3 sm:px-6 font-semibold order-1 button button-action-green text-base">
@@ -578,9 +601,7 @@
         </div>
     </div>
 
-    <div id="source-manager-modal" class="modal hidden">
-        <div class="source-manager-modal-content">
-            <span id="source-manager-modal-close-button" class="source-manager-modal-close">&times;</span>
+    <div id="source-manager-modal" class="modal hidden"> <div class="source-manager-modal-content"> <span id="source-manager-modal-close-button" class="source-manager-modal-close">&times;</span>
             <div class="source-manager-header">
                 <h2 class="source-manager-title">MonetizationVars Source</h2>
             </div>
@@ -597,30 +618,29 @@
             </div>
 
             <div id="source-manager-advanced-options-toggle" class="advanced-options-toggle">
-                <svg id="source-manager-advanced-icon" class="transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                <svg id="source-manager-advanced-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                 <span>Advanced: Change Source URL</span>
             </div>
             <div id="source-manager-advanced-content" class="advanced-options-content">
                  <div class="advanced-options-inner-wrapper">
                     <label for="new-source-url" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">New Source (Raw File URL):</label>
                     <div class="flex items-center gap-2 mb-2">
-                        <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="flex-grow p-2.5 rounded-md">
-                        <button id="load-new-source-button" class="button button-primary px-3 py-2 text-xs sm:text-sm flex-shrink-0">Load</button>
+                        <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="flex-grow min-w-0"> <button id="load-new-source-button" class="button button-primary px-3 py-2 text-xs sm:text-sm flex-shrink-0">Load</button>
                     </div>
                     <p class="text-xs" style="color: var(--text-secondary);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
                  </div>
             </div>
 
-            <div class="mt-6 pt-6 border-t" style="border-color: var(--border-color-primary);"> 
-                <h3 class="text-lg font-semibold mb-3 text-center" style="color: var(--text-primary);">Actions</h3> 
+            <div class="mt-6 pt-6 border-t" style="border-color: var(--border-color-primary);">
+                <h3 class="text-lg font-semibold mb-3 text-center" style="color: var(--text-primary);">Actions</h3>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-2.5 text-sm font-semibold"> 
+                    <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-2.5 text-sm font-semibold">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
                         Download & Auto-Patch
                     </button>
-                    <button id="download-original-button" class="w-full sm:w-auto button button-secondary py-2.5 text-sm font-semibold"> 
+                    <button id="download-original-button" class="w-full sm:w-auto button button-secondary py-2.5 text-sm font-semibold">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
@@ -637,34 +657,45 @@
         </div>
     </div>
 
-    <div id="important-notes-section" class="important-notes-block w-full max-w-2xl mx-auto">
-        <h2>Important Notes</h2>
-        <ul>
-            <li>Input file for manual decryption must be named exactly <code>MonetizationVars</code> (case-insensitive, no extension).</li>
-            <li>When <strong>decrypting</strong>:
-                <ul>
-                    <li>Known .NET boolean Base64 strings are converted to <code>true</code>/<code>false</code>.</li>
-                    <li>Known .NET Int32 Base64 strings are converted to numbers (e.g., <code>12</code>).</li>
-                    <li>Others remain Base64.</li>
+    <div class="w-full max-w-2xl mx-auto mt-8">
+        <button id="important-notes-toggle-button" aria-expanded="false" aria-controls="important-notes-content-wrapper"
+                class="w-full flex justify-between items-center p-4 font-medium text-left rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-white"
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color-primary);">
+            <span>Important Notes</span>
+            <svg id="important-notes-icon-svg" class="w-5 h-5 transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+        <div id="important-notes-content-wrapper" class="overflow-hidden transition-all duration-300 ease-out">
+            <div class="important-notes-block" style="border: 1px solid var(--border-color-primary); border-top: none; padding: 1.5rem; border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); background-color: var(--bg-secondary);">
+                <h2 class="sr-only">Important Notes Details</h2> <ul>
+                    <li>Input file for manual decryption must be named exactly <code>MonetizationVars</code> (case-insensitive, no extension).</li>
+                    <li>When <strong>decrypting</strong>:
+                        <ul>
+                            <li>Known .NET boolean Base64 strings are converted to <code>true</code>/<code>false</code>.</li>
+                            <li>Known .NET Int32 Base64 strings are converted to numbers (e.g., <code>12</code>).</li>
+                            <li>Others remain Base64.</li>
+                        </ul>
+                    </li>
+                    <li>When <strong>encrypting</strong>:
+                        <ul>
+                            <li><code>true</code>/<code>false</code> in JSON become .NET boolean Base64.</li>
+                            <li>Numbers in JSON are assumed to be Int32 and become .NET Int32 Base64.</li>
+                            <li>Other values are stringified, then Base64 encoded.</li>
+                        </ul>
+                        The output filename will be "MonetizationVars".
+                    </li>
+                    <li>"Unlock All" sets boolean <code>false</code> to <code>true</code> and .NET false Base64 to .NET true Base64 in the JSON textarea. It does not affect numbers.</li>
+                    <li>Default cipher key: <code>com.wtfapps.apollo16</code>. Access via "Advanced Options" in the manual processing tabs. The auto-patcher uses this key unless changed via manual tab's advanced options <em>before</em> auto-patching.</li>
+                    <li class="derivative-work">This tool is a derivative work based on the C# project <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">bitlife-edit by yntha</a>. All original logic credits go to yntha. Both projects are licensed under GPLv3.</li>
                 </ul>
-            </li>
-            <li>When <strong>encrypting</strong>:
-                <ul>
-                    <li><code>true</code>/<code>false</code> in JSON become .NET boolean Base64.</li>
-                    <li>Numbers in JSON are assumed to be Int32 and become .NET Int32 Base64.</li>
-                    <li>Other values are stringified, then Base64 encoded.</li>
-                </ul>
-                The output filename will be "MonetizationVars".
-            </li>
-            <li>"Unlock All" sets boolean <code>false</code> to <code>true</code> and .NET false Base64 to .NET true Base64 in the JSON textarea. It does not affect numbers.</li>
-            <li>Default cipher key: <code>com.wtfapps.apollo16</code>. Access via "Advanced Options" in the manual processing tabs. The auto-patcher uses this key unless changed via manual tab's advanced options <em>before</em> auto-patching.</li>
-            <li class="derivative-work">This tool is a derivative work based on the C# project <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">bitlife-edit by yntha</a>. All original logic credits go to yntha. Both projects are licensed under GPLv3.</li>
-        </ul>
+            </div>
+        </div>
     </div>
 
 </div>
 <footer class="app-footer w-full">
-    <p class="version">v1.3.13</p> 
+    <p class="version">v1.4.0</p>
     <p class="derivative-work-footer">
         Derivative of <a href="https://github.com/yntha/bitlife-edit" target="_blank" rel="noopener noreferrer">yntha/bitlife-edit</a> (GPLv3).
     </p>
@@ -682,11 +713,11 @@
         const B64_NET_BOOLEAN_TRUE_STANDARD = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs=";
         const B64_NET_BOOLEAN_TRUE_VARIANT  = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAs=";
         const B64_NET_BOOLEAN_FALSE_STANDARD= "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAw=";
-        
+
         const USER_SERIALIZED_INT32_PREFIX = new Uint8Array([0, 1, 0, 0, 0, 255, 255, 255, 255, 1, 0, 0, 0, 0, 0, 0, 0, 4, 1, 0, 0, 0, 12, 83, 121, 115, 116, 101, 109, 46, 73, 110, 116, 51, 50, 1, 0, 0, 0, 7, 109, 95, 118, 97, 108, 117, 101, 0, 8]);
         const USER_SERIALIZED_INT32_SUFFIX = new Uint8Array([11]);
-        const USER_INT32_VALUE_OFFSET = 48; 
-        const USER_SERIALIZED_INT32_TOTAL_LENGTH = USER_SERIALIZED_INT32_PREFIX.length + 4 + USER_SERIALIZED_INT32_SUFFIX.length; 
+        const USER_INT32_VALUE_OFFSET = 48;
+        const USER_SERIALIZED_INT32_TOTAL_LENGTH = USER_SERIALIZED_INT32_PREFIX.length + 4 + USER_SERIALIZED_INT32_SUFFIX.length;
 
         const TARGET_ENCRYPTED_FILENAME = "MonetizationVars";
         const HIDE_FINAL_DOWNLOAD_WARNING_KEY = 'bitEditHideFinalDownloadWarning';
@@ -715,8 +746,8 @@
         // --- State Variables ---
         let activeMode = 'decrypt';
         let currentJsonObject = null;
-        let stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; 
-        let stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; 
+        let stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
+        let stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
         let showFinalDownloadWarningPreference;
         let versionFromTxt = null;
 
@@ -744,10 +775,10 @@
                 }
                 if (bytes.length !== USER_SERIALIZED_INT32_TOTAL_LENGTH) return null;
                 const prefixBytesFromFile = bytes.slice(0, USER_SERIALIZED_INT32_PREFIX.length);
-                const suffixByteFromFile = bytes[bytes.length - 1]; 
+                const suffixByteFromFile = bytes[bytes.length - 1];
                 if (!arraysEqual(prefixBytesFromFile, USER_SERIALIZED_INT32_PREFIX) || suffixByteFromFile !== USER_SERIALIZED_INT32_SUFFIX[0]) return null;
                 const dataView = new DataView(bytes.buffer, bytes.byteOffset + USER_SERIALIZED_INT32_PREFIX.length, 4);
-                return dataView.getInt32(0, true); 
+                return dataView.getInt32(0, true);
             } catch (e) { return null; }
         }
 
@@ -755,7 +786,7 @@
             if (typeof value !== 'number' || !Number.isInteger(value)) return null;
             const valueBuffer = new ArrayBuffer(4);
             const dataView = new DataView(valueBuffer);
-            dataView.setInt32(0, value, true); 
+            dataView.setInt32(0, value, true);
             const valueBytes = Array.from(new Uint8Array(valueBuffer));
             const fullByteArray = new Uint8Array(USER_SERIALIZED_INT32_TOTAL_LENGTH);
             fullByteArray.set(USER_SERIALIZED_INT32_PREFIX, 0);
@@ -774,7 +805,7 @@
             for (let i = 0; i < len; i++) {
                 const p1 = parts1[i] || 0;
                 const p2 = parts2[i] || 0;
-                if (Number.isNaN(p1) || Number.isNaN(p2)) return 0; 
+                if (Number.isNaN(p1) || Number.isNaN(p2)) return 0;
                 if (p1 > p2) return 1;
                 if (p1 < p2) return -1;
             }
@@ -784,16 +815,16 @@
         async function fetchBitLifeVersion() {
             if (!ui.bitlifeVersion) { console.error("ui.bitlifeVersion not defined in fetchBitLifeVersion."); return null; }
             try {
-                const response = await fetch('https://raw.githubusercontent.com/S0methingSomething/BitEdit/Latest/BitEdit/Get_Bitlife_Version/version.txt', { cache: "no-store" }); 
+                const response = await fetch('https://raw.githubusercontent.com/S0methingSomething/BitEdit/Latest/BitEdit/Get_Bitlife_Version/version.txt', { cache: "no-store" });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const versionText = (await response.text()).trim();
                 versionFromTxt = versionText;
-                ui.bitlifeVersion.textContent = versionFromTxt; 
+                ui.bitlifeVersion.textContent = versionFromTxt;
                 if(ui.modalBitlifeVersionDynamic) ui.modalBitlifeVersionDynamic.textContent = versionFromTxt;
                 return versionFromTxt;
             } catch (error) {
                 console.error('Failed to fetch BitLife version.txt:', error);
-                if (ui.bitlifeVersion) ui.bitlifeVersion.textContent = 'Error'; 
+                if (ui.bitlifeVersion) ui.bitlifeVersion.textContent = 'Error';
                 if(ui.modalBitlifeVersionDynamic) ui.modalBitlifeVersionDynamic.textContent = 'Error';
                 versionFromTxt = null;
                 return null;
@@ -817,7 +848,7 @@
             }
 
             try {
-                const response = await fetch(GITHUB_API_LATEST_TAG_URL, { cache: "no-store" }); 
+                const response = await fetch(GITHUB_API_LATEST_TAG_URL, { cache: "no-store" });
                 if (!response.ok) {
                     console.warn(`GitHub API for BitEdit release notes failed: ${response.status}`);
                     currentSourceInfo.statusMessage = "(Could not verify BitEdit release notes)";
@@ -859,18 +890,18 @@
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.textContent = message;
-            toast.className = 'fixed py-2 px-4 rounded-md shadow-lg text-sm font-medium'; 
+            toast.className = 'fixed py-2 px-4 rounded-md shadow-lg text-sm font-medium';
             Object.assign(toast.style, {
                  bottom: '-50px',  left: '50%', transform: 'translateX(-50%)',
                  zIndex: '200', transition: 'opacity 0.3s ease-in-out, bottom 0.3s ease-in-out',
             });
             if (type === 'success') { toast.style.backgroundColor = 'var(--accent-green)'; toast.style.color = 'white'; }
             else if (type === 'error') { toast.style.backgroundColor = 'var(--accent-red)'; toast.style.color = 'white'; }
-            else { toast.style.backgroundColor = 'var(--bg-tertiary)'; toast.style.color = 'var(--text-primary)'; toast.style.border = '1px solid var(--border-color-primary)';} 
+            else { toast.style.backgroundColor = 'var(--bg-tertiary)'; toast.style.color = 'var(--text-primary)'; toast.style.border = '1px solid var(--border-color-primary)';}
             document.body.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '1'; toast.style.bottom = '20px';}, 10); 
+            setTimeout(() => { toast.style.opacity = '1'; toast.style.bottom = '20px';}, 10);
             setTimeout(() => {
-                toast.style.opacity = '0'; toast.style.bottom = '-50px'; 
+                toast.style.opacity = '0'; toast.style.bottom = '-50px';
                 setTimeout(() => { if (toast.parentNode) { document.body.removeChild(toast);}}, 300);
             }, 3000);
         }
@@ -879,7 +910,7 @@
         function clearError() { if(ui.errorMessageDiv) {ui.errorMessageDiv.classList.add('hidden'); ui.errorMessageDiv.textContent = '';} }
 
         function showStandardModal(modalElement) { if(modalElement){modalElement.classList.remove('hidden'); setTimeout(() => { modalElement.classList.add('visible'); }, 10);} }
-        function hideStandardModal(modalElement) { if(modalElement){modalElement.classList.remove('visible'); setTimeout(() => { modalElement.classList.add('hidden'); }, 250);} } 
+        function hideStandardModal(modalElement) { if(modalElement){modalElement.classList.remove('visible'); setTimeout(() => { modalElement.classList.add('hidden'); }, 250);} }
 
         function openSourceManagerModal() {
             updateSourceManagerDisplay(currentSourceInfo);
@@ -907,7 +938,7 @@
                     const img = document.createElement('img');
                     img.src = sourceInfo.pfpImageUrl;
                     img.alt = sourceInfo.name.substring(0,2);
-                    img.className = "w-full h-full object-cover"; 
+                    img.className = "w-full h-full object-cover";
                     img.onerror = () => { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase(); };
                     ui.sourcePfpLarge.appendChild(img);
                 } else {
@@ -917,7 +948,7 @@
             if(ui.sourceNameLarge) ui.sourceNameLarge.textContent = sourceInfo.name;
             if(ui.sourceUrlDisplayLarge) {
                 ui.sourceUrlDisplayLarge.href = sourceInfo.url;
-                const displayUrl = sourceInfo.url.length > 40 ? sourceInfo.url.substring(0, 15) + "..." + sourceInfo.url.substring(sourceInfo.url.length - 15) : sourceInfo.url; 
+                const displayUrl = sourceInfo.url.length > 40 ? sourceInfo.url.substring(0, 15) + "..." + sourceInfo.url.substring(sourceInfo.url.length - 15) : sourceInfo.url;
                 ui.sourceUrlDisplayLarge.textContent = `View Raw: ${displayUrl}`;
             }
 
@@ -955,7 +986,7 @@
         function addLogToAutoPatcher(message, type = 'info') {
             if(!ui.autoPatchLog || !ui.autoPatchLogContainer) return;
             const logEntry = document.createElement('p');
-            logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`; 
+            logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`;
             logEntry.classList.add(type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info'));
             ui.autoPatchLog.appendChild(logEntry);
             ui.autoPatchLog.scrollTop = ui.autoPatchLog.scrollHeight;
@@ -970,23 +1001,23 @@
                 const itemMap = {};
                 const lines = fileContent.split('\n').filter(line => line.trim() !== '');
                 for (const line of lines) {
-                    const parts = line.split(/:(.+)/); 
-                    if (parts.length < 2 || !parts[1]) { console.warn("Malformed line (missing or empty value):", line); continue; } 
+                    const parts = line.split(/:(.+)/);
+                    if (parts.length < 2 || !parts[1]) { console.warn("Malformed line (missing or empty value):", line); continue; }
                     const encKey = parts[0].trim(); const encVal = parts[1].trim();
                     try {
                         const decKey = base64DecodeAndXOR(encKey, obfuscatedKey);
-                        const decValB64 = base64DecodeAndXOR(encVal, obfuscatedKey); 
+                        const decValB64 = base64DecodeAndXOR(encVal, obfuscatedKey);
 
                         if (decValB64 === B64_NET_BOOLEAN_TRUE_STANDARD || decValB64 === B64_NET_BOOLEAN_TRUE_VARIANT) {
                             itemMap[decKey] = true;
                         } else if (decValB64 === B64_NET_BOOLEAN_FALSE_STANDARD) {
                             itemMap[decKey] = false;
                         } else {
-                            const intValue = decryptInt(decValB64); 
+                            const intValue = decryptInt(decValB64);
                             if (intValue !== null) {
                                 itemMap[decKey] = intValue;
                             } else {
-                                itemMap[decKey] = decValB64; 
+                                itemMap[decKey] = decValB64;
                             }
                         }
                     } catch (e) {
@@ -999,15 +1030,15 @@
             return processedJsonObject;
         }
 
-        async function handleManualFileProcessing(fileContent, inputFileName, cipherKeyStr) { 
+        async function handleManualFileProcessing(fileContent, inputFileName, cipherKeyStr) {
             clearError();
-            
-            if (!ui.jsonOutput) { 
+
+            if (!ui.jsonOutput) {
                 console.error("CRITICAL ERROR in handleManualFileProcessing: ui.jsonOutput is undefined. Cannot clear or set value.");
                 showError("Internal error: Output area not found (ERR_HMFP_JSO_UNDEF_1).");
                 return;
             }
-            ui.jsonOutput.value = ''; 
+            ui.jsonOutput.value = '';
 
             if (!ui.outputControls) {
                  console.error("ERROR in handleManualFileProcessing: ui.outputControls is undefined.");
@@ -1024,13 +1055,13 @@
                 if (activeMode === 'decrypt') { stateForDecrypt.jsonObject = processedJson; }
                 else { stateForEncrypt.jsonObject = processedJson; }
                 currentJsonObject = processedJson;
-                
-                if (!ui.jsonOutput) { 
+
+                if (!ui.jsonOutput) {
                      console.error("CRITICAL ERROR in handleManualFileProcessing: ui.jsonOutput is undefined before setting final JSON. (ERR_HMFP_JSO_UNDEF_2)");
                      showError("Internal error: Output area disappeared (ERR_HMFP_JSO_UNDEF_2).");
                      return;
                 }
-                ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2); 
+                ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2);
                 if (ui.outputControls) ui.outputControls.classList.remove('hidden');
 
             } catch (error) {
@@ -1045,7 +1076,7 @@
         function setupUIForMode(newMode) {
             activeMode = newMode;
             clearError();
-            
+
             if (!ui.jsonOutput) { console.error("ERROR in setupUIForMode: ui.jsonOutput is undefined.");}
             else { ui.jsonOutput.value = ''; }
 
@@ -1059,13 +1090,13 @@
 
             if(ui.toolContent) {
                 ui.toolContent.innerHTML = `
-                    <div class="space-y-4"> 
+                    <div class="space-y-4">
                         <label for="file-input" class="block text-sm font-medium" style="color: var(--text-secondary);">${fileLabelText}</label>
                         <input type="file" id="file-input" accept="${fileAccept}" class="block w-full text-sm button button-secondary"/>
                         <span id="file-name-display" class="block text-xs mt-1.5" style="color: var(--text-secondary);">No file selected.</span>
 
                         <div id="advanced-options-toggle-container" class="advanced-options-toggle">
-                            <svg id="advanced-options-icon" class="transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem; height:1.25rem; margin-right:0.5rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            <svg id="advanced-options-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem; height:1.25rem; margin-right:0.5rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                             <span>Advanced Options (Cipher Key)</span>
                         </div>
                         <div id="advanced-options-content-area" class="advanced-options-content">
@@ -1074,7 +1105,6 @@
                                 <input type="text" id="cipher-key" placeholder="Default: ${DEFAULT_CIPHER_KEY}" class="w-full" />
                             </div>
                         </div>
-
                         <button id="process-button" class="w-full font-semibold py-2.5 px-4 button button-primary text-base">${buttonText}</button>
                     </div>`;
                 attachToolContentListeners();
@@ -1085,8 +1115,8 @@
 
             const fileNameDisplay = document.getElementById('file-name-display');
             let modeState = (newMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
-            
-            if (fileNameDisplay) { 
+
+            if (fileNameDisplay) {
                 if (modeState.inputFileName !== 'file' && modeState.fileContent !== null) {
                     fileNameDisplay.textContent = `Selected: ${modeState.inputFileName}`;
                     fileNameDisplay.style.color = 'var(--accent-green)';
@@ -1095,7 +1125,7 @@
                     fileNameDisplay.style.color = 'var(--text-secondary)';
                 }
             }
-            
+
             if (modeState.jsonObject && ui.jsonOutput && ui.outputControls) {
                 ui.jsonOutput.value = JSON.stringify(modeState.jsonObject, null, 2);
                 ui.outputControls.classList.remove('hidden');
@@ -1111,12 +1141,12 @@
             const advancedIcon = document.getElementById('advanced-options-icon');
 
             if (fileInput) {
-                fileInput.addEventListener('change', async (event) => { 
+                fileInput.addEventListener('change', async (event) => {
                     clearError();
                     if (event.target.files.length > 0) {
                         const selectedFile = event.target.files[0];
-                        const tempInputFileName = selectedFile.name; 
-                        
+                        const tempInputFileName = selectedFile.name;
+
                         try {
                             const fileText = await selectedFile.text();
                             if (activeMode === 'decrypt') {
@@ -1126,25 +1156,25 @@
                             }
                             if (fileNameDisplay) {
                                 fileNameDisplay.textContent = `Selected: ${tempInputFileName}`;
-                                fileNameDisplay.style.color = 'var(--accent-green)'; 
+                                fileNameDisplay.style.color = 'var(--accent-green)';
                                 fileNameDisplay.classList.add('file-selected-text-anim');
                                 setTimeout(() => fileNameDisplay.classList.remove('file-selected-text-anim'), 300);
                             }
                         } catch (readError) {
                             console.error("Error reading file immediately:", readError);
                             showError(`Failed to read file: ${readError.message}. Please try selecting it again.`);
-                            if (activeMode === 'decrypt') { stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; } 
+                            if (activeMode === 'decrypt') { stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
                             else { stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
                             if (fileNameDisplay) { fileNameDisplay.textContent = 'No file selected.'; fileNameDisplay.style.color = 'var(--text-secondary)';}
                         }
-                        
-                        if (!ui.jsonOutput) { console.error("ERROR in fileInput listener: ui.jsonOutput is undefined.");} 
+
+                        if (!ui.jsonOutput) { console.error("ERROR in fileInput listener: ui.jsonOutput is undefined.");}
                         else { ui.jsonOutput.value = '';}
 
                         if(ui.outputControls) ui.outputControls.classList.add('hidden');
                         currentJsonObject = null;
-                    } else { 
-                        if (activeMode === 'decrypt') { stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; } 
+                    } else {
+                        if (activeMode === 'decrypt') { stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
                         else { stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
                         if (fileNameDisplay) {
                             fileNameDisplay.textContent = 'No file selected.';
@@ -1197,7 +1227,7 @@
                     errorDiv.textContent = "Critical Error: UI components could not be initialized. Please refresh or contact support if the issue persists. (ERR_DOM_TC_MISSING)";
                     body.prepend(errorDiv);
                 }
-                return; 
+                return;
             }
 
             const ids = [
@@ -1206,14 +1236,16 @@
                 'download-encrypted-button', 'error-message', 'flowchart-modal', 'modal-title',
                 'modal-body', 'modal-close-button', 'download-final-warning-modal',
                 'dont-show-final-warning-again', 'download-final-warning-modal-close-button',
-                'download-final-warning-ok-button', 'bitlife-version', 'open-source-manager-button', 
+                'download-final-warning-ok-button', 'bitlife-version', 'open-source-manager-button',
                 'source-manager-modal', 'source-manager-modal-close-button', 'source-pfp-large',
                 'source-name-large', 'source-status-label-large', 'source-url-display-large',
-                'source-fetched-version-message', 'modal-bitlife-version-dynamic', 
+                'source-fetched-version-message', 'modal-bitlife-version-dynamic',
                 'source-manager-advanced-options-toggle', 'source-manager-advanced-content',
-                'source-manager-advanced-icon', 'new-source-url', 'load-new-source-button',
+                'source-manager-advanced-icon', 'new-source-url', // This ID is correct for the input element
+                'load-new-source-button',
                 'download-original-button', 'auto-patch-button', 'auto-patch-cors-notice',
-                'auto-patch-log-container', 'auto-patch-log'
+                'auto-patch-log-container', 'auto-patch-log',
+                'important-notes-toggle-button', 'important-notes-content-wrapper', 'important-notes-icon-svg'
             ];
             ids.forEach(id => {
                 const element = document.getElementById(id);
@@ -1222,7 +1254,12 @@
                 }
                 ui[id.replace(/-(\w)/g, (match, letter) => letter.toUpperCase())] = element;
             });
-            
+             // Ensure newSourceUrlInput is correctly assigned if the auto-conversion missed it
+            if (!ui.newSourceUrlInput && ui.newSourceUrl) { // common mistake is ui.newSourceUrl vs ui.newSourceUrlInput
+                ui.newSourceUrlInput = ui.newSourceUrl; // assuming newSourceUrl was the one cached for the input
+            }
+
+
             if (!ui.jsonOutput) {
                  console.error("CRITICAL: ui.jsonOutput is undefined immediately after caching attempt in DOMContentLoaded. The textarea with ID 'json-output' might be missing or ID is incorrect. (ERR_DOM_JSO_CACHE_FAIL)");
             }
@@ -1236,14 +1273,14 @@
             }
 
             await fetchBitLifeVersion();
-            await checkSourceOutdatedStatus(); 
-            setupUIForMode('decrypt'); 
+            await checkSourceOutdatedStatus();
+            setupUIForMode('decrypt');
 
-            ui.tabDecrypt.addEventListener('click', () => setupUIForMode('decrypt'));
-            ui.tabEncrypt.addEventListener('click', () => setupUIForMode('encrypt'));
+            if(ui.tabDecrypt) ui.tabDecrypt.addEventListener('click', () => setupUIForMode('decrypt'));
+            if(ui.tabEncrypt) ui.tabEncrypt.addEventListener('click', () => setupUIForMode('encrypt'));
 
-            ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
-            ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
+            if(ui.openSourceManagerButton) ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
+            if(ui.sourceManagerModalCloseButton) ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
 
             if (ui.sourceManagerAdvancedOptionsToggle && ui.sourceManagerAdvancedContent && ui.sourceManagerAdvancedIcon) {
                 ui.sourceManagerAdvancedOptionsToggle.addEventListener('click', () => {
@@ -1252,242 +1289,258 @@
                 });
             }
 
-            ui.loadNewSourceButton.addEventListener('click', async () => {
-                const newUrl = ui.newSourceUrlInput.value.trim();
-                if (newUrl) {
-                    try {
-                        const parsedUrl = new URL(newUrl); 
-                        currentMonetizationVarsSourceURL = parsedUrl.href;
-                        let sourceNameGuess = parsedUrl.hostname;
-                        if (parsedUrl.hostname.includes('githubusercontent.com') && parsedUrl.pathname.split('/').length > 2) {
-                            const pathParts = parsedUrl.pathname.split('/');
-                            sourceNameGuess = `${pathParts[1]}/${pathParts[2]} (Raw)`;
-                        }
-                        currentSourceInfo = {
-                            name: sourceNameGuess, pfpImageUrl: '',
-                            pfpFallbackText: sourceNameGuess.substring(0,2).toUpperCase(),
-                            url: parsedUrl.href, statusMessage: "", fetchedVersion: null
-                        };
-                        await checkSourceOutdatedStatus(); 
-                        showToast(`Source updated to: ${sourceNameGuess}`, "success");
-                    } catch (e) {
-                        showToast("Invalid URL. Please enter a valid URL.", "error");
-                        console.error("Invalid URL:", e);
-                    }
-                } else { 
-                    currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
-                    currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO));
-                    await checkSourceOutdatedStatus();
-                    showToast("Source reverted to default.", "info");
-                }
-            });
-
-            ui.downloadOriginalButton.addEventListener('click', () => {
-                window.open(ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL, '_blank');
-                showToast("Original MonetizationVars download started.", "info");
-                if (showFinalDownloadWarningPreference) {
-                    showStandardModal(ui.downloadFinalWarningModal);
-                }
-            });
-
-            ui.autoPatchButton.addEventListener('click', async () => {
-                if(!ui.autoPatchLogContainer || !ui.autoPatchLog) {
-                    console.error("Log containers not found in UI cache.");
-                    showError("Logging system error. Cannot proceed.");
-                    return;
-                }
-                ui.autoPatchLog.innerHTML = '';
-                ui.autoPatchLogContainer.classList.add('hidden'); 
-                ui.autoPatchCorsNotice.classList.add('hidden');
-                ui.autoPatchButton.disabled = true;
-
-                addLogToAutoPatcher("Starting auto-patch...", 'info');
-
-                try {
-                    addLogToAutoPatcher(`Fetching from: ${currentMonetizationVarsSourceURL}`, 'info');
-                    const response = await fetch(currentMonetizationVarsSourceURL, { cache: "no-store" });
-                    if (!response.ok) {
-                        throw new Error(`Fetch failed (HTTP ${response.status}). Server may be down or CORS issue.`);
-                    }
-                    const fetchedFileContent = await response.text();
-                    addLogToAutoPatcher("Content fetched successfully.", 'success');
-
-                    addLogToAutoPatcher("Decrypting content...", 'info');
-                    const effectiveKeyForAutoPatch = getEffectiveCipherKeyForOperation(); 
-                    let decryptedJson = await processMonetizationVarsContent(fetchedFileContent, 'decrypt', effectiveKeyForAutoPatch);
-                    addLogToAutoPatcher(`Decrypted with key: ${effectiveKeyForAutoPatch === DEFAULT_CIPHER_KEY ? 'Default' : 'Custom'}.`, 'success');
-
-                    addLogToAutoPatcher("Applying 'Unlock All / Set True' patch...", 'info');
-                    let changedByPatch = false;
-                    const tempJsonForPatch = JSON.parse(JSON.stringify(decryptedJson)); 
-                    for (const key in tempJsonForPatch) {
-                        if (Object.hasOwnProperty.call(tempJsonForPatch, key)) {
-                            if (tempJsonForPatch[key] === false) { tempJsonForPatch[key] = true; changedByPatch = true; }
-                            else if (tempJsonForPatch[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJsonForPatch[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changedByPatch = true; }
-                        }
-                    }
-                    if (changedByPatch) { decryptedJson = tempJsonForPatch; addLogToAutoPatcher("'Unlock All' patch applied.", 'success');}
-                    else { addLogToAutoPatcher("No items required 'Unlock All' patch.", 'info'); }
-
-                    addLogToAutoPatcher("Re-encrypting patched content...", 'info');
-                    const obfuscatedKeyForEncrypt = getObfuscatedKey(effectiveKeyForAutoPatch);
-                    let encryptedFileContent = "";
-                    for (const key in decryptedJson) {
-                        if (Object.hasOwnProperty.call(decryptedJson, key)) {
-                            const value = decryptedJson[key];
-                            const cipheredKey = xorAndBase64Encode(key, obfuscatedKeyForEncrypt);
-                            let valueToSerializeB64;
-
-                            if (typeof value === 'boolean') {
-                                valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD;
-                            } else if (typeof value === 'number' && Number.isInteger(value)) {
-                                const encryptedIntB64 = encryptInt(value); 
-                                if (encryptedIntB64) {
-                                    valueToSerializeB64 = encryptedIntB64;
-                                } else {
-                                    console.warn(`Failed to encrypt integer value for key ${key}, falling back to string.`);
-                                    valueToSerializeB64 = utf8StringToBase64(String(value)); 
-                                }
-                            } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) {
-                                valueToSerializeB64 = value;
-                            } else { 
-                                valueToSerializeB64 = utf8StringToBase64(String(value));
+            // Ensure ui.newSourceUrlInput is used here
+            if(ui.loadNewSourceButton && ui.newSourceUrlInput) {
+                ui.loadNewSourceButton.addEventListener('click', async () => {
+                    const newUrl = ui.newSourceUrlInput.value.trim(); // Use ui.newSourceUrlInput
+                    if (newUrl) {
+                        try {
+                            const parsedUrl = new URL(newUrl);
+                            currentMonetizationVarsSourceURL = parsedUrl.href;
+                            let sourceNameGuess = parsedUrl.hostname;
+                            if (parsedUrl.hostname.includes('githubusercontent.com') && parsedUrl.pathname.split('/').length > 2) {
+                                const pathParts = parsedUrl.pathname.split('/');
+                                sourceNameGuess = `${pathParts[1]}/${pathParts[2]} (Raw)`;
                             }
-                            const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKeyForEncrypt);
-                            encryptedFileContent += `${cipheredKey}:${cipheredValue}\n`;
+                            currentSourceInfo = {
+                                name: sourceNameGuess, pfpImageUrl: '',
+                                pfpFallbackText: sourceNameGuess.substring(0,2).toUpperCase(),
+                                url: parsedUrl.href, statusMessage: "", fetchedVersion: null
+                            };
+                            await checkSourceOutdatedStatus();
+                            showToast(`Source updated to: ${sourceNameGuess}`, "success");
+                        } catch (e) {
+                            showToast("Invalid URL. Please enter a valid URL.", "error");
+                            console.error("Invalid URL:", e);
                         }
-                    }
-                    addLogToAutoPatcher("Content re-encrypted.", 'success');
-
-                    addLogToAutoPatcher("Preparing download...", 'info');
-                    const blob = new Blob([encryptedFileContent.trimEnd()], { type: 'application/octet-stream' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = TARGET_ENCRYPTED_FILENAME;
-                    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
-                    addLogToAutoPatcher(`Patched ${TARGET_ENCRYPTED_FILENAME} downloaded successfully!`, 'success');
-                    if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); }
-
-                } catch (error) {
-                    console.error("Auto-patch error:", error);
-                    addLogToAutoPatcher(`Error: ${error.message}`, 'error');
-                    showToast(`Auto-patch failed: ${error.message}`, 'error');
-                    if (error.message.toLowerCase().includes('fetch') || error.message.toLowerCase().includes('cors')) {
-                        if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.remove('hidden');
-                    }
-                } finally {
-                     if(ui.autoPatchButton) ui.autoPatchButton.disabled = false;
-                }
-            });
-
-            ui.unlockAllButton.addEventListener('click', () => {
-                if (!currentJsonObject) {
-                    if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_1)."); return;}
-                    try { if (ui.jsonOutput.value) currentJsonObject = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to process."); return; }}
-                    catch (e) { showError("Invalid JSON in textarea. Cannot process."); return; }
-                }
-                if (!currentJsonObject) { showError("No JSON data to process."); return; } 
-                try {
-                    let changed = false; const tempJson = JSON.parse(JSON.stringify(currentJsonObject)); 
-                    for (const key in tempJson) {
-                        if (Object.hasOwnProperty.call(tempJson, key)) {
-                            if (tempJson[key] === false) { tempJson[key] = true; changed = true; }
-                            else if (tempJson[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJson[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changed = true; }
-                        }
-                    }
-                    if (changed) {
-                        currentJsonObject = tempJson; 
-                        if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_2)."); return;}
-                        ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2);
-                        if (activeMode === 'decrypt') stateForDecrypt.jsonObject = currentJsonObject; else stateForEncrypt.jsonObject = currentJsonObject;
-                        showToast("Unlocked all applicable items.", "success");
-                    } else { showToast("No items were changed by 'Unlock All'.", "info"); }
-                } catch (e) { showError("Error during 'Unlock All': " + e.message); console.error("Unlock all error:", e); }
-            });
-
-            ui.copyJsonButton.addEventListener('click', () => {
-                if (!ui.jsonOutput || !ui.jsonOutput.value) { 
-                    showToast("No JSON to copy.", "info"); 
-                    return; 
-                }
-                ui.jsonOutput.select(); 
-                ui.jsonOutput.setSelectionRange(0, 99999);
-                
-                try {
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        showToast('JSON copied to clipboard!', 'success');
                     } else {
-                        console.error('document.execCommand("copy") returned false.');
-                        showToast('Failed to copy JSON. Try manual copy.', 'error');
+                        currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
+                        currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO));
+                        await checkSourceOutdatedStatus();
+                        showToast("Source reverted to default.", "info");
                     }
-                } catch (err) {
-                    console.error('Error using document.execCommand("copy"): ', err);
-                    showToast('Failed to copy JSON. Browser may not support this action.', 'error');
-                }
-            });
+                });
+            }
 
-            ui.downloadDecryptedJsonButton.addEventListener('click', () => {
-                if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON data to download.", "info"); return; }
-                try {
-                    const jsonString = ui.jsonOutput.value; 
-                    JSON.parse(jsonString); 
-                    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
-                    let baseDlFilename = (stateForDecrypt.inputFileName && stateForDecrypt.inputFileName !== 'file') ? stateForDecrypt.inputFileName : 'decrypted_data'; 
-                    const finalBase = baseDlFilename.includes('.') ? baseDlFilename.substring(0, baseDlFilename.lastIndexOf('.')) : baseDlFilename;
-                    const downloadFileName = `${finalBase}_decrypted.json`;
-                    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = downloadFileName;
-                    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
-                    showToast('Decrypted JSON download started.', 'success');
-                } catch (err) { showError('Invalid JSON in textarea. Cannot download.'); console.error("Download decrypted JSON error:", err); }
-            });
 
-            ui.downloadEncryptedButton.addEventListener('click', () => {
-                let jsonToEncrypt = currentJsonObject;
-                if (!jsonToEncrypt) { 
-                    if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_DEB_JSO_UNDEF)."); return;}
-                    try { if (ui.jsonOutput.value) jsonToEncrypt = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to encrypt."); return; }} 
-                    catch (e) { showError("Invalid JSON in textarea. Cannot encrypt."); return; }
-                }
-                if (!jsonToEncrypt) { showError("No JSON data to encrypt."); return; } 
-                try {
-                    const effectiveKeyForEncrypt = getEffectiveCipherKeyForOperation();
-                    const obfuscatedKey = getObfuscatedKey(effectiveKeyForEncrypt);
-                    let varFileContent = "";
-                    for (const key in jsonToEncrypt) {
-                        if (Object.hasOwnProperty.call(jsonToEncrypt, key)) {
-                            const value = jsonToEncrypt[key]; 
-                            const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); 
-                            let valueToSerializeB64;
+            if(ui.downloadOriginalButton) {
+                ui.downloadOriginalButton.addEventListener('click', () => {
+                    window.open(ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL, '_blank');
+                    showToast("Original MonetizationVars download started.", "info");
+                    if (showFinalDownloadWarningPreference) {
+                        showStandardModal(ui.downloadFinalWarningModal);
+                    }
+                });
+            }
 
-                            if (typeof value === 'boolean') {
-                                valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD;
-                            } else if (typeof value === 'number' && Number.isInteger(value)) {
-                                const encryptedIntB64 = encryptInt(value); 
-                                if (encryptedIntB64) {
-                                    valueToSerializeB64 = encryptedIntB64;
-                                } else {
-                                    console.warn(`Failed to encrypt integer value for key ${key} using encryptInt, falling back to string.`);
-                                    valueToSerializeB64 = utf8StringToBase64(String(value)); 
-                                }
-                            } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) {
-                                valueToSerializeB64 = value; 
-                            } else { 
-                                valueToSerializeB64 = utf8StringToBase64(String(value));
-                            }
-                            const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKeyForEncrypt);
-                            varFileContent += `${cipheredKey}:${cipheredValue}\n`;
+            if(ui.autoPatchButton) {
+                ui.autoPatchButton.addEventListener('click', async () => {
+                    if(!ui.autoPatchLogContainer || !ui.autoPatchLog) {
+                        console.error("Log containers not found in UI cache.");
+                        showError("Logging system error. Cannot proceed.");
+                        return;
+                    }
+                    ui.autoPatchLog.innerHTML = '';
+                    ui.autoPatchLogContainer.classList.add('hidden');
+                    ui.autoPatchCorsNotice.classList.add('hidden');
+                    ui.autoPatchButton.disabled = true;
+
+                    addLogToAutoPatcher("Starting auto-patch...", 'info');
+
+                    try {
+                        addLogToAutoPatcher(`Fetching from: ${currentMonetizationVarsSourceURL}`, 'info');
+                        const response = await fetch(currentMonetizationVarsSourceURL, { cache: "no-store" });
+                        if (!response.ok) {
+                            throw new Error(`Fetch failed (HTTP ${response.status}). Server may be down or CORS issue.`);
                         }
-                    }
-                    const blob = new Blob([varFileContent.trimEnd()], { type: 'application/octet-stream' });
-                    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME;
-                    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
-                    if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); }
-                    showToast(`Encrypted ${TARGET_ENCRYPTED_FILENAME} downloaded.`, 'success');
-                } catch (e) { showError("Error encrypting data: " + e.message); console.error("Download encrypted error:", e);}
-            });
+                        const fetchedFileContent = await response.text();
+                        addLogToAutoPatcher("Content fetched successfully.", 'success');
 
-            if(ui.modalCloseButton) ui.modalCloseButton.addEventListener('click', () => hideStandardModal(ui.flowchartModal)); 
+                        addLogToAutoPatcher("Decrypting content...", 'info');
+                        const effectiveKeyForAutoPatch = getEffectiveCipherKeyForOperation();
+                        let decryptedJson = await processMonetizationVarsContent(fetchedFileContent, 'decrypt', effectiveKeyForAutoPatch);
+                        addLogToAutoPatcher(`Decrypted with key: ${effectiveKeyForAutoPatch === DEFAULT_CIPHER_KEY ? 'Default' : 'Custom'}.`, 'success');
+
+                        addLogToAutoPatcher("Applying 'Unlock All / Set True' patch...", 'info');
+                        let changedByPatch = false;
+                        const tempJsonForPatch = JSON.parse(JSON.stringify(decryptedJson));
+                        for (const key in tempJsonForPatch) {
+                            if (Object.hasOwnProperty.call(tempJsonForPatch, key)) {
+                                if (tempJsonForPatch[key] === false) { tempJsonForPatch[key] = true; changedByPatch = true; }
+                                else if (tempJsonForPatch[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJsonForPatch[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changedByPatch = true; }
+                            }
+                        }
+                        if (changedByPatch) { decryptedJson = tempJsonForPatch; addLogToAutoPatcher("'Unlock All' patch applied.", 'success');}
+                        else { addLogToAutoPatcher("No items required 'Unlock All' patch.", 'info'); }
+
+                        addLogToAutoPatcher("Re-encrypting patched content...", 'info');
+                        const obfuscatedKey = getObfuscatedKey(effectiveKeyForAutoPatch);
+                        let encryptedFileContent = "";
+                        for (const key in decryptedJson) {
+                            if (Object.hasOwnProperty.call(decryptedJson, key)) {
+                                const value = decryptedJson[key];
+                                const cipheredKey = xorAndBase64Encode(key, obfuscatedKey);
+                                let valueToSerializeB64;
+
+                                if (typeof value === 'boolean') {
+                                    valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD;
+                                } else if (typeof value === 'number' && Number.isInteger(value)) {
+                                    const encryptedIntB64 = encryptInt(value);
+                                    if (encryptedIntB64) {
+                                        valueToSerializeB64 = encryptedIntB64;
+                                    } else {
+                                        console.warn(`Failed to encrypt integer value for key ${key}, falling back to string.`);
+                                        valueToSerializeB64 = utf8StringToBase64(String(value));
+                                    }
+                                } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) {
+                                    valueToSerializeB64 = value;
+                                } else {
+                                    valueToSerializeB64 = utf8StringToBase64(String(value));
+                                }
+                                const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey);
+                                encryptedFileContent += `${cipheredKey}:${cipheredValue}\n`;
+                            }
+                        }
+                        addLogToAutoPatcher("Content re-encrypted.", 'success');
+
+                        addLogToAutoPatcher("Preparing download...", 'info');
+                        const blob = new Blob([encryptedFileContent.trimEnd()], { type: 'application/octet-stream' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = TARGET_ENCRYPTED_FILENAME;
+                        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+                        addLogToAutoPatcher(`Patched ${TARGET_ENCRYPTED_FILENAME} downloaded successfully!`, 'success');
+                        if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); }
+
+                    } catch (error) {
+                        console.error("Auto-patch error:", error);
+                        addLogToAutoPatcher(`Error: ${error.message}`, 'error');
+                        showToast(`Auto-patch failed: ${error.message}`, 'error');
+                        if (error.message.toLowerCase().includes('fetch') || error.message.toLowerCase().includes('cors')) {
+                            if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.remove('hidden');
+                        }
+                    } finally {
+                         if(ui.autoPatchButton) ui.autoPatchButton.disabled = false;
+                    }
+                });
+            }
+
+            if(ui.unlockAllButton) {
+                ui.unlockAllButton.addEventListener('click', () => {
+                    if (!currentJsonObject) {
+                        if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_1)."); return;}
+                        try { if (ui.jsonOutput.value) currentJsonObject = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to process."); return; }}
+                        catch (e) { showError("Invalid JSON in textarea. Cannot process."); return; }
+                    }
+                    if (!currentJsonObject) { showError("No JSON data to process."); return; }
+                    try {
+                        let changed = false; const tempJson = JSON.parse(JSON.stringify(currentJsonObject));
+                        for (const key in tempJson) {
+                            if (Object.hasOwnProperty.call(tempJson, key)) {
+                                if (tempJson[key] === false) { tempJson[key] = true; changed = true; }
+                                else if (tempJson[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJson[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changed = true; }
+                            }
+                        }
+                        if (changed) {
+                            currentJsonObject = tempJson;
+                            if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_2)."); return;}
+                            ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2);
+                            if (activeMode === 'decrypt') stateForDecrypt.jsonObject = currentJsonObject; else stateForEncrypt.jsonObject = currentJsonObject;
+                            showToast("Unlocked all applicable items.", "success");
+                        } else { showToast("No items were changed by 'Unlock All'.", "info"); }
+                    } catch (e) { showError("Error during 'Unlock All': " + e.message); console.error("Unlock all error:", e); }
+                });
+            }
+
+            if(ui.copyJsonButton) {
+                ui.copyJsonButton.addEventListener('click', () => {
+                    if (!ui.jsonOutput || !ui.jsonOutput.value) {
+                        showToast("No JSON to copy.", "info");
+                        return;
+                    }
+                    ui.jsonOutput.select();
+                    ui.jsonOutput.setSelectionRange(0, 99999);
+
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            showToast('JSON copied to clipboard!', 'success');
+                        } else {
+                            console.error('document.execCommand("copy") returned false.');
+                            showToast('Failed to copy JSON. Try manual copy.', 'error');
+                        }
+                    } catch (err) {
+                        console.error('Error using document.execCommand("copy"): ', err);
+                        showToast('Failed to copy JSON. Browser may not support this action.', 'error');
+                    }
+                });
+            }
+
+            if(ui.downloadDecryptedJsonButton) {
+                ui.downloadDecryptedJsonButton.addEventListener('click', () => {
+                    if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON data to download.", "info"); return; }
+                    try {
+                        const jsonString = ui.jsonOutput.value;
+                        JSON.parse(jsonString);
+                        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+                        let baseDlFilename = (stateForDecrypt.inputFileName && stateForDecrypt.inputFileName !== 'file') ? stateForDecrypt.inputFileName : 'decrypted_data';
+                        const finalBase = baseDlFilename.includes('.') ? baseDlFilename.substring(0, baseDlFilename.lastIndexOf('.')) : baseDlFilename;
+                        const downloadFileName = `${finalBase}_decrypted.json`;
+                        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = downloadFileName;
+                        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+                        showToast('Decrypted JSON download started.', 'success');
+                    } catch (err) { showError('Invalid JSON in textarea. Cannot download.'); console.error("Download decrypted JSON error:", err); }
+                });
+            }
+
+            if(ui.downloadEncryptedButton) {
+                ui.downloadEncryptedButton.addEventListener('click', () => {
+                    let jsonToEncrypt = currentJsonObject;
+                    if (!jsonToEncrypt) {
+                        if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_DEB_JSO_UNDEF)."); return;}
+                        try { if (ui.jsonOutput.value) jsonToEncrypt = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to encrypt."); return; }}
+                        catch (e) { showError("Invalid JSON in textarea. Cannot encrypt."); return; }
+                    }
+                    if (!jsonToEncrypt) { showError("No JSON data to encrypt."); return; }
+                    try {
+                        const effectiveKeyForEncrypt = getEffectiveCipherKeyForOperation();
+                        const obfuscatedKey = getObfuscatedKey(effectiveKeyForEncrypt);
+                        let varFileContent = "";
+                        for (const key in jsonToEncrypt) {
+                            if (Object.hasOwnProperty.call(jsonToEncrypt, key)) {
+                                const value = jsonToEncrypt[key];
+                                const cipheredKey = xorAndBase64Encode(key, obfuscatedKey);
+                                let valueToSerializeB64;
+
+                                if (typeof value === 'boolean') {
+                                    valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD;
+                                } else if (typeof value === 'number' && Number.isInteger(value)) {
+                                    const encryptedIntB64 = encryptInt(value);
+                                    if (encryptedIntB64) {
+                                        valueToSerializeB64 = encryptedIntB64;
+                                    } else {
+                                        console.warn(`Failed to encrypt integer value for key ${key} using encryptInt, falling back to string.`);
+                                        valueToSerializeB64 = utf8StringToBase64(String(value));
+                                    }
+                                } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) {
+                                    valueToSerializeB64 = value;
+                                } else {
+                                    valueToSerializeB64 = utf8StringToBase64(String(value));
+                                }
+                                const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey);
+                                varFileContent += `${cipheredKey}:${cipheredValue}\n`;
+                            }
+                        }
+                        const blob = new Blob([varFileContent.trimEnd()], { type: 'application/octet-stream' });
+                        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME;
+                        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+                        if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); }
+                        showToast(`Encrypted ${TARGET_ENCRYPTED_FILENAME} downloaded.`, 'success');
+                    } catch (e) { showError("Error encrypting data: " + e.message); console.error("Download encrypted error:", e);}
+                });
+            }
+
+            if(ui.modalCloseButton) ui.modalCloseButton.addEventListener('click', () => hideStandardModal(ui.flowchartModal));
             if(ui.downloadFinalWarningModalCloseButton) {
                 ui.downloadFinalWarningModalCloseButton.addEventListener('click', () => {
                     hideStandardModal(ui.downloadFinalWarningModal);
@@ -1498,6 +1551,40 @@
                 ui.downloadFinalWarningOkButton.addEventListener('click', () => {
                     hideStandardModal(ui.downloadFinalWarningModal);
                     if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save 'don't show again' preference.", e); }}
+                });
+            }
+
+            // Collapsible "Important Notes"
+            if (ui.importantNotesToggleButton && ui.importantNotesContentWrapper && ui.importantNotesIconSvg) {
+                // Initial state: collapsed
+                ui.importantNotesContentWrapper.style.maxHeight = '0';
+                ui.importantNotesContentWrapper.style.opacity = '0';
+                ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false');
+                ui.importantNotesIconSvg.style.transform = 'rotate(0deg)';
+
+                ui.importantNotesToggleButton.addEventListener('click', () => {
+                    const isCurrentlyExpanded = ui.importantNotesContentWrapper.style.maxHeight !== '0px';
+                    if (isCurrentlyExpanded) { // Collapse it
+                        ui.importantNotesContentWrapper.style.maxHeight = '0';
+                        ui.importantNotesContentWrapper.style.opacity = '0';
+                        ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false');
+                        ui.importantNotesIconSvg.style.transform = 'rotate(0deg)';
+                    } else { // Expand it
+                        // Temporarily set to auto to get scrollHeight, then set fixed max-height for animation
+                        ui.importantNotesContentWrapper.style.maxHeight = 'auto';
+                        const scrollHeight = ui.importantNotesContentWrapper.scrollHeight;
+                        ui.importantNotesContentWrapper.style.maxHeight = '0'; // Reset for animation start
+
+                        // Force reflow to apply the maxHeight = 0 before transitioning to scrollHeight
+                        //offsetHeight is a common way to trigger reflow
+                        ui.importantNotesContentWrapper.offsetHeight;
+
+
+                        ui.importantNotesContentWrapper.style.maxHeight = scrollHeight + 'px';
+                        ui.importantNotesContentWrapper.style.opacity = '1';
+                        ui.importantNotesToggleButton.setAttribute('aria-expanded', 'true');
+                        ui.importantNotesIconSvg.style.transform = 'rotate(180deg)';
+                    }
                 });
             }
 
