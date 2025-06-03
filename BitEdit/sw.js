@@ -6,8 +6,7 @@ const PRECACHE_ASSETS = [
     './', // Alias for index.html
     './index.html',
     './manifest.json',
-    // Tailwind CSS (CDN)
-    'https://cdn.tailwindcss.com',
+    './output.css',
     // Google Fonts CSS
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     // Default PFP image
