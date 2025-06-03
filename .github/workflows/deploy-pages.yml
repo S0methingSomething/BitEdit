@@ -4,16 +4,17 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/index.html'
-      - 'BitEdit/input.css'
-      - 'tailwind.config.js'
-      - 'BitEdit/**/*.js'
+      - 'BitEdit/index.html'         # For version extraction
+      - 'BitEdit/tailwind/input.css' # Path to your main Tailwind input CSS
+      - 'tailwind.config.js'       # Assumed to be at the root
+      - 'postcss.config.js'        # Assumed to be at the root
+      - 'BitEdit/**/*.js'          # If other JS files influence Tailwind classes
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: write   # To push updated version files
+  pages: write      # To deploy to GitHub Pages
+  id-token: write   # For OIDC token for GitHub Pages deployment
 
 concurrency:
   group: "pages"
@@ -46,8 +47,10 @@ jobs:
         run: npx --no -- @tailwindcss/cli --help || echo "@tailwindcss/cli not found or --help failed"
 
       - name: Build Tailwind CSS
-        run: npx --no -- @tailwindcss/cli -i ./BitEdit/input.css -o ./BitEdit/output.css --minify
-        # Explicitly using @tailwindcss/cli
+        run: npx --no -- @tailwindcss/cli -i ./BitEdit/tailwind/input.css -o ./BitEdit/output.css --minify
+        # Input: ./BitEdit/tailwind/input.css
+        # Output: ./BitEdit/output.css
+        # Config files (tailwind.config.js, postcss.config.js) are expected at the repo root.
 
       - name: Extract version from BitEdit/index.html
         id: get_version
@@ -112,6 +115,8 @@ jobs:
 
           cp "$SW_FILE_PATH" "${SW_FILE_PATH}.orig"
           
+          # This sed command finds the line after GITHUB_ACTION_MARKER_SW_CACHE_NAME
+          # and replaces the content of '...' in "const CACHE_NAME = '...';"
           sed -E -i.bak "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${NORMALIZED_VERSION}\2/;}" "$SW_FILE_PATH"
           
           if ! cmp -s "${SW_FILE_PATH}.bak" "$SW_FILE_PATH"; then
@@ -121,7 +126,7 @@ jobs:
             echo "sw.js: CACHE_NAME already up to date or sed command did not modify the file."
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
-          rm -f "${SW_FILE_PATH}.bak"
+          rm -f "${SW_FILE_PATH}.bak" # Clean up backup file from sed -i
 
       - name: Setup Pages
         id: pages
@@ -130,7 +135,7 @@ jobs:
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit' # This directory now includes locally modified files
+          path: './BitEdit' # This directory now includes locally modified/generated files
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -147,7 +152,7 @@ jobs:
 
           if [ "${{ steps.update_version_txt.outputs.changed }}" == "true" ]; then
             git add BitEdit/BitEdit_version.txt
-            FILES_TO_COMMIT="BitEdit_version.txt"
+            FILES_TO_COMMIT="BitEdit/BitEdit_version.txt"
             COMMIT_MESSAGE_DETAILS="BitEdit_version.txt"
           fi
 
