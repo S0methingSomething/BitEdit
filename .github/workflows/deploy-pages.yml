@@ -4,10 +4,10 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/index.html'    # For version extraction & Tailwind processing
-      - 'BitEdit/css/input.css' # Or your Tailwind input CSS file path
-      - 'tailwind.config.js'  # If your Tailwind config changes
-      - 'BitEdit/**/*.js'       # If JS files affect Tailwind classes
+      - 'BitEdit/index.html'
+      - 'BitEdit/css/input.css'
+      - 'tailwind.config.js'
+      - 'BitEdit/**/*.js'
   workflow_dispatch:
 
 permissions:
@@ -33,17 +33,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your preferred LTS version
-          cache: 'npm' # Cache npm dependencies
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Install dependencies (including Tailwind CSS)
-        run: npm ci # npm ci is generally preferred in CI for faster, reliable installs from package-lock.json
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build Tailwind CSS
-        run: npx tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
-        # Adjust -i path if your input CSS is elsewhere or if not using one.
-        # If not using an input file and relying solely on content paths in tailwind.config.js:
-        # npx tailwindcss -o ./BitEdit/output.css --minify
+        run: ./node_modules/.bin/tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
+        # This directly calls the tailwindcss binary installed by npm ci
 
       - name: Extract version from BitEdit/index.html
         id: get_version
@@ -78,11 +76,14 @@ jobs:
         run: |
           VERSION_TO_WRITE="${{ steps.get_version.outputs.version_original }}"
           VERSION_FILE_PATH="BitEdit/BitEdit_version.txt" 
+          
           mkdir -p "$(dirname "$VERSION_FILE_PATH")"
+          
           CURRENT_CONTENT=""
           if [ -f "$VERSION_FILE_PATH" ]; then
             CURRENT_CONTENT=$(cat "$VERSION_FILE_PATH")
           fi
+
           if [ "$CURRENT_CONTENT" != "$VERSION_TO_WRITE" ]; then
             echo "BitEdit_version.txt: Content changed. Writing '$VERSION_TO_WRITE'."
             echo "$VERSION_TO_WRITE" > "$VERSION_FILE_PATH"
@@ -97,12 +98,16 @@ jobs:
         run: |
           NORMALIZED_VERSION="${{ steps.normalize_version.outputs.value }}"
           SW_FILE_PATH="BitEdit/sw.js"
+          
           if [ ! -f "$SW_FILE_PATH" ]; then
             echo "Error: $SW_FILE_PATH not found."
             exit 1
           fi
+
           cp "$SW_FILE_PATH" "${SW_FILE_PATH}.orig"
+          
           sed -E -i.bak "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${NORMALIZED_VERSION}\2/;}" "$SW_FILE_PATH"
+          
           if ! cmp -s "${SW_FILE_PATH}.bak" "$SW_FILE_PATH"; then
             echo "sw.js: CACHE_NAME updated to '${NORMALIZED_VERSION}'"
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -119,7 +124,7 @@ jobs:
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit' # This now includes the generated output.css
+          path: './BitEdit'
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -130,13 +135,16 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
           FILES_TO_COMMIT=""
           COMMIT_MESSAGE_DETAILS=""
+
           if [ "${{ steps.update_version_txt.outputs.changed }}" == "true" ]; then
             git add BitEdit/BitEdit_version.txt
             FILES_TO_COMMIT="BitEdit_version.txt"
             COMMIT_MESSAGE_DETAILS="BitEdit_version.txt"
           fi
+
           if [ "${{ steps.update_sw_js.outputs.changed }}" == "true" ]; then
             git add BitEdit/sw.js
             if [ -n "$FILES_TO_COMMIT" ]; then
@@ -147,6 +155,7 @@ jobs:
               COMMIT_MESSAGE_DETAILS="sw.js CACHE_NAME"
             fi
           fi
+          
           echo "Committing changes to: $FILES_TO_COMMIT"
           git commit -m "docs: Update $COMMIT_MESSAGE_DETAILS to ${{ steps.get_version.outputs.version_original }} [skip ci]"
           git push
