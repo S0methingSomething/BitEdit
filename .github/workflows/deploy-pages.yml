@@ -1,10 +1,13 @@
-name: Deploy BitEdit and Update Version Files
+name: Build Tailwind, Deploy BitEdit, and Update Version Files
 
 on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/index.html' # Triggers on changes to the versioned index.html
+      - 'BitEdit/index.html'    # For version extraction & Tailwind processing
+      - 'BitEdit/css/input.css' # Or your Tailwind input CSS file path
+      - 'tailwind.config.js'  # If your Tailwind config changes
+      - 'BitEdit/**/*.js'       # If JS files affect Tailwind classes
   workflow_dispatch:
 
 permissions:
@@ -26,6 +29,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your preferred LTS version
+          cache: 'npm' # Cache npm dependencies
+
+      - name: Install dependencies (including Tailwind CSS)
+        run: npm ci # npm ci is generally preferred in CI for faster, reliable installs from package-lock.json
+
+      - name: Build Tailwind CSS
+        run: npx tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
+        # Adjust -i path if your input CSS is elsewhere or if not using one.
+        # If not using an input file and relying solely on content paths in tailwind.config.js:
+        # npx tailwindcss -o ./BitEdit/output.css --minify
 
       - name: Extract version from BitEdit/index.html
         id: get_version
@@ -51,23 +69,20 @@ jobs:
         id: normalize_version
         run: |
           RAW_VERSION="${{ steps.get_version.outputs.version_original }}"
-          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//') # Remove leading 'v'
+          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//') 
           echo "Normalized version for CACHE_NAME: $NORMALIZED_VERSION"
           echo "value=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Create/Update BitEdit_version.txt locally
         id: update_version_txt
         run: |
-          VERSION_TO_WRITE="${{ steps.get_version.outputs.version_original }}" # Use original version for this file
+          VERSION_TO_WRITE="${{ steps.get_version.outputs.version_original }}"
           VERSION_FILE_PATH="BitEdit/BitEdit_version.txt" 
-          
           mkdir -p "$(dirname "$VERSION_FILE_PATH")"
-          
           CURRENT_CONTENT=""
           if [ -f "$VERSION_FILE_PATH" ]; then
             CURRENT_CONTENT=$(cat "$VERSION_FILE_PATH")
           fi
-
           if [ "$CURRENT_CONTENT" != "$VERSION_TO_WRITE" ]; then
             echo "BitEdit_version.txt: Content changed. Writing '$VERSION_TO_WRITE'."
             echo "$VERSION_TO_WRITE" > "$VERSION_FILE_PATH"
@@ -80,26 +95,14 @@ jobs:
       - name: Update CACHE_NAME in sw.js locally
         id: update_sw_js
         run: |
-          NORMALIZED_VERSION="${{ steps.normalize_version.outputs.value }}" # e.g., "1.4.3"
+          NORMALIZED_VERSION="${{ steps.normalize_version.outputs.value }}"
           SW_FILE_PATH="BitEdit/sw.js"
-          
           if [ ! -f "$SW_FILE_PATH" ]; then
             echo "Error: $SW_FILE_PATH not found."
             exit 1
           fi
-
-          # Store original content to check for changes
           cp "$SW_FILE_PATH" "${SW_FILE_PATH}.orig"
-          
-          # This sed command finds the line after GITHUB_ACTION_MARKER_SW_CACHE_NAME
-          # and replaces the content of '...' in "const CACHE_NAME = '...';"
-          # It preserves the 'const CACHE_NAME = ' part and the ending '; // comment' part.
-          # Group 1: (const CACHE_NAME = *')
-          # Group 2: (';.*)  -> the semicolon and the rest of the line (comment)
-          # Replacement: \1${NORMALIZED_VERSION}\2 -> inserts the normalized version between the single quotes.
           sed -E -i.bak "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${NORMALIZED_VERSION}\2/;}" "$SW_FILE_PATH"
-          
-          # Check if the file was actually modified by sed
           if ! cmp -s "${SW_FILE_PATH}.bak" "$SW_FILE_PATH"; then
             echo "sw.js: CACHE_NAME updated to '${NORMALIZED_VERSION}'"
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -107,7 +110,7 @@ jobs:
             echo "sw.js: CACHE_NAME already up to date or sed command did not modify the file."
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
-          rm -f "${SW_FILE_PATH}.bak" # Clean up backup file
+          rm -f "${SW_FILE_PATH}.bak"
 
       - name: Setup Pages
         id: pages
@@ -116,7 +119,7 @@ jobs:
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit' # This directory now contains locally modified files
+          path: './BitEdit' # This now includes the generated output.css
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -127,16 +130,13 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
           FILES_TO_COMMIT=""
           COMMIT_MESSAGE_DETAILS=""
-
           if [ "${{ steps.update_version_txt.outputs.changed }}" == "true" ]; then
             git add BitEdit/BitEdit_version.txt
             FILES_TO_COMMIT="BitEdit_version.txt"
             COMMIT_MESSAGE_DETAILS="BitEdit_version.txt"
           fi
-
           if [ "${{ steps.update_sw_js.outputs.changed }}" == "true" ]; then
             git add BitEdit/sw.js
             if [ -n "$FILES_TO_COMMIT" ]; then
@@ -147,7 +147,6 @@ jobs:
               COMMIT_MESSAGE_DETAILS="sw.js CACHE_NAME"
             fi
           fi
-          
           echo "Committing changes to: $FILES_TO_COMMIT"
           git commit -m "docs: Update $COMMIT_MESSAGE_DETAILS to ${{ steps.get_version.outputs.version_original }} [skip ci]"
           git push
