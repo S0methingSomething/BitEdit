@@ -5,9 +5,9 @@ on:
     branches: ["main"]
     paths:
       - 'BitEdit/index.html'
-      - 'BitEdit/css/input.css'
+      - 'BitEdit/css/input.css' # Assuming this is your main Tailwind input
       - 'tailwind.config.js'
-      - 'BitEdit/**/*.js'
+      - 'BitEdit/**/*.js'       # If JS files influence Tailwind classes
   workflow_dispatch:
 
 permissions:
@@ -33,15 +33,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20' 
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: List node_modules/.bin (for debugging)
+        run: ls -la node_modules/.bin || echo "node_modules/.bin not found or empty after npm ci"
+
       - name: Build Tailwind CSS
-        run: ./node_modules/.bin/tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
-        # This directly calls the tailwindcss binary installed by npm ci
+        run: $(npm bin)/tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
+        # This uses npm to find the correct path to the tailwindcss binary
 
       - name: Extract version from BitEdit/index.html
         id: get_version
@@ -124,7 +127,7 @@ jobs:
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit'
+          path: './BitEdit' # This directory now includes locally modified files
 
       - name: Deploy to GitHub Pages
         id: deployment
