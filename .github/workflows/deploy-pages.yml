@@ -5,9 +5,9 @@ on:
     branches: ["main"]
     paths:
       - 'BitEdit/index.html'
-      - 'BitEdit/css/input.css' # Assuming this is your main Tailwind input
+      - 'BitEdit/input.css' # Updated path for Tailwind input CSS
       - 'tailwind.config.js'
-      - 'BitEdit/**/*.js'       # If JS files influence Tailwind classes
+      - 'BitEdit/**/*.js'
   workflow_dispatch:
 
 permissions:
@@ -43,8 +43,8 @@ jobs:
         run: ls -la node_modules/.bin || echo "node_modules/.bin not found or empty after npm ci"
 
       - name: Build Tailwind CSS
-        run: npx --no -- tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
-        # Using npx --no -- to execute the locally installed tailwindcss
+        run: npx --no -- tailwindcss -i ./BitEdit/input.css -o ./BitEdit/output.css --minify
+        # Updated input path for input.css
 
       - name: Extract version from BitEdit/index.html
         id: get_version
@@ -163,3 +163,4 @@ jobs:
           git commit -m "docs: Update $COMMIT_MESSAGE_DETAILS to ${{ steps.get_version.outputs.version_original }} [skip ci]"
           git push
           echo "Version files updated and pushed to repository."
+

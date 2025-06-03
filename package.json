@@ -19,7 +19,9 @@
   "homepage": "https://github.com/S0methingSomething/BitEdit#readme",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.4",
+    "postcss": "^8.5.4"
+  },
+  "dependencies": {
     "tailwindcss": "^4.1.8"
   }
 }
