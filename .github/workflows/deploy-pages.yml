@@ -43,8 +43,8 @@ jobs:
         run: ls -la node_modules/.bin || echo "node_modules/.bin not found or empty after npm ci"
 
       - name: Build Tailwind CSS
-        run: $(npm bin)/tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
-        # This uses npm to find the correct path to the tailwindcss binary
+        run: npx --no -- tailwindcss -i ./BitEdit/css/input.css -o ./BitEdit/output.css --minify
+        # Using npx --no -- to execute the locally installed tailwindcss
 
       - name: Extract version from BitEdit/index.html
         id: get_version
