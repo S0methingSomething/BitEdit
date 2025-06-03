@@ -521,7 +521,7 @@
 
         // --- App Version (Manually update this when releasing a new version) ---
         // GITHUB_ACTION_MARKER_APP_VERSION (Do not remove or alter this line)
-        const CURRENT_APP_VERSION = "v1.4.4"; 
+        const CURRENT_APP_VERSION = "v1.4.5"; 
 
         // --- Constants ---
         const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
@@ -747,29 +747,25 @@
             if(ui.tabDecrypt) ui.tabDecrypt.classList.toggle('active', newMode === 'decrypt');
             if(ui.tabEncrypt) ui.tabEncrypt.classList.toggle('active', newMode === 'encrypt');
 
-            // Get references to the pre-rendered elements
             const fileInputLabel = document.getElementById('file-input-label');
             const fileInputElement = document.getElementById('file-input');
             const processButtonElement = document.getElementById('process-button');
-            const fileNameDisplay = document.getElementById('file-name-display'); // This one will be cached in ui.fileNameDisplay
+            const fileNameDisplay = document.getElementById('file-name-display'); 
 
             if (!fileInputLabel || !fileInputElement || !processButtonElement || !fileNameDisplay) {
                 console.error("CRITICAL: One or more pre-rendered UI elements for the tool content are missing. UI updates for mode changes will fail.");
-                // Fallback or error message if critical elements for mode switching are not found.
-                // For now, we proceed assuming they are there.
             }
 
             if (newMode === 'decrypt') {
                 if (fileInputLabel) fileInputLabel.textContent = `Select '${TARGET_ENCRYPTED_FILENAME}' File:`;
                 if (fileInputElement) fileInputElement.accept = '*/*';
                 if (processButtonElement) processButtonElement.textContent = 'Start Decryption';
-            } else { // 'encrypt' mode
+            } else { 
                 if (fileInputLabel) fileInputLabel.textContent = 'Select JSON File to Encrypt:';
                 if (fileInputElement) fileInputElement.accept = '.json,text/plain';
                 if (processButtonElement) processButtonElement.textContent = 'Load JSON from File';
             }
             
-            // Reset file input display and state for the new mode
             let modeState = (newMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
             if (fileNameDisplay) {
                 if (modeState.inputFileName !== 'file' && modeState.fileContent !== null) {
@@ -778,9 +774,8 @@
                 } else {
                     fileNameDisplay.textContent = 'No file selected.';
                     fileNameDisplay.style.color = 'var(--text-secondary)';
-                    if (fileInputElement) fileInputElement.value = ""; // Clear the selected file visually
+                    if (fileInputElement) fileInputElement.value = ""; 
 
-                    // Reset state specific to the new mode if it was from the other mode
                     if (newMode === 'decrypt' && (stateForDecrypt.inputFileName !== 'file' || stateForDecrypt.fileContent !== null)) {
                          stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
                     } else if (newMode === 'encrypt' && (stateForEncrypt.inputFileName !== 'file' || stateForEncrypt.fileContent !== null)) {
@@ -789,7 +784,6 @@
                 }
             }
 
-            // Restore JSON output if available for the current mode's state
             if (modeState.jsonObject && ui.jsonOutput && ui.outputControls) {
                 ui.jsonOutput.value = JSON.stringify(modeState.jsonObject, null, 2);
                 ui.outputControls.classList.remove('hidden');
@@ -800,11 +794,8 @@
         }
 
         function attachToolContentListeners() {
-            // These elements are now static in the HTML, get them directly if not already in ui object,
-            // or ensure ui object is populated correctly first.
-            // For simplicity, assuming they are found by their IDs directly here.
             const fileInput = document.getElementById('file-input');
-            const fileNameDisplay = document.getElementById('file-name-display'); // ui.fileNameDisplay should be used if cached
+            const fileNameDisplay = document.getElementById('file-name-display'); 
             const processButton = document.getElementById('process-button');
             const advancedToggle = document.getElementById('advanced-options-toggle-container');
             const advancedContent = document.getElementById('advanced-options-content-area');
@@ -813,7 +804,7 @@
             if (fileInput) {
                 fileInput.addEventListener('change', async (event) => {
                     clearError();
-                    const currentFileNameDisplay = ui.fileNameDisplay || document.getElementById('file-name-display'); // Use cached or get fresh
+                    const currentFileNameDisplay = ui.fileNameDisplay || document.getElementById('file-name-display'); 
                     if (event.target.files.length > 0) {
                         const selectedFile = event.target.files[0];
                         const tempInputFileName = selectedFile.name;
@@ -862,7 +853,7 @@
                 processButton.addEventListener('click', () => {
                     const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
                     if (modeState.fileContent !== null && modeState.inputFileName !== 'file') {
-                        const cipherKeyInput = document.getElementById('cipher-key'); // This ID is inside the tool-content
+                        const cipherKeyInput = document.getElementById('cipher-key'); 
                         const effectiveKey = (cipherKeyInput && cipherKeyInput.value.trim()) ? cipherKeyInput.value.trim() : DEFAULT_CIPHER_KEY;
                         handleManualFileProcessing(modeState.fileContent, modeState.inputFileName, effectiveKey);
                     } else {
@@ -873,7 +864,6 @@
         }
 
         function getEffectiveCipherKeyForOperation() {
-            // This ID is now part of the static HTML within #tool-content
             const cipherKeyInput = document.getElementById('cipher-key'); 
             const advancedContent = document.getElementById('advanced-options-content-area');
             if (cipherKeyInput && advancedContent && advancedContent.classList.contains('expanded') && cipherKeyInput.value.trim()) {
@@ -911,7 +901,6 @@
                 'auto-patch-log-container', 'auto-patch-log',
                 'important-notes-toggle-button', 'important-notes-content-wrapper', 'important-notes-icon-svg',
                 'offline-indicator', 'update-available-banner', 'app-version-display',
-                // Add IDs from the pre-rendered tool-content if they need to be in the ui cache specifically
                 'file-input-label', 'file-input', 'file-name-display', 'advanced-options-toggle-container', 
                 'advanced-options-icon', 'advanced-options-content-area', 'cipher-key', 'process-button'
             ];
@@ -928,22 +917,110 @@
             await fetchBitLifeVersion();
             await checkSourceOutdatedStatus();
             
-            // UI for 'decrypt' mode is now pre-rendered.
-            // Call setupUIForMode to ensure text is correct for the initial activeMode ('decrypt'),
-            // and to correctly initialize states.
             setupUIForMode(activeMode); 
-            attachToolContentListeners(); // Attach listeners to the (now static) tool content elements.
+            attachToolContentListeners(); 
 
-            // --- Event Listeners for elements outside of tool-content ---
+            // Event listeners for elements outside of tool-content
             if(ui.tabDecrypt) ui.tabDecrypt.addEventListener('click', () => setupUIForMode('decrypt'));
             if(ui.tabEncrypt) ui.tabEncrypt.addEventListener('click', () => setupUIForMode('encrypt'));
-            // ... (rest of the event listeners as they were, they target elements by their IDs which are now static or still outside tool-content) ...
             if(ui.openSourceManagerButton) ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
             if(ui.sourceManagerModalCloseButton) ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
             if (ui.sourceManagerAdvancedOptionsToggle && ui.sourceManagerAdvancedContent && ui.sourceManagerAdvancedIcon) { ui.sourceManagerAdvancedOptionsToggle.addEventListener('click', () => { const isExpanded = ui.sourceManagerAdvancedContent.classList.toggle('expanded'); ui.sourceManagerAdvancedIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'; }); }
             if(ui.loadNewSourceButton && ui.newSourceUrlInput) { ui.loadNewSourceButton.addEventListener('click', async () => { const newUrl = ui.newSourceUrlInput.value.trim(); if (newUrl) { try { const parsedUrl = new URL(newUrl); currentMonetizationVarsSourceURL = parsedUrl.href; let sourceNameGuess = parsedUrl.hostname; if (parsedUrl.hostname.includes('githubusercontent.com') && parsedUrl.pathname.split('/').length > 2) { const pathParts = parsedUrl.pathname.split('/'); sourceNameGuess = `${pathParts[1]}/${pathParts[2]} (Raw)`; } currentSourceInfo = { name: sourceNameGuess, pfpImageUrl: '', pfpFallbackText: sourceNameGuess.substring(0,2).toUpperCase(), url: parsedUrl.href, statusMessage: "", fetchedVersion: null }; await checkSourceOutdatedStatus(); showToast(`Source updated to: ${sourceNameGuess}`, "success"); } catch (e) { showToast("Invalid URL.", "error"); console.error("Invalid URL:", e); } } else { currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL; currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO)); await checkSourceOutdatedStatus(); showToast("Source reverted to default.", "info"); } }); }
             if(ui.downloadOriginalButton) { ui.downloadOriginalButton.addEventListener('click', () => { window.open(ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL, '_blank'); showToast("Original MonetizationVars download started.", "info"); if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } }); }
-            if(ui.autoPatchButton) { ui.autoPatchButton.addEventListener('click', async () => { if(!ui.autoPatchLogContainer || !ui.autoPatchLog) { console.error("Log containers not found."); showError("Logging system error."); return; } ui.autoPatchLog.innerHTML = ''; ui.autoPatchLogContainer.classList.add('hidden'); ui.autoPatchCorsNotice.classList.add('hidden'); ui.autoPatchButton.disabled = true; addLogToAutoPatcher("Starting auto-patch...", 'info'); try { addLogToAutoPatcher(`Fetching from: ${currentMonetizationVarsSourceURL}`, 'info'); const response = await fetch(currentMonetizationVarsSourceURL, { cache: "no-store" }); if (!response.ok) { throw new Error(`Fetch failed (HTTP ${response.status}).`); } const fetchedFileContent = await response.text(); addLogToAutoPatcher("Content fetched.", 'success'); addLogToAutoPatcher("Decrypting...", 'info'); const effectiveKeyForAutoPatch = getEffectiveCipherKeyForOperation(); let decryptedJson = await processMonetizationVarsContent(fetchedFileContent, 'decrypt', effectiveKeyForAutoPatch); addLogToAutoPatcher(`Decrypted with key: ${effectiveKeyForAutoPatch === DEFAULT_CIPHER_KEY ? 'Default' : 'Custom'}.`, 'success'); addLogToAutoPatcher("Applying 'Unlock All' patch...", 'info'); let changedByPatch = false; const tempJsonForPatch = JSON.parse(JSON.stringify(decryptedJson)); for (const key in tempJsonForPatch) { if (Object.hasOwnProperty.call(tempJsonForPatch, key)) { if (tempJsonForPatch[key] === false) { tempJsonForPatch[key] = true; changedByPatch = true; } else if (tempJsonForPatch[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJsonForPatch[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changedByPatch = true; } } } if (changedByPatch) { decryptedJson = tempJsonForPatch; addLogToAutoPatcher("'Unlock All' applied.", 'success');} else { addLogToAutoPatcher("No items needed 'Unlock All'.", 'info'); } addLogToAutoPatcher("Re-encrypting...", 'info'); const obfuscatedKey = getObfuscatedKey(effectiveKeyForAutoPatch); let encryptedFileContent = ""; for (const key in decryptedJson) { if (Object.hasOwnProperty.call(decryptedJson, key)) { const value = decryptedJson[key]; const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); let valueToSerializeB64; if (typeof value === 'boolean') { valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; } else if (typeof value === 'number' && Number.isInteger(value)) { const encryptedIntB64 = encryptInt(value); if (encryptedIntB64) { valueToSerializeB64 = encryptedIntB64; } else { console.warn(`Failed to encrypt int for key ${key}`); valueToSerializeB64 = utf8StringToBase64(String(value)); } } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { valueToSerializeB64 = value; } else { valueToSerializeB64 = utf8StringToBase64(String(value)); } const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); encryptedFileContent += `${cipheredKey}:${cipheredValue}\n`; } } addLogToAutoPatcher("Content re-encrypted.", 'success'); addLogToAutoPatcher("Preparing download...", 'info'); const blob = new Blob([encryptedFileContent.trimEnd()], { type: 'application/octet-stream' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); addLogToAutoPatcher(`Patched ${TARGET_ENCRYPTED_FILENAME} downloaded!`, 'success'); if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } } catch (error) { console.error("Auto-patch error:", error); addLogToAutoPatcher(`Error: ${error.message}`, 'error'); showToast(`Auto-patch failed: ${error.message}`, 'error'); if (error.message.toLowerCase().includes('fetch') || error.message.toLowerCase().includes('cors')) { if(ui.autoPatchCorsNotice) { ui.autoPatchCorsNotice.textContent = "Fetch error. CORS issue or server down. Try manual download or CORS proxy."; ui.autoPatchCorsNotice.classList.remove('hidden'); } } } finally { if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; } }); }
+            if(ui.autoPatchButton) { 
+                ui.autoPatchButton.addEventListener('click', async () => { 
+                    if(!ui.autoPatchLogContainer || !ui.autoPatchLog) { 
+                        console.error("Log containers not found."); 
+                        showError("Logging system error."); 
+                        return; 
+                    } 
+                    ui.autoPatchLog.innerHTML = ''; 
+                    ui.autoPatchLogContainer.classList.add('hidden'); 
+                    ui.autoPatchCorsNotice.classList.add('hidden'); 
+                    ui.autoPatchButton.disabled = true; 
+                    addLogToAutoPatcher("Starting auto-patch...", 'info'); 
+                    addLogToAutoPatcher(`Attempting to fetch from: ${currentMonetizationVarsSourceURL}`, 'info');
+                    try { 
+                        const response = await fetch(currentMonetizationVarsSourceURL, { cache: "no-store" }); 
+                        if (!response.ok) { 
+                            throw new Error(`Fetch failed (HTTP ${response.status}) for ${currentMonetizationVarsSourceURL}`); 
+                        } 
+                        const fetchedFileContent = await response.text(); 
+                        addLogToAutoPatcher("Content fetched.", 'success'); 
+                        addLogToAutoPatcher("Decrypting...", 'info'); 
+                        const effectiveKeyForAutoPatch = getEffectiveCipherKeyForOperation(); 
+                        let decryptedJson = await processMonetizationVarsContent(fetchedFileContent, 'decrypt', effectiveKeyForAutoPatch); 
+                        addLogToAutoPatcher(`Decrypted with key: ${effectiveKeyForAutoPatch === DEFAULT_CIPHER_KEY ? 'Default' : 'Custom'}.`, 'success'); 
+                        addLogToAutoPatcher("Applying 'Unlock All' patch...", 'info'); 
+                        let changedByPatch = false; 
+                        const tempJsonForPatch = JSON.parse(JSON.stringify(decryptedJson)); 
+                        for (const key in tempJsonForPatch) { 
+                            if (Object.hasOwnProperty.call(tempJsonForPatch, key)) { 
+                                if (tempJsonForPatch[key] === false) { tempJsonForPatch[key] = true; changedByPatch = true; } 
+                                else if (tempJsonForPatch[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJsonForPatch[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changedByPatch = true; } 
+                            } 
+                        } 
+                        if (changedByPatch) { 
+                            decryptedJson = tempJsonForPatch; 
+                            addLogToAutoPatcher("'Unlock All' applied.", 'success');
+                        } else { 
+                            addLogToAutoPatcher("No items needed 'Unlock All'.", 'info'); 
+                        } 
+                        addLogToAutoPatcher("Re-encrypting...", 'info'); 
+                        const obfuscatedKey = getObfuscatedKey(effectiveKeyForAutoPatch); 
+                        let encryptedFileContent = ""; 
+                        for (const key in decryptedJson) { 
+                            if (Object.hasOwnProperty.call(decryptedJson, key)) { 
+                                const value = decryptedJson[key]; 
+                                const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); 
+                                let valueToSerializeB64; 
+                                if (typeof value === 'boolean') { 
+                                    valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; 
+                                } else if (typeof value === 'number' && Number.isInteger(value)) { 
+                                    const encryptedIntB64 = encryptInt(value); 
+                                    if (encryptedIntB64) { 
+                                        valueToSerializeB64 = encryptedIntB64; 
+                                    } else { 
+                                        console.warn(`Failed to encrypt int for key ${key}`); 
+                                        valueToSerializeB64 = utf8StringToBase64(String(value)); 
+                                    } 
+                                } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { 
+                                    valueToSerializeB64 = value; 
+                                } else { 
+                                    valueToSerializeB64 = utf8StringToBase64(String(value)); 
+                                } 
+                                const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); 
+                                encryptedFileContent += `${cipheredKey}:${cipheredValue}\n`; 
+                            } 
+                        } 
+                        addLogToAutoPatcher("Content re-encrypted.", 'success'); 
+                        addLogToAutoPatcher("Preparing download...", 'info'); 
+                        const blob = new Blob([encryptedFileContent.trimEnd()], { type: 'application/octet-stream' }); 
+                        const link = document.createElement('a'); 
+                        link.href = URL.createObjectURL(blob); 
+                        link.download = TARGET_ENCRYPTED_FILENAME; 
+                        document.body.appendChild(link); 
+                        link.click(); 
+                        document.body.removeChild(link); 
+                        URL.revokeObjectURL(link.href); 
+                        addLogToAutoPatcher(`Patched ${TARGET_ENCRYPTED_FILENAME} downloaded!`, 'success'); 
+                        if (showFinalDownloadWarningPreference) { 
+                            showStandardModal(ui.downloadFinalWarningModal); 
+                        } 
+                    } catch (error) { 
+                        console.error("Auto-patch error:", error); 
+                        addLogToAutoPatcher(`Error: ${error.message}`, 'error'); 
+                        showToast(`Auto-patch failed: ${error.message}`, 'error'); 
+                        if(ui.autoPatchCorsNotice) {
+                            ui.autoPatchCorsNotice.textContent = `Failed to fetch the MonetizationVars file from the source. This could be due to a network issue, the server being temporarily unavailable, or a CORS policy on the remote server if using a custom URL. Please check your internet connection and the source URL (${currentMonetizationVarsSourceURL}). You can try the 'Download Original' button or manually provide the file.`;
+                            ui.autoPatchCorsNotice.classList.remove('hidden');
+                        }
+                    } finally { 
+                        if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; 
+                    } 
+                }); 
+            }
             if(ui.unlockAllButton) { ui.unlockAllButton.addEventListener('click', () => { if (!currentJsonObject) { if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_1)."); return;} try { if (ui.jsonOutput.value) currentJsonObject = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to process."); return; }} catch (e) { showError("Invalid JSON in textarea."); return; } } if (!currentJsonObject) { showError("No JSON data to process."); return; } try { let changed = false; const tempJson = JSON.parse(JSON.stringify(currentJsonObject)); for (const key in tempJson) { if (Object.hasOwnProperty.call(tempJson, key)) { if (tempJson[key] === false) { tempJson[key] = true; changed = true; } else if (tempJson[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJson[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changed = true; } } } if (changed) { currentJsonObject = tempJson; if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_2)."); return;} ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2); if (activeMode === 'decrypt') stateForDecrypt.jsonObject = currentJsonObject; else stateForEncrypt.jsonObject = currentJsonObject; showToast("Unlocked all applicable items.", "success"); } else { showToast("No items changed by 'Unlock All'.", "info"); } } catch (e) { showError("Error during 'Unlock All': " + e.message); console.error("Unlock all error:", e); } }); }
             if(ui.copyJsonButton) { ui.copyJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to copy.", "info"); return; } ui.jsonOutput.select(); ui.jsonOutput.setSelectionRange(0, 99999); try { const successful = document.execCommand('copy'); if (successful) { showToast('JSON copied!', 'success'); } else { console.error('execCommand("copy") failed.'); showToast('Failed to copy. Try manual.', 'error'); } } catch (err) { console.error('execCommand("copy") error: ', err); showToast('Failed to copy. Browser issue.', 'error'); } }); }
             if(ui.downloadDecryptedJsonButton) { ui.downloadDecryptedJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to download.", "info"); return; } try { const jsonString = ui.jsonOutput.value; JSON.parse(jsonString); const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' }); let baseDlFilename = (stateForDecrypt.inputFileName && stateForDecrypt.inputFileName !== 'file') ? stateForDecrypt.inputFileName : 'decrypted_data'; const finalBase = baseDlFilename.includes('.') ? baseDlFilename.substring(0, baseDlFilename.lastIndexOf('.')) : baseDlFilename; const downloadFileName = `${finalBase}_decrypted.json`; const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = downloadFileName; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); showToast('Decrypted JSON download started.', 'success'); } catch (err) { showError('Invalid JSON in textarea.'); console.error("Download decrypted error:", err); } }); }
