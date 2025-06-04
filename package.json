@@ -2,11 +2,15 @@
   "name": "bitedit",
   "version": "1.0.0",
   "description": "A web-based editor for viewing, modifying, and patching MonetizationVars files for BitLife.",
-  "main": "BitEdit/index.html",
+  "main": "dist/index.html",
   "scripts": {
-    "build:css": "tailwindcss -i ./BitEdit/input.css -o ./BitEdit/output.css --minify",
-    "watch:css": "tailwindcss -i ./BitEdit/input.css -o ./BitEdit/output.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:ts": "tsc",
+    "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
+    "build:static": "copyfiles -u 1 public/**/* dist",
+    "build": "npm run build:ts && npm run build:css && npm run build:static",
+    "watch:ts": "tsc --watch",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+    "dev": "concurrently \"npm:watch:*\""
   },
   "repository": {
     "type": "git",
@@ -20,9 +24,12 @@
   },
   "homepage": "https://github.com/S0methingSomething/BitEdit#readme",
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.8",
     "autoprefixer": "^10.4.19",
+    "concurrently": "^9.1.2",
+    "copyfiles": "^2.4.1",
     "postcss": "^8.4.38",
-    "tailwindcss": "^4.1.8"
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.4.5"
   }
 }
+

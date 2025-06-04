@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitEdit - MonetizationVars Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="output.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <style>
+        :root {
+            /* Vercel-inspired Dark Theme Palette */
+            --bg-canvas: #000000;
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #1C1C1C;
+            --bg-tertiary: #2A2A2A;
+            --border-color-primary: #333333;
+            --border-color-secondary: #444444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #888888;
+            --text-tertiary: #666666;
+            --accent-focus: #0070F3;
+            --accent-focus-rgb: 0, 112, 243;
+            --accent-focus-shadow: rgba(0, 112, 243, 0.3);
+            --accent-green: #10b981;
+            --accent-green-rgb: 16, 185, 129;
+            --accent-yellow: #f59e0b;
+            --accent-yellow-rgb: 245, 158, 11;
+            --accent-red: #ef4444;
+            --accent-red-rgb: 239, 68, 68;
+            --accent-indigo: #6366f1;
+            --accent-indigo-rgb: 99, 102, 241;
+            --accent-sky: #0ea5e9;
+            --accent-sky-rgb: 14, 165, 233;
+            --transition-duration: 0.15s;
+            --transition-timing: ease;
+            --border-radius-sm: 0.25rem;
+            --border-radius-md: 0.375rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 40px; /* Space for offline/update indicators */
+        }
+        .content-wrapper { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center;}
+        .main-container {
+            background-color: var(--bg-primary);
+            width: 100%;
+            border: 1px solid var(--border-color-primary);
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 0 0 1px var(--border-color-primary);
+        }
+        .page-title-container { text-align: center; margin-bottom: 1.5rem; margin-top: 1rem; }
+        .page-title {
+            font-size: 2rem;
+            line-height: 1.2;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .ai-attribution-top, .derivative-attribution-top {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-top: 0.375rem;
+        }
+        .derivative-attribution-top a {
+            color: var(--text-tertiary);
+            text-decoration: none;
+            transition: color var(--transition-duration) var(--transition-timing);
+        }
+        .derivative-attribution-top a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+        .tab-navigation-container {
+            border-bottom: 1px solid var(--border-color-primary);
+        }
+        .tab-button {
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            transition: color var(--transition-duration) var(--transition-timing),
+                        border-color var(--transition-duration) var(--transition-timing);
+            border-radius: 0;
+            background-color: transparent;
+        }
+        .tab-button.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary);
+        }
+        .tab-button:not(.active):hover {
+            color: var(--text-primary);
+            border-bottom-color: var(--border-color-secondary);
+            background-color: transparent;
+        }
+        .tab-button:focus { outline: none; }
+        .tab-button:focus-visible {
+            outline: 2px solid var(--accent-focus);
+            outline-offset: 2px;
+            border-bottom-color: transparent;
+        }
+        textarea, input[type="text"], input[type="url"] {
+            background-color: var(--bg-canvas);
+            border: 1px solid var(--border-color-primary);
+            color: var(--text-primary);
+            transition: border-color var(--transition-duration) var(--transition-timing), box-shadow var(--transition-duration) var(--transition-timing);
+            border-radius: var(--border-radius-sm);
+            padding: 0.625rem 0.875rem;
+        }
+        textarea::placeholder, input[type="text"]::placeholder, input[type="url"]::placeholder { color: var(--text-secondary); }
+        textarea:focus, input[type="text"]:focus, input[type="url"]:focus {
+            border-color: var(--accent-focus);
+            box-shadow: 0 0 0 2px var(--accent-focus-shadow);
+            outline: none;
+        }
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: var(--bg-secondary); border-radius: 10px; }
+        textarea::-webkit-scrollbar-thumb { background: var(--border-color-secondary); border-radius: 10px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+        .modal {
+            position: fixed;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center; padding: 1rem;
+            opacity: 0; transform: scale(0.97) translateY(10px);
+            pointer-events: none; transition: opacity 0.2s var(--transition-timing), transform 0.2s var(--transition-timing);
+            z-index: 50;
+        }
+        #flowchart-modal { z-index: 110; }
+        #download-final-warning-modal { z-index: 150; }
+        .modal.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+        .modal-content {
+            background-color: var(--bg-primary);
+            margin: auto;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color-primary);
+            border-radius: var(--border-radius-md);
+            width: 100%;
+            max-width: 500px;
+            color: var(--text-primary);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color-primary); padding-bottom: 1rem;}
+        .modal-title { font-size: 1.125rem; sm:font-size: 1.25rem; font-weight: 600; }
+        .modal-close { color: var(--text-secondary); font-size: 1.75rem; font-weight: bold; cursor: pointer; padding: 0.25rem; transition: color var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing); }
+        .modal-close:hover, .modal-close:focus { color: var(--text-primary); transform: scale(1.1); }
+        .modal-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .modal-body code { background-color: var(--bg-tertiary); padding: 0.1rem 0.4rem; border-radius: var(--border-radius-sm); font-family: monospace; color: var(--text-secondary); border: 1px solid var(--border-color-primary); word-break: break-all; }
+        .modal-body ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.75rem;}
+        .modal-footer { margin-top: 1.5rem; display: flex; flex-direction: column; sm:flex-row; justify-content: flex-end; align-items: center; gap: 0.75rem;}
+        .modal-footer label { display: flex; align-items: center; font-size: 0.875rem; color: var(--text-secondary); margin-right:auto; }
+        .modal-footer input[type="checkbox"] { margin-right: 0.5rem; accent-color: var(--accent-focus); width: 1rem; height: 1rem; border: 1px solid var(--border-color-primary); border-radius: 0.125rem; cursor: pointer; background-color: var(--bg-secondary);}
+        .modal-footer input[type="checkbox"]:checked { background-color: var(--accent-focus); border-color: var(--accent-focus); }
+        #source-manager-modal { z-index: 100; }
+        .source-manager-modal-content {
+            background-color: var(--bg-primary);
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            min-height: initial;
+            max-height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            border-radius: var(--border-radius-md);
+            border: 1px solid var(--border-color-primary);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            overflow-y: auto;
+            margin: auto;
+        }
+        @media (min-width: 768px) {
+            #source-manager-modal { padding: 2rem; }
+            .source-manager-modal-content { max-width: 640px; max-height: 90vh; }
+        }
+        .source-manager-modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            color: var(--text-secondary); font-size: 2rem;
+            font-weight: bold; cursor: pointer; line-height: 1;
+            transition: color var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing);
+            z-index: 10;
+        }
+        .source-manager-modal-close:hover { color: var(--text-primary); transform: scale(1.1); }
+        .source-manager-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color-primary); }
+        .source-manager-title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
+        .current-source-info-card { background-color: var(--bg-secondary); border: 1px solid var(--border-color-primary); border-radius: var(--border-radius-md); padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+        .current-source-pfp-container { display: flex; justify-content: center; margin-bottom: 1rem; }
+        #source-pfp-large { width: 80px; height: 80px; border-radius: 50%; background-color: var(--bg-tertiary); color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 500; border: 2px solid var(--accent-focus); overflow: hidden; flex-shrink: 0; }
+        #source-pfp-large img { width: 100%; height: 100%; object-fit: cover; }
+        #source-name-large { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; word-break: break-all; }
+        @media (min-width: 768px) { #source-name-large { font-size: 1.25rem; } }
+        #source-status-label-large { font-size: 0.875rem; font-weight: 500; display: block; margin-bottom: 0.5rem; }
+        #source-status-label-large.potentially-newer { color: var(--accent-green); }
+        #source-status-label-large.outdated { color: var(--accent-red); }
+        #source-status-label-large.neutral { color: var(--text-secondary); }
+        #source-fetched-version-message { font-size: 0.875rem; color: var(--accent-green); margin-bottom: 0.5rem; }
+        #modal-bitlife-version-info { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem; }
+        #modal-bitlife-version-info span { color: var(--text-primary); font-weight: 500; }
+        .advanced-options-toggle { display: flex; align-items: center; cursor: pointer; padding: 0.5rem; color: var(--text-secondary); margin-bottom: 0.25rem; border-radius: var(--border-radius-sm); transition: color var(--transition-duration) var(--transition-timing), background-color var(--transition-duration) var(--transition-timing); }
+        .advanced-options-toggle:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+        .advanced-options-toggle svg { width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; transition: transform var(--transition-duration) var(--transition-timing); stroke: currentColor; }
+        .advanced-options-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, opacity 0.3s ease-out, border-color 0.3s ease-out; background-color: var(--bg-secondary); border-radius: var(--border-radius-sm); border: 1px solid transparent; opacity: 0; padding-left: 0; padding-right: 0; }
+        .advanced-options-content.expanded { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; padding-left: 1rem; padding-right: 1rem; margin-top: 0.5rem; border-color: var(--border-color-primary); opacity: 1; overflow: visible; }
+        #advanced-options-content-area.expanded { max-height: 120px; }
+        #source-manager-advanced-content.expanded { max-height: 200px; margin-bottom: 1rem; }
+        #auto-patch-log { background-color: var(--bg-secondary); border: 1px solid var(--border-color-primary); border-radius: var(--border-radius-sm); max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; padding: 0.75rem; width: 100%; }
+        #auto-patch-log p { margin-bottom: 0.25rem; padding: 0.1rem 0.25rem; }
+        #auto-patch-log .log-success { color: var(--accent-green); }
+        #auto-patch-log .log-error { color: var(--accent-red); }
+        #auto-patch-log .log-info { color: var(--text-secondary); }
+        #auto-patch-cors-notice { font-size: 0.875rem; color: var(--accent-yellow); margin-top: 0.75rem; padding: 0.75rem; background-color: rgba(var(--accent-yellow-rgb), 0.1); border: 1px solid var(--accent-yellow); border-radius: var(--border-radius-sm); }
+        .button { padding: 0.625rem 1.25rem; border-radius: var(--border-radius-sm); font-weight: 500; text-align: center; transition: background-color var(--transition-duration) var(--transition-timing), border-color var(--transition-duration) var(--transition-timing), color var(--transition-duration) var(--transition-timing), opacity var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing); border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+        .button:hover:not(:disabled) { opacity: 0.85; }
+        .button:active:not(:disabled) { transform: scale(0.97); opacity: 0.7; }
+        .button:focus { outline: none; }
+        .button:focus-visible:not(:disabled) { outline: 2px solid var(--accent-focus); outline-offset: 2px; box-shadow: none; }
+        .button-primary { background-color: var(--text-primary); color: var(--bg-canvas); border-color: var(--text-primary); }
+        .button-primary:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.9); border-color: rgba(255, 255, 255, 0.9); opacity: 1; }
+        .button-secondary { background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color-primary); }
+        .button-secondary:hover:not(:disabled) { background-color: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-color-secondary); opacity: 1; }
+        input[type="file"].button-secondary { color: var(--text-secondary); padding: 0; }
+        input[type="file"].button-secondary::file-selector-button { padding: 0.5rem 1rem; margin-right: 0.75rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color-primary); background-color: var(--bg-secondary); color: var(--text-primary); font-weight: 500; cursor: pointer; transition: background-color var(--transition-duration) var(--transition-timing); }
+        input[type="file"].button-secondary::file-selector-button:hover { background-color: var(--bg-tertiary); }
+        .button-action-green { background-color: var(--accent-green); color: white; border-color: var(--accent-green); }
+        .button-action-green:hover:not(:disabled) { background-color: var(--accent-green); opacity: 0.85; }
+        .button-action-yellow { background-color: var(--accent-yellow); color: var(--bg-primary); border-color: var(--accent-yellow); }
+        .button-action-yellow:hover:not(:disabled) { background-color: var(--accent-yellow); opacity: 0.85; }
+        .button-action-indigo { background-color: var(--accent-indigo); color: white; border-color: var(--accent-indigo); }
+        .button-action-indigo:hover:not(:disabled) { background-color: var(--accent-indigo); opacity: 0.85; }
+        .button-action-sky { background-color: var(--accent-sky); color: white; border-color: var(--accent-sky); }
+        .button-action-sky:hover:not(:disabled) { background-color: var(--accent-sky); opacity: 0.85; }
+        #file-name-display.file-selected-text-anim { animation: fileNameAnim 0.3s var(--transition-timing); }
+        @keyframes fileNameAnim { 0% { opacity: 0.7; transform: translateY(2px);} 100% { opacity: 1; transform: translateY(0); } }
+        .app-footer { text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.875rem; border-top: 1px solid var(--border-color-primary); margin-top: auto; }
+        .app-footer .version { font-size: 0.75rem; color: var(--text-tertiary); }
+        .app-footer .derivative-work-footer { font-size: 0.75rem; margin-top: 0.5rem; }
+        #top-info-bar { background-color: transparent; border: 1px solid var(--border-color-primary); padding: 0.75rem 1rem; }
+        #important-notes-toggle-button { transition: background-color var(--transition-duration) var(--transition-timing); }
+        #important-notes-toggle-button:hover { background-color: var(--bg-tertiary) !important; }
+        .important-notes-block ul { list-style-type: none; padding-left: 0; color: var(--text-secondary); }
+        .important-notes-block ul ul { list-style-type: circle; padding-left: 1.25rem; margin-top: 0.25rem;}
+        .important-notes-block li { padding-left: 1.75rem; position: relative; margin-bottom: 0.75rem; line-height: 1.6; font-size: 0.875rem; }
+        .important-notes-block li::before { content: "—"; position: absolute; left: 0.5rem; top: 1px; color: var(--text-secondary); font-weight: bold; }
+        .important-notes-block code { background-color: var(--bg-tertiary); padding: 0.2em 0.4em; margin: 0 0.1em; font-size: 0.9em; border-radius: var(--border-radius-sm); font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; word-break: break-word; border: 1px solid var(--border-color-primary); color: var(--text-secondary); }
+        .important-notes-block strong { font-weight: 600; color: var(--text-primary); }
+        .important-notes-block em { font-style: italic; color: var(--text-primary); }
+
+        /* Status Indicators */
+        #offline-indicator, #update-available-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+        #offline-indicator {
+            background-color: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+        #update-available-banner {
+            background-color: var(--accent-green); /* Default for update success */
+            color: white;
+        }
+        #update-available-banner.update-check-failed { /* New class for failure indication */
+            background-color: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+        #update-available-banner button {
+            margin-left: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+            border: 1px solid currentColor; /* Adapts to text color */
+            background-color: transparent;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+        }
+        #update-available-banner button:hover {
+            background-color: rgba(0,0,0,0.1); /* Subtle hover, works for both banner colors */
+        }
+        #update-available-banner.update-check-failed button {
+             border-color: var(--bg-primary); /* Ensure button border is visible on yellow bg */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4 md:p-8">
+
+<div id="update-available-banner">
+    </div>
+
+<div class="content-wrapper w-full flex flex-col items-center">
+    <div class="main-container p-4 sm:p-6 md:p-8 w-full max-w-2xl">
+        <div class="page-title-container">
+            <h1 class="page-title">BitEdit</h1>
+            <p class="ai-attribution-top">Made with AI (Gemini)</p>
+            <p class="derivative-attribution-top">
+                Based on <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">yntha's bitlife-edit</a> (GPLv3).
+            </p>
+        </div>
+
+        <div id="top-info-bar" class="rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4">
+            <div class="text-center sm:text-left mb-3 sm:mb-0">
+                <p class="text-sm sm:text-base font-semibold mb-1">Don't have a MonetizationVars?</p>
+                <button id="open-source-manager-button" class="button button-primary py-2 px-3 text-xs sm:text-sm w-full sm:w-auto">
+                    Download or auto patch MonetizationVars
+                </button>
+                <p style="font-size: 0.65rem; line-height: 0.8rem;" class="opacity-60 mt-0.5">(from external source)</p>
+            </div>
+            <p class="text-xs text-center sm:text-right w-full sm:w-auto mt-2 sm:mt-0" style="color: var(--text-secondary);">
+                Latest BitLife Ver: <span id="bitlife-version" class="font-semibold" style="color: var(--text-primary);">Loading...</span>
+            </p>
+        </div>
+
+        <div class="mb-6 tab-navigation-container">
+            <nav class="flex space-x-1" aria-label="Tabs">
+                <button id="tab-decrypt" class="tab-button active">
+                    Decrypt File
+                </button>
+                <button id="tab-encrypt" class="tab-button">
+                    Encrypt JSON
+                </button>
+            </nav>
+        </div>
+
+        <div id="tool-content" class="mt-6">
+            <div class="space-y-4">
+                <label id="file-input-label" for="file-input" class="block text-sm font-medium" style="color: var(--text-secondary);">Select 'MonetizationVars' File:</label>
+                <input type="file" id="file-input" accept="*/*" class="block w-full text-sm button button-secondary"/>
+                <span id="file-name-display" class="block text-xs mt-1.5" style="color: var(--text-secondary);">No file selected.</span>
+
+                <div id="advanced-options-toggle-container" class="advanced-options-toggle">
+                    <svg id="advanced-options-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem; height:1.25rem; margin-right:0.5rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    <span>Advanced Options (Cipher Key)</span>
+                </div>
+                <div id="advanced-options-content-area" class="advanced-options-content">
+                   <div class="advanced-options-inner-wrapper">
+                        <label for="cipher-key" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">Cipher Key (Optional - Case Insensitive):</label>
+                        <input type="text" id="cipher-key" placeholder="Default: com.wtfapps.apollo16" class="w-full" />
+                    </div>
+                </div>
+                <button id="process-button" class="w-full font-semibold py-2.5 px-4 button button-primary text-base">Start Decryption</button>
+            </div>
+            </div>
+
+        <div id="output-controls" class="mt-6 hidden">
+             <button id="unlock-all-button" class="w-full mb-4 px-4 py-3 font-semibold button button-action-yellow text-base">
+                Unlock All / Set All to True
+            </button>
+            <div id="json-output-container" class="mb-4">
+                <label for="json-output" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">JSON Data:</label>
+                <textarea id="json-output" rows="10" class="w-full p-3 resize-y"></textarea>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <button id="download-encrypted-button" class="w-full sm:w-auto px-4 py-3 sm:px-6 font-semibold order-1 button button-action-green text-base">
+                    Download Encrypted "MonetizationVars"
+                </button>
+                <div class="flex flex-col xs:flex-row gap-2 order-2 sm:order-3 mt-2 sm:mt-0 w-full sm:w-auto">
+                    <button id="copy-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium button button-action-indigo text-sm">Copy JSON</button>
+                    <button id="download-decrypted-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium button button-action-sky text-sm">Download Decrypted JSON</button>
+                </div>
+            </div>
+        </div>
+         <div id="error-message" class="mt-4 p-3 rounded-md hidden text-sm" style="background-color: rgba(var(--accent-red-rgb),0.9); color: white; border: 1px solid rgba(var(--accent-red-rgb), 0.7);"></div>
+
+        <div id="progress-flowchart-container" class="flowchart-container-outer flowchart mt-4 hidden">
+        </div>
+    </div>
+
+    <div id="flowchart-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title">Step Details</h2>
+                <span id="modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="download-final-warning-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">File Downloaded</h2>
+                <span id="download-final-warning-modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Please check the downloaded file. If it has an extension, remove it to use on BitLife.</p>
+            </div>
+            <div class="modal-footer">
+                <label for="dont-show-final-warning-again">
+                    <input type="checkbox" id="dont-show-final-warning-again">
+                    Don't show this again
+                </label>
+                <button id="download-final-warning-ok-button" class="button button-primary px-4 py-2 text-sm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="source-manager-modal" class="modal hidden"> <div class="source-manager-modal-content"> <span id="source-manager-modal-close-button" class="source-manager-modal-close">&times;</span>
+            <div class="source-manager-header">
+                <h2 class="source-manager-title">MonetizationVars Source</h2>
+            </div>
+
+            <div class="current-source-info-card">
+                <div class="current-source-pfp-container">
+                    <div id="source-pfp-large">S0</div>
+                </div>
+                <h3 id="source-name-large" class="truncate">Default Source Name</h3>
+                <span id="source-status-label-large" class="status-label neutral">(Status Loading...)</span>
+                <p id="source-fetched-version-message" class="hidden">Successfully fetched (vX.Y.Z)</p>
+                <a id="source-url-display-large" href="#" target="_blank" rel="noopener noreferrer" class="block text-xs mt-1">View Raw File</a>
+                <p id="modal-bitlife-version-info" class="mt-2">Latest BitLife Ver: <span id="modal-bitlife-version-dynamic">Loading...</span></p>
+            </div>
+
+            <div id="source-manager-advanced-options-toggle" class="advanced-options-toggle">
+                <svg id="source-manager-advanced-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                <span>Advanced: Change Source URL</span>
+            </div>
+            <div id="source-manager-advanced-content" class="advanced-options-content">
+                 <div class="advanced-options-inner-wrapper">
+                    <label for="new-source-url" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">New Source (Raw File URL):</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="flex-grow min-w-0"> <button id="load-new-source-button" class="button button-primary px-3 py-2 text-xs sm:text-sm flex-shrink-0">Load</button>
+                    </div>
+                    <p class="text-xs" style="color: var(--text-secondary);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
+                 </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t" style="border-color: var(--border-color-primary);">
+                <h3 class="text-lg font-semibold mb-3 text-center" style="color: var(--text-primary);">Actions</h3>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-2.5 text-sm font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Download & Auto-Patch
+                    </button>
+                    <button id="download-original-button" class="w-full sm:w-auto button button-secondary py-2.5 text-sm font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Original
+                    </button>
+                </div>
+                <div id="auto-patch-cors-notice" class="hidden text-center mt-3">
+                </div>
+                <div id="auto-patch-log-container" class="mt-4 hidden w-full">
+                    <p class="text-xs font-medium mb-1 text-left" style="color: var(--text-secondary);">Patching Log:</p>
+                    <div id="auto-patch-log" class="w-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-2xl mx-auto mt-8">
+        <button id="important-notes-toggle-button" aria-expanded="false" aria-controls="important-notes-content-wrapper"
+                class="w-full flex justify-between items-center p-4 font-medium text-left rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-white"
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color-primary);">
+            <span>Important Notes</span>
+            <svg id="important-notes-icon-svg" class="w-5 h-5 transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+        <div id="important-notes-content-wrapper" class="overflow-hidden transition-all duration-300 ease-out">
+            <div class="important-notes-block" style="border: 1px solid var(--border-color-primary); border-top: none; padding: 1.5rem; border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); background-color: var(--bg-secondary);">
+                <h2 class="sr-only">Important Notes Details</h2> <ul>
+                    <li>Input file for manual decryption must be named exactly <code>MonetizationVars</code> (case-insensitive, no extension).</li>
+                    <li>When <strong>decrypting</strong>:
+                        <ul>
+                            <li>Known .NET boolean Base64 strings are converted to <code>true</code>/<code>false</code>.</li>
+                            <li>Known .NET Int32 Base64 strings are converted to numbers (e.g., <code>12</code>).</li>
+                            <li>Others remain Base64.</li>
+                        </ul>
+                    </li>
+                    <li>When <strong>encrypting</strong>:
+                        <ul>
+                            <li><code>true</code>/<code>false</code> in JSON become .NET boolean Base64.</li>
+                            <li>Numbers in JSON are assumed to be Int32 and become .NET Int32 Base64.</li>
+                            <li>Other values are stringified, then Base64 encoded.</li>
+                        </ul>
+                        The output filename will be "MonetizationVars".
+                    </li>
+                    <li>"Unlock All" sets boolean <code>false</code> to <code>true</code> and .NET false Base64 to .NET true Base64 in the JSON textarea. It does not affect numbers.</li>
+                    <li>Default cipher key: <code>com.wtfapps.apollo16</code>. Access via "Advanced Options" in the manual processing tabs. The auto-patcher uses this key unless changed via manual tab's advanced options <em>before</em> auto-patching.</li>
+                    <li class="derivative-work">This tool is a derivative work based on the C# project <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">bitlife-edit by yntha</a>. All original logic credits go to yntha. Both projects are licensed under GPLv3.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+<footer class="app-footer w-full">
+    <p class="version" id="app-version-display"></p>
+    <p class="derivative-work-footer">
+        Derivative of <a href="https://github.com/yntha/bitlife-edit" target="_blank" rel="noopener noreferrer">yntha/bitlife-edit</a> (GPLv3).
+    </p>
+</footer>
+
+<div id="offline-indicator">Offline Mode</div>
+
+<script src="script.js" defer></script>
+
+</body>
+</html>
+

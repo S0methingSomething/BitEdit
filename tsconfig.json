@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* --- Build Options --- */
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "outDir": "./dist",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /* --- Strictness --- */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": false, // Not needed for this project (no classes)
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    /* --- Module Resolution --- */
+    "moduleResolution": "node"
+  },
+  "include": [
+    "src/**/*" // Assumes your .ts file is in a 'src' folder
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
+
