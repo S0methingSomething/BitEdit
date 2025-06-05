@@ -78,7 +78,7 @@ After loading JSON data:
 
 ## ⚠️ Important Considerations
 
-> **Educational Use**: This tool is designed for educational and research purposes to understand game monetization structures.
+> **Educational Use**: This tool is designed for educational and research purposes
 
 **Before You Begin:**
 - Always backup your original game files
