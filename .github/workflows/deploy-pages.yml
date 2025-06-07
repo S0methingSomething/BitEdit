@@ -1,20 +1,20 @@
-name: Build Tailwind, Deploy BitEdit, and Update Files
+name: Build, Deploy, and Commit
 
 on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/index.html'         # For version extraction
-      - 'BitEdit/tailwind/input.css' # Path to your main Tailwind input CSS
-      - 'tailwind.config.js'       # Assumed to be at the root
-      - 'postcss.config.js'        # Assumed to be at the root
-      - 'BitEdit/**/*.js'          # If other JS files influence Tailwind classes
+      - 'public/index.html'      # Path to your main HTML file
+      - 'public/sw.js'           # Path to your service worker
+      - 'src/css/input.css'      # Path to your main Tailwind source
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
   workflow_dispatch:
 
 permissions:
-  contents: write   # To push updated version files and output.css
-  pages: write      # To deploy to GitHub Pages
-  id-token: write   # For OIDC token for GitHub Pages deployment
+  contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
@@ -34,26 +34,26 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' 
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build Tailwind CSS
-        run: npx @tailwindcss/cli -i ./BitEdit/tailwind/input.css -o ./BitEdit/output.css --minify
+        run: npx tailwindcss -i ./src/css/input.css -o ./dist/output.css --minify
 
-      - name: Extract version from BitEdit/index.html
+      - name: Extract version from index.html
         id: get_version
         run: |
-          INDEX_FILE_PATH="BitEdit/index.html"
+          INDEX_FILE_PATH="public/index.html"
           if [ ! -f "$INDEX_FILE_PATH" ]; then
             echo "Error: $INDEX_FILE_PATH not found."
             exit 1
           fi
           VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
           VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
-          
+
           if [ -z "$VERSION_STRING" ]; then
             echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
             exit 1
@@ -64,22 +64,27 @@ jobs:
         id: normalize_version
         run: |
           RAW_VERSION="${{ steps.get_version.outputs.version_original }}"
-          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//') 
+          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//')
           echo "value=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Create/Update BitEdit_version.txt locally
+      - name: Create/Update BitEdit_version.txt
         run: |
-          echo "${{ steps.get_version.outputs.version_original }}" > BitEdit/BitEdit_version.txt
+          echo "${{ steps.get_version.outputs.version_original }}" > public/BitEdit_version.txt
 
-      - name: Update CACHE_NAME in sw.js locally
+      - name: Update CACHE_NAME in sw.js
         run: |
-          SW_FILE_PATH="BitEdit/sw.js"
+          SW_FILE_PATH="public/sw.js"
           if [ ! -f "$SW_FILE_PATH" ]; then
             echo "Error: $SW_FILE_PATH not found."
             exit 1
           fi
           sed -i.bak -E "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${{ steps.normalize_version.outputs.value }}\2/;}" "$SW_FILE_PATH"
           rm -f "${SW_FILE_PATH}.bak"
+
+      - name: Prepare artifact by copying public files to dist
+        run: |
+          # Copy all files from public/ into dist/, overwriting if necessary
+          cp -r public/. dist/
 
       - name: Setup Pages
         id: pages
@@ -88,28 +93,27 @@ jobs:
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './BitEdit'
+          path: './dist' # Deploy the final dist folder
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Commit and push generated files
+      - name: Commit and push generated and updated files
         if: success()
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Add all potentially generated or modified files to the staging area.
-          # This includes the newly built CSS and any updated version files.
-          git add BitEdit/output.css BitEdit/BitEdit_version.txt BitEdit/sw.js
-          
-          # Check for staged changes. If there are changes, commit and push.
+
+          # Add the generated CSS and any files updated in the public directory
+          git add dist/output.css public/BitEdit_version.txt public/sw.js
+
           if ! git diff --staged --quiet; then
             echo "Detected changes in generated files. Committing..."
-            git commit -m "build: Update generated files [skip ci]" -m "This commit includes the latest Tailwind CSS build (output.css) and any version updates."
+            git commit -m "build: Update generated files [skip ci]"
             git push
-            echo "Pushed updated generated files to the repository."
+            echo "Pushed updated files to the repository."
           else
             echo "No changes in generated files to commit."
           fi
+

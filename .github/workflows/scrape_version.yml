@@ -23,11 +23,11 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r BitEdit/Get_Bitlife_Version/requirements.txt
+        run: pip install -r scripts/get_bitlife_version/requirements.txt
 
       - name: Scrape for current version
         id: scrape # ID to reference output in later steps
-        run: echo "current_version=$(python BitEdit/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
+        run: echo "current_version=$(python scripts/get_bitlife_version/Get_version.py)" >> $GITHUB_OUTPUT
 
       - name: Debug Print Scraped Version
         run: echo "Raw scraped version output by script is --->${{ steps.scrape.outputs.current_version }}<---"
@@ -36,7 +36,7 @@ jobs:
         id: validation # ID to reference output in later steps
         run: |
           scraped_version="${{ steps.scrape.outputs.current_version }}"
-          version_file="BitEdit/Get_Bitlife_Version/version.txt"
+          version_file="scripts/get_bitlife_version/version.txt"
           should_write_new_version="false" # Default: do not update file
 
           echo "Starting validation for scraped version: '$scraped_version'"
@@ -44,7 +44,7 @@ jobs:
           if [ -z "$scraped_version" ]; then
             echo "Scraped version is blank. No update."
             echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
-            exit 0 
+            exit 0
           fi
 
           if ! echo "$scraped_version" | grep -q "[0-9]"; then
@@ -61,7 +61,7 @@ jobs:
           else
             existing_version=$(cat "$version_file")
             echo "Existing version in '$version_file' is '$existing_version'."
-            
+
             # Use dpkg for robust version string comparison
             if dpkg --compare-versions "$scraped_version" gt "$existing_version"; then
               echo "Scraped version '$scraped_version' is NEWER. Will update."
@@ -70,19 +70,19 @@ jobs:
               echo "Scraped version '$scraped_version' is NOT NEWER. No update."
             fi
           fi
-          
+
           echo "should_write=$should_write_new_version" >> $GITHUB_OUTPUT
 
       - name: Create or Update version.txt
         if: steps.validation.outputs.should_write == 'true'
         run: |
-          echo "Writing version ${{ steps.scrape.outputs.current_version }} to BitEdit/Get_Bitlife_Version/version.txt"
-          echo "${{ steps.scrape.outputs.current_version }}" > BitEdit/Get_Bitlife_Version/version.txt
+          echo "Writing version ${{ steps.scrape.outputs.current_version }} to scripts/get_bitlife_version/version.txt"
+          echo "${{ steps.scrape.outputs.current_version }}" > scripts/get_bitlife_version/version.txt
 
       - name: Commit version.txt
-        if: steps.validation.outputs.should_write == 'true' 
+        if: steps.validation.outputs.should_write == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update BitLife version to ${{ steps.scrape.outputs.current_version }}"
-          file_pattern: 'BitEdit/Get_Bitlife_Version/version.txt'
+          file_pattern: 'scripts/get_bitlife_version/version.txt'
 

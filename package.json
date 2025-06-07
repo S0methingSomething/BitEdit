@@ -2,11 +2,9 @@
   "name": "bitedit",
   "version": "1.0.0",
   "description": "A web-based editor for viewing, modifying, and patching MonetizationVars files for BitLife.",
-  "main": "BitEdit/index.html",
   "scripts": {
-    "build:css": "tailwindcss -i ./BitEdit/input.css -o ./BitEdit/output.css --minify",
-    "watch:css": "tailwindcss -i ./BitEdit/input.css -o ./BitEdit/output.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx tailwindcss -i ./src/css/input.css -o ./dist/output.css --minify",
+    "dev": "npx tailwindcss -i ./src/css/input.css -o ./dist/output.css --watch"
   },
   "repository": {
     "type": "git",
@@ -26,3 +24,4 @@
     "tailwindcss": "^4.1.8"
   }
 }
+
