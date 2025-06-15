@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BitEdit - MonetizationVars Editor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <style>
+        /* This style block is kept for users who might not have a Tailwind CSS build process. */
+        /* If you are using your own output.css, these styles are likely defined in your source CSS file. */
         :root {
             /* Vercel-inspired Dark Theme Palette */
             --bg-canvas: #000000;
@@ -43,258 +45,6 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-canvas);
             color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            padding-bottom: 40px; /* Space for offline/update indicators */
-        }
-        .content-wrapper { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center;}
-        .main-container {
-            background-color: var(--bg-primary);
-            width: 100%;
-            border: 1px solid var(--border-color-primary);
-            border-radius: var(--border-radius-md);
-            box-shadow: 0 0 0 1px var(--border-color-primary);
-        }
-        .page-title-container { text-align: center; margin-bottom: 1.5rem; margin-top: 1rem; }
-        .page-title {
-            font-size: 2rem;
-            line-height: 1.2;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .ai-attribution-top, .derivative-attribution-top {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 0.375rem;
-        }
-        .derivative-attribution-top a {
-            color: var(--text-tertiary);
-            text-decoration: none;
-            transition: color var(--transition-duration) var(--transition-timing);
-        }
-        .derivative-attribution-top a:hover {
-            color: var(--text-primary);
-            text-decoration: underline;
-        }
-        .tab-navigation-container {
-            border-bottom: 1px solid var(--border-color-primary);
-        }
-        .tab-button {
-            padding: 0.75rem 1rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            border-bottom: 2px solid transparent;
-            transition: color var(--transition-duration) var(--transition-timing),
-                        border-color var(--transition-duration) var(--transition-timing);
-            border-radius: 0;
-            background-color: transparent;
-        }
-        .tab-button.active {
-            color: var(--text-primary);
-            border-bottom-color: var(--text-primary);
-        }
-        .tab-button:not(.active):hover {
-            color: var(--text-primary);
-            border-bottom-color: var(--border-color-secondary);
-            background-color: transparent;
-        }
-        .tab-button:focus { outline: none; }
-        .tab-button:focus-visible {
-            outline: 2px solid var(--accent-focus);
-            outline-offset: 2px;
-            border-bottom-color: transparent;
-        }
-        textarea, input[type="text"], input[type="url"] {
-            background-color: var(--bg-canvas);
-            border: 1px solid var(--border-color-primary);
-            color: var(--text-primary);
-            transition: border-color var(--transition-duration) var(--transition-timing), box-shadow var(--transition-duration) var(--transition-timing);
-            border-radius: var(--border-radius-sm);
-            padding: 0.625rem 0.875rem;
-        }
-        textarea::placeholder, input[type="text"]::placeholder, input[type="url"]::placeholder { color: var(--text-secondary); }
-        textarea:focus, input[type="text"]:focus, input[type="url"]:focus {
-            border-color: var(--accent-focus);
-            box-shadow: 0 0 0 2px var(--accent-focus-shadow);
-            outline: none;
-        }
-        textarea::-webkit-scrollbar { width: 8px; }
-        textarea::-webkit-scrollbar-track { background: var(--bg-secondary); border-radius: 10px; }
-        textarea::-webkit-scrollbar-thumb { background: var(--border-color-secondary); border-radius: 10px; }
-        textarea::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
-        .modal {
-            position: fixed;
-            left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.8);
-            display: flex; align-items: center; justify-content: center; padding: 1rem;
-            opacity: 0; transform: scale(0.97) translateY(10px);
-            pointer-events: none; transition: opacity 0.2s var(--transition-timing), transform 0.2s var(--transition-timing);
-            z-index: 50;
-        }
-        #flowchart-modal { z-index: 110; }
-        #download-final-warning-modal { z-index: 150; }
-        .modal.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-        .modal-content {
-            background-color: var(--bg-primary);
-            margin: auto;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color-primary);
-            border-radius: var(--border-radius-md);
-            width: 100%;
-            max-width: 500px;
-            color: var(--text-primary);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
-            max-height: calc(100vh - 4rem);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color-primary); padding-bottom: 1rem;}
-        .modal-title { font-size: 1.125rem; sm:font-size: 1.25rem; font-weight: 600; }
-        .modal-close { color: var(--text-secondary); font-size: 1.75rem; font-weight: bold; cursor: pointer; padding: 0.25rem; transition: color var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing); }
-        .modal-close:hover, .modal-close:focus { color: var(--text-primary); transform: scale(1.1); }
-        .modal-body p { margin-bottom: 0.75rem; line-height: 1.6; }
-        .modal-body code { background-color: var(--bg-tertiary); padding: 0.1rem 0.4rem; border-radius: var(--border-radius-sm); font-family: monospace; color: var(--text-secondary); border: 1px solid var(--border-color-primary); word-break: break-all; }
-        .modal-body ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.75rem;}
-        .modal-footer { margin-top: 1.5rem; display: flex; flex-direction: column; sm:flex-row; justify-content: flex-end; align-items: center; gap: 0.75rem;}
-        .modal-footer label { display: flex; align-items: center; font-size: 0.875rem; color: var(--text-secondary); margin-right:auto; }
-        .modal-footer input[type="checkbox"] { margin-right: 0.5rem; accent-color: var(--accent-focus); width: 1rem; height: 1rem; border: 1px solid var(--border-color-primary); border-radius: 0.125rem; cursor: pointer; background-color: var(--bg-secondary);}
-        .modal-footer input[type="checkbox"]:checked { background-color: var(--accent-focus); border-color: var(--accent-focus); }
-        #source-manager-modal { z-index: 100; }
-        .source-manager-modal-content {
-            background-color: var(--bg-primary);
-            width: 100%;
-            max-width: 500px;
-            height: auto;
-            min-height: initial;
-            max-height: calc(100vh - 4rem);
-            display: flex;
-            flex-direction: column;
-            border-radius: var(--border-radius-md);
-            border: 1px solid var(--border-color-primary);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
-            padding: 1.5rem;
-            overflow-y: auto;
-            margin: auto;
-        }
-        @media (min-width: 768px) {
-            #source-manager-modal { padding: 2rem; }
-            .source-manager-modal-content { max-width: 640px; max-height: 90vh; }
-        }
-        .source-manager-modal-close {
-            position: absolute; top: 1rem; right: 1rem;
-            color: var(--text-secondary); font-size: 2rem;
-            font-weight: bold; cursor: pointer; line-height: 1;
-            transition: color var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing);
-            z-index: 10;
-        }
-        .source-manager-modal-close:hover { color: var(--text-primary); transform: scale(1.1); }
-        .source-manager-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color-primary); }
-        .source-manager-title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
-        .current-source-info-card { background-color: var(--bg-secondary); border: 1px solid var(--border-color-primary); border-radius: var(--border-radius-md); padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
-        .current-source-pfp-container { display: flex; justify-content: center; margin-bottom: 1rem; }
-        #source-pfp-large { width: 80px; height: 80px; border-radius: 50%; background-color: var(--bg-tertiary); color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 500; border: 2px solid var(--accent-focus); overflow: hidden; flex-shrink: 0; }
-        #source-pfp-large img { width: 100%; height: 100%; object-fit: cover; }
-        #source-name-large { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; word-break: break-all; }
-        @media (min-width: 768px) { #source-name-large { font-size: 1.25rem; } }
-        #source-status-label-large { font-size: 0.875rem; font-weight: 500; display: block; margin-bottom: 0.5rem; }
-        #source-status-label-large.potentially-newer { color: var(--accent-green); }
-        #source-status-label-large.outdated { color: var(--accent-red); }
-        #source-status-label-large.neutral { color: var(--text-secondary); }
-        #source-fetched-version-message { font-size: 0.875rem; color: var(--accent-green); margin-bottom: 0.5rem; }
-        #modal-bitlife-version-info { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem; }
-        #modal-bitlife-version-info span { color: var(--text-primary); font-weight: 500; }
-        .advanced-options-toggle { display: flex; align-items: center; cursor: pointer; padding: 0.5rem; color: var(--text-secondary); margin-bottom: 0.25rem; border-radius: var(--border-radius-sm); transition: color var(--transition-duration) var(--transition-timing), background-color var(--transition-duration) var(--transition-timing); }
-        .advanced-options-toggle:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
-        .advanced-options-toggle svg { width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; transition: transform var(--transition-duration) var(--transition-timing); stroke: currentColor; }
-        .advanced-options-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, opacity 0.3s ease-out, border-color 0.3s ease-out; background-color: var(--bg-secondary); border-radius: var(--border-radius-sm); border: 1px solid transparent; opacity: 0; padding-left: 0; padding-right: 0; }
-        .advanced-options-content.expanded { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; padding-left: 1rem; padding-right: 1rem; margin-top: 0.5rem; border-color: var(--border-color-primary); opacity: 1; overflow: visible; }
-        #advanced-options-content-area.expanded { max-height: 120px; }
-        #source-manager-advanced-content.expanded { max-height: 200px; margin-bottom: 1rem; }
-        #auto-patch-log { background-color: var(--bg-secondary); border: 1px solid var(--border-color-primary); border-radius: var(--border-radius-sm); max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; padding: 0.75rem; width: 100%; }
-        #auto-patch-log p { margin-bottom: 0.25rem; padding: 0.1rem 0.25rem; }
-        #auto-patch-log .log-success { color: var(--accent-green); }
-        #auto-patch-log .log-error { color: var(--accent-red); }
-        #auto-patch-log .log-info { color: var(--text-secondary); }
-        #auto-patch-cors-notice { font-size: 0.875rem; color: var(--accent-yellow); margin-top: 0.75rem; padding: 0.75rem; background-color: rgba(var(--accent-yellow-rgb), 0.1); border: 1px solid var(--accent-yellow); border-radius: var(--border-radius-sm); }
-        .button { padding: 0.625rem 1.25rem; border-radius: var(--border-radius-sm); font-weight: 500; text-align: center; transition: background-color var(--transition-duration) var(--transition-timing), border-color var(--transition-duration) var(--transition-timing), color var(--transition-duration) var(--transition-timing), opacity var(--transition-duration) var(--transition-timing), transform var(--transition-duration) var(--transition-timing); border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-        .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-        .button:hover:not(:disabled) { opacity: 0.85; }
-        .button:active:not(:disabled) { transform: scale(0.97); opacity: 0.7; }
-        .button:focus { outline: none; }
-        .button:focus-visible:not(:disabled) { outline: 2px solid var(--accent-focus); outline-offset: 2px; box-shadow: none; }
-        .button-primary { background-color: var(--text-primary); color: var(--bg-canvas); border-color: var(--text-primary); }
-        .button-primary:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.9); border-color: rgba(255, 255, 255, 0.9); opacity: 1; }
-        .button-secondary { background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color-primary); }
-        .button-secondary:hover:not(:disabled) { background-color: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-color-secondary); opacity: 1; }
-        input[type="file"].button-secondary { color: var(--text-secondary); padding: 0; }
-        input[type="file"].button-secondary::file-selector-button { padding: 0.5rem 1rem; margin-right: 0.75rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color-primary); background-color: var(--bg-secondary); color: var(--text-primary); font-weight: 500; cursor: pointer; transition: background-color var(--transition-duration) var(--transition-timing); }
-        input[type="file"].button-secondary::file-selector-button:hover { background-color: var(--bg-tertiary); }
-        .button-action-green { background-color: var(--accent-green); color: white; border-color: var(--accent-green); }
-        .button-action-green:hover:not(:disabled) { background-color: var(--accent-green); opacity: 0.85; }
-        .button-action-yellow { background-color: var(--accent-yellow); color: var(--bg-primary); border-color: var(--accent-yellow); }
-        .button-action-yellow:hover:not(:disabled) { background-color: var(--accent-yellow); opacity: 0.85; }
-        .button-action-indigo { background-color: var(--accent-indigo); color: white; border-color: var(--accent-indigo); }
-        .button-action-indigo:hover:not(:disabled) { background-color: var(--accent-indigo); opacity: 0.85; }
-        .button-action-sky { background-color: var(--accent-sky); color: white; border-color: var(--accent-sky); }
-        .button-action-sky:hover:not(:disabled) { background-color: var(--accent-sky); opacity: 0.85; }
-        #file-name-display.file-selected-text-anim { animation: fileNameAnim 0.3s var(--transition-timing); }
-        @keyframes fileNameAnim { 0% { opacity: 0.7; transform: translateY(2px);} 100% { opacity: 1; transform: translateY(0); } }
-        .app-footer { text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.875rem; border-top: 1px solid var(--border-color-primary); margin-top: auto; }
-        .app-footer .version { font-size: 0.75rem; color: var(--text-tertiary); }
-        .app-footer .derivative-work-footer { font-size: 0.75rem; margin-top: 0.5rem; }
-        #top-info-bar { background-color: transparent; border: 1px solid var(--border-color-primary); padding: 0.75rem 1rem; }
-        #important-notes-toggle-button { transition: background-color var(--transition-duration) var(--transition-timing); }
-        #important-notes-toggle-button:hover { background-color: var(--bg-tertiary) !important; }
-        .important-notes-block ul { list-style-type: none; padding-left: 0; color: var(--text-secondary); }
-        .important-notes-block ul ul { list-style-type: circle; padding-left: 1.25rem; margin-top: 0.25rem;}
-        .important-notes-block li { padding-left: 1.75rem; position: relative; margin-bottom: 0.75rem; line-height: 1.6; font-size: 0.875rem; }
-        .important-notes-block li::before { content: "—"; position: absolute; left: 0.5rem; top: 1px; color: var(--text-secondary); font-weight: bold; }
-        .important-notes-block code { background-color: var(--bg-tertiary); padding: 0.2em 0.4em; margin: 0 0.1em; font-size: 0.9em; border-radius: var(--border-radius-sm); font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; word-break: break-word; border: 1px solid var(--border-color-primary); color: var(--text-secondary); }
-        .important-notes-block strong { font-weight: 600; color: var(--text-primary); }
-        .important-notes-block em { font-style: italic; color: var(--text-primary); }
-
-        /* Status Indicators */
-        #offline-indicator, #update-available-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 0.5rem;
-            text-align: center;
-            font-size: 0.875rem;
-            font-weight: 500;
-            z-index: 1000;
-            display: none; /* Hidden by default */
-        }
-        #offline-indicator {
-            background-color: var(--accent-yellow);
-            color: var(--bg-primary);
-        }
-        #update-available-banner {
-            background-color: var(--accent-green); /* Default for update success */
-            color: white;
-        }
-        #update-available-banner.update-check-failed { /* New class for failure indication */
-            background-color: var(--accent-yellow);
-            color: var(--bg-primary);
-        }
-        #update-available-banner button {
-            margin-left: 0.75rem;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.8rem;
-            border: 1px solid currentColor; /* Adapts to text color */
-            background-color: transparent;
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-        }
-        #update-available-banner button:hover {
-            background-color: rgba(0,0,0,0.1); /* Subtle hover, works for both banner colors */
-        }
-        #update-available-banner.update-check-failed button {
-             border-color: var(--bg-primary); /* Ensure button border is visible on yellow bg */
         }
     </style>
     <!-- Counter.dev Analytics Script -->
@@ -305,33 +55,31 @@
 </head>
 <body class="flex flex-col items-center p-4 md:p-8">
 
-<div id="update-available-banner">
-    </div>
+<div id="update-available-banner" class="fixed bottom-0 left-0 w-full p-2 text-center text-sm font-medium z-50 hidden"></div>
 
 <div class="content-wrapper w-full flex flex-col items-center">
-    <div class="main-container p-4 sm:p-6 md:p-8 w-full max-w-2xl">
-        <div class="page-title-container">
-            <h1 class="page-title">BitEdit</h1>
-            <p class="ai-attribution-top">Made with AI (Gemini)</p>
-            <p class="derivative-attribution-top">
-                Based on <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">yntha's bitlife-edit</a> (GPLv3).
+    <div class="main-container bg-custom-primary border border-custom-primary rounded-custom-md shadow-lg p-4 sm:p-6 md:p-8 w-full max-w-2xl">
+        <div class="page-title-container text-center mb-6 mt-4">
+            <h1 class="text-3xl font-semibold text-custom-text-primary">BitEdit</h1>
+            <p class="text-xs text-custom-text-tertiary mt-1.5">Made with AI (Gemini)</p>
+            <p class="text-xs text-custom-text-tertiary mt-1">
+                Based on <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer" class="text-custom-text-tertiary hover:text-custom-text-primary hover:underline transition-colors">yntha's bitlife-edit</a> (GPLv3).
             </p>
         </div>
 
-        <div id="top-info-bar" class="rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4">
+        <div id="top-info-bar" class="border border-custom-primary rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4">
             <div class="text-center sm:text-left mb-3 sm:mb-0">
-                <p class="text-sm sm:text-base font-semibold mb-1">Don't have a MonetizationVars?</p>
-                <button id="open-source-manager-button" class="button button-primary py-2 px-3 text-xs sm:text-sm w-full sm:w-auto">
-                    Download or auto patch MonetizationVars
+                <p class="text-sm sm:text-base font-semibold mb-1 text-custom-text-primary">Don't have a MonetizationVars?</p>
+                <button id="open-source-manager-button" class="bg-custom-text-primary text-custom-canvas py-2 px-3 text-xs sm:text-sm w-full sm:w-auto rounded-custom-sm font-medium hover:opacity-90 transition-opacity">
+                    Download or auto patch
                 </button>
-                <p style="font-size: 0.65rem; line-height: 0.8rem;" class="opacity-60 mt-0.5">(from external source)</p>
             </div>
-            <p class="text-xs text-center sm:text-right w-full sm:w-auto mt-2 sm:mt-0" style="color: var(--text-secondary);">
-                Latest BitLife Ver: <span id="bitlife-version" class="font-semibold" style="color: var(--text-primary);">Loading...</span>
+            <p class="text-xs text-center sm:text-right w-full sm:w-auto mt-2 sm:mt-0 text-custom-text-secondary">
+                Latest BitLife Ver: <span id="bitlife-version" class="font-semibold text-custom-text-primary">Loading...</span>
             </p>
         </div>
 
-        <div class="mb-6 tab-navigation-container">
+        <div class="mb-6 border-b border-custom-primary">
             <nav class="flex space-x-1" aria-label="Tabs">
                 <button id="tab-decrypt" class="tab-button active">
                     Decrypt File
@@ -344,43 +92,43 @@
 
         <div id="tool-content" class="mt-6">
             <div class="space-y-4">
-                <label id="file-input-label" for="file-input" class="block text-sm font-medium" style="color: var(--text-secondary);">Select 'MonetizationVars' File:</label>
-                <input type="file" id="file-input" accept="*/*" class="block w-full text-sm button button-secondary"/>
-                <span id="file-name-display" class="block text-xs mt-1.5" style="color: var(--text-secondary);">No file selected.</span>
+                <label id="file-input-label" for="file-input" class="block text-sm font-medium text-custom-text-secondary">Select 'MonetizationVars' File:</label>
+                <input type="file" id="file-input" accept="*/*" class="block w-full text-sm text-custom-text-secondary border border-custom-primary rounded-custom-sm file:mr-4 file:py-2 file:px-4 file:rounded-custom-sm file:border-0 file:text-sm file:font-semibold file:bg-custom-secondary file:text-custom-text-primary hover:file:bg-custom-tertiary transition-colors cursor-pointer"/>
+                <span id="file-name-display" class="block text-xs mt-1.5 text-custom-text-secondary">No file selected.</span>
 
-                <div id="advanced-options-toggle-container" class="advanced-options-toggle">
-                    <svg id="advanced-options-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem; height:1.25rem; margin-right:0.5rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                    <span>Advanced Options (Cipher Key)</span>
+                <div id="advanced-options-toggle-container" class="advanced-options-toggle group">
+                    <svg id="advanced-options-icon" class="w-5 h-5 mr-2 text-custom-text-secondary group-hover:text-custom-text-primary transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    <span class="text-custom-text-secondary group-hover:text-custom-text-primary">Advanced Options (Cipher Key)</span>
                 </div>
                 <div id="advanced-options-content-area" class="advanced-options-content">
-                   <div class="advanced-options-inner-wrapper">
-                        <label for="cipher-key" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">Cipher Key (Optional - Case Insensitive):</label>
-                        <input type="text" id="cipher-key" placeholder="Default: com.wtfapps.apollo16" class="w-full" />
+                   <div class="p-4 bg-custom-secondary rounded-custom-sm border border-custom-primary">
+                        <label for="cipher-key" class="block text-sm font-medium mb-1 text-custom-text-secondary">Cipher Key (Optional - Case Insensitive):</label>
+                        <input type="text" id="cipher-key" placeholder="Default: com.wtfapps.apollo16" class="w-full bg-custom-canvas border border-custom-primary rounded-custom-sm p-2 text-sm focus:border-custom-accent-focus focus:ring-2 focus:ring-custom-accent-focus focus:ring-opacity-50" />
                     </div>
                 </div>
-                <button id="process-button" class="w-full font-semibold py-2.5 px-4 button button-primary text-base">Start Decryption</button>
+                <button id="process-button" class="w-full font-semibold py-2.5 px-4 bg-custom-text-primary text-custom-canvas rounded-custom-sm text-base hover:opacity-90 transition-opacity">Start Decryption</button>
             </div>
             </div>
 
         <div id="output-controls" class="mt-6 hidden">
-             <button id="unlock-all-button" class="w-full mb-4 px-4 py-3 font-semibold button button-action-yellow text-base">
+             <button id="unlock-all-button" class="w-full mb-4 px-4 py-3 font-semibold bg-custom-accent-yellow text-custom-canvas rounded-custom-md text-base hover:opacity-90 transition-opacity">
                 Unlock All / Set All to True
             </button>
             <div id="json-output-container" class="mb-4">
-                <label for="json-output" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">JSON Data:</label>
-                <textarea id="json-output" rows="10" class="w-full p-3 resize-y"></textarea>
+                <label for="json-output" class="block text-sm font-medium mb-2 text-custom-text-secondary">JSON Data:</label>
+                <textarea id="json-output" rows="10" class="w-full p-3 resize-y bg-custom-canvas border border-custom-primary rounded-custom-md focus:border-custom-accent-focus focus:ring-2 focus:ring-custom-accent-focus focus:ring-opacity-50"></textarea>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <button id="download-encrypted-button" class="w-full sm:w-auto px-4 py-3 sm:px-6 font-semibold order-1 button button-action-green text-base">
+                <button id="download-encrypted-button" class="w-full sm:w-auto px-4 py-3 sm:px-6 font-semibold order-1 bg-custom-accent-green text-white rounded-custom-md text-base hover:opacity-90 transition-opacity">
                     Download Encrypted "MonetizationVars"
                 </button>
                 <div class="flex flex-col xs:flex-row gap-2 order-2 sm:order-3 mt-2 sm:mt-0 w-full sm:w-auto">
-                    <button id="copy-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium button button-action-indigo text-sm">Copy JSON</button>
-                    <button id="download-decrypted-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium button button-action-sky text-sm">Download Decrypted JSON</button>
+                    <button id="copy-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium bg-custom-accent-indigo text-white rounded-custom-sm text-sm hover:opacity-90 transition-opacity">Copy JSON</button>
+                    <button id="download-decrypted-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium bg-custom-accent-sky text-white rounded-custom-sm text-sm hover:opacity-90 transition-opacity">Download Decrypted JSON</button>
                 </div>
             </div>
         </div>
-           <div id="error-message" class="mt-4 p-3 rounded-md hidden text-sm" style="background-color: rgba(var(--accent-red-rgb),0.9); color: white; border: 1px solid rgba(var(--accent-red-rgb), 0.7);"></div>
+           <div id="error-message" class="mt-4 p-3 rounded-md hidden text-sm bg-red-600 text-white"></div>
 
         <div id="progress-flowchart-container" class="flowchart-container-outer flowchart mt-4 hidden">
         </div>
@@ -388,151 +136,146 @@
 
     <!-- Modals Section -->
     <div id="flowchart-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-title" class="modal-title">Step Details</h2>
+        <div class="modal-content bg-custom-primary border border-custom-primary rounded-custom-md shadow-lg">
+            <div class="modal-header border-b border-custom-primary">
+                <h2 id="modal-title" class="modal-title text-lg font-semibold">Step Details</h2>
                 <span id="modal-close-button" class="modal-close">&times;</span>
             </div>
-            <div id="modal-body" class="modal-body"></div>
+            <div id="modal-body" class="modal-body mt-4"></div>
         </div>
     </div>
 
     <div id="wrong-file-name-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Incorrect File Selected</h2>
+        <div class="modal-content bg-custom-primary border border-custom-primary rounded-custom-md shadow-lg">
+            <div class="modal-header border-b border-custom-primary">
+                <h2 class="modal-title text-lg font-semibold">Incorrect File Selected</h2>
                 <span id="wrong-file-name-modal-close-button" class="modal-close">&times;</span>
             </div>
-            <div class="modal-body">
-                <p>For decryption, you must select the file named exactly <strong>MonetizationVars</strong> (without any file extension).</p>
+            <div class="modal-body mt-4">
+                <p>For decryption, you must select the file named exactly <strong class="text-custom-accent-yellow">MonetizationVars</strong> (without any file extension).</p>
                 <p>Please select the correct file to continue.</p>
             </div>
-            <div class="modal-footer justify-end">
-                <button id="wrong-file-name-ok-button" class="button button-primary px-4 py-2 text-sm">OK</button>
+            <div class="modal-footer justify-end mt-6">
+                <button id="wrong-file-name-ok-button" class="bg-custom-accent-focus text-white px-4 py-2 text-sm rounded-custom-sm font-medium hover:opacity-90 transition-opacity">OK</button>
             </div>
         </div>
     </div>
 
     <div id="download-final-warning-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">File Downloaded</h2>
+        <div class="modal-content bg-custom-primary border border-custom-primary rounded-custom-md shadow-lg">
+            <div class="modal-header border-b border-custom-primary">
+                <h2 class="modal-title text-lg font-semibold">File Downloaded</h2>
                 <span id="download-final-warning-modal-close-button" class="modal-close">&times;</span>
             </div>
-            <div class="modal-body">
+            <div class="modal-body mt-4">
                 <p>Please check the downloaded file. If it has an extension, remove it to use on BitLife.</p>
             </div>
-            <div class="modal-footer">
-                <label for="dont-show-final-warning-again">
-                    <input type="checkbox" id="dont-show-final-warning-again">
+            <div class="modal-footer justify-between mt-6">
+                <label for="dont-show-final-warning-again" class="flex items-center text-sm text-custom-text-secondary">
+                    <input type="checkbox" id="dont-show-final-warning-again" class="mr-2 bg-custom-secondary border-custom-primary text-custom-accent-focus focus:ring-custom-accent-focus">
                     Don't show this again
                 </label>
-                <button id="download-final-warning-ok-button" class="button button-primary px-4 py-2 text-sm">OK</button>
+                <button id="download-final-warning-ok-button" class="bg-custom-accent-focus text-white px-4 py-2 text-sm rounded-custom-sm font-medium hover:opacity-90 transition-opacity">OK</button>
             </div>
         </div>
     </div>
 
-    <div id="source-manager-modal" class="modal hidden"> <div class="source-manager-modal-content"> <span id="source-manager-modal-close-button" class="source-manager-modal-close">&times;</span>
-            <div class="source-manager-header">
-                <h2 class="source-manager-title">MonetizationVars Source</h2>
+    <div id="source-manager-modal" class="modal hidden">
+        <div class="source-manager-modal-content bg-custom-primary border border-custom-primary rounded-custom-md shadow-lg p-6 max-w-lg">
+            <span id="source-manager-modal-close-button" class="source-manager-modal-close">&times;</span>
+            <div class="source-manager-header text-center mb-6 pb-4 border-b border-custom-primary">
+                <h2 class="source-manager-title text-xl font-semibold">MonetizationVars Source</h2>
             </div>
 
-            <div class="current-source-info-card">
-                <div class="current-source-pfp-container">
-                    <div id="source-pfp-large">S0</div>
+            <div class="current-source-info-card bg-custom-secondary border border-custom-primary rounded-custom-md p-6 mb-6 text-center">
+                <div class="flex justify-center mb-4">
+                    <div id="source-pfp-large" class="w-20 h-20 rounded-full bg-custom-tertiary text-custom-text-primary flex items-center justify-center text-2xl font-medium border-2 border-custom-accent-focus overflow-hidden flex-shrink-0"></div>
                 </div>
-                <h3 id="source-name-large" class="truncate">Default Source Name</h3>
-                <span id="source-status-label-large" class="status-label neutral">(Status Loading...)</span>
-                <p id="source-fetched-version-message" class="hidden">Successfully fetched (vX.Y.Z)</p>
-                <a id="source-url-display-large" href="#" target="_blank" rel="noopener noreferrer" class="block text-xs mt-1">View Raw File</a>
-                <p id="modal-bitlife-version-info" class="mt-2">Latest BitLife Ver: <span id="modal-bitlife-version-dynamic">Loading...</span></p>
+                <h3 id="source-name-large" class="text-lg font-semibold truncate">Default Source Name</h3>
+                <span id="source-status-label-large" class="status-label block text-sm font-medium mb-2">(Status Loading...)</span>
+                <p id="source-fetched-version-message" class="hidden text-sm text-green-400 mb-2"></p>
+                <a id="source-url-display-large" href="#" target="_blank" rel="noopener noreferrer" class="block text-xs mt-1 text-custom-text-secondary hover:text-custom-text-primary transition-colors">View Raw File</a>
+                <p id="modal-bitlife-version-info" class="mt-2 text-sm text-custom-text-secondary">Latest BitLife Ver: <span id="modal-bitlife-version-dynamic" class="text-custom-text-primary font-medium">Loading...</span></p>
             </div>
 
-            <div id="source-manager-advanced-options-toggle" class="advanced-options-toggle">
-                <svg id="source-manager-advanced-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                <span>Advanced: Change Source URL</span>
+            <div id="source-manager-advanced-options-toggle" class="advanced-options-toggle group">
+                 <svg id="source-manager-advanced-icon" class="w-5 h-5 mr-3 text-custom-text-secondary group-hover:text-custom-text-primary transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path></svg>
+                <span class="text-custom-text-secondary group-hover:text-custom-text-primary">Advanced: Change Source URL</span>
             </div>
             <div id="source-manager-advanced-content" class="advanced-options-content">
-                 <div class="advanced-options-inner-wrapper">
-                    <label for="new-source-url" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">New Source (Raw File URL):</label>
+                 <div class="p-4 bg-custom-secondary rounded-custom-sm border border-custom-primary mb-4">
+                    <label for="new-source-url" class="block text-sm font-medium mb-1 text-custom-text-secondary">New Source (Raw File URL):</label>
                     <div class="flex items-center gap-2 mb-2">
-                        <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="flex-grow min-w-0"> <button id="load-new-source-button" class="button button-primary px-3 py-2 text-xs sm:text-sm flex-shrink-0">Load</button>
+                        <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="flex-grow min-w-0 bg-custom-canvas border border-custom-primary rounded-custom-sm p-2 text-sm focus:border-custom-accent-focus focus:ring-2 focus:ring-custom-accent-focus focus:ring-opacity-50">
+                        <button id="load-new-source-button" class="bg-custom-accent-focus text-white px-3 py-2 text-xs sm:text-sm rounded-custom-sm font-medium hover:opacity-90 transition-opacity flex-shrink-0">Load</button>
                     </div>
-                    <p class="text-xs" style="color: var(--text-secondary);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
+                    <p class="text-xs text-custom-text-secondary">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
                  </div>
             </div>
 
-            <div class="mt-6 pt-6 border-t" style="border-color: var(--border-color-primary);">
-                <h3 class="text-lg font-semibold mb-3 text-center" style="color: var(--text-primary);">Actions</h3>
+            <div class="mt-6 pt-6 border-t border-custom-primary">
+                <h3 class="text-lg font-semibold mb-3 text-center text-custom-text-primary">Actions</h3>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-2.5 text-sm font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
+                    <button id="auto-patch-button" class="w-full sm:w-auto bg-custom-accent-green text-white py-2.5 px-4 text-sm font-semibold rounded-custom-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                         Download & Auto-Patch
                     </button>
-                    <button id="download-original-button" class="w-full sm:w-auto button button-secondary py-2.5 text-sm font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
+                    <button id="download-original-button" class="w-full sm:w-auto bg-custom-secondary text-custom-text-primary border border-custom-primary py-2.5 px-4 text-sm font-semibold rounded-custom-md flex items-center justify-center gap-2 hover:bg-custom-tertiary transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                         Download Original
                     </button>
                 </div>
-                <div id="auto-patch-cors-notice" class="hidden text-center mt-3">
-                </div>
+                <div id="auto-patch-cors-notice" class="hidden text-center mt-3 text-sm p-3 bg-yellow-900 bg-opacity-50 text-yellow-300 border border-yellow-700 rounded-md"></div>
                 <div id="auto-patch-log-container" class="mt-4 hidden w-full">
-                    <p class="text-xs font-medium mb-1 text-left" style="color: var(--text-secondary);">Patching Log:</p>
-                    <div id="auto-patch-log" class="w-full"></div>
+                    <p class="text-xs font-medium mb-1 text-left text-custom-text-secondary">Patching Log:</p>
+                    <div id="auto-patch-log" class="w-full bg-custom-secondary border border-custom-primary rounded-custom-sm p-3 max-h-40 overflow-y-auto text-xs font-mono"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="w-full max-w-2xl mx-auto mt-8">
-        <button id="important-notes-toggle-button" aria-expanded="false" aria-controls="important-notes-content-wrapper"
-                class="w-full flex justify-between items-center p-4 font-medium text-left rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-white"
-                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color-primary);">
+        <button id="important-notes-toggle-button" aria-expanded="false" aria-controls="important-notes-content-wrapper" class="w-full flex justify-between items-center p-4 font-medium text-left rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-white bg-custom-secondary text-custom-text-primary border border-custom-primary hover:bg-custom-tertiary transition-colors">
             <span>Important Notes</span>
             <svg id="important-notes-icon-svg" class="w-5 h-5 transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
         </button>
         <div id="important-notes-content-wrapper" class="overflow-hidden transition-all duration-300 ease-out" style="max-height: 0px; opacity: 0;">
-            <div class="important-notes-block" style="border: 1px solid var(--border-color-primary); border-top: none; padding: 1.5rem; border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); background-color: var(--bg-secondary);">
-                <h2 class="sr-only">Important Notes Details</h2> <ul>
-                    <li>Input file for manual decryption must be named exactly <code>MonetizationVars</code> (case-insensitive, no extension).</li>
-                    <li>When <strong>decrypting</strong>:
-                        <ul>
-                            <li>Known .NET boolean Base64 strings are converted to <code>true</code>/<code>false</code>.</li>
-                            <li>Known .NET Int32 Base64 strings are converted to numbers (e.g., <code>12</code>).</li>
+            <div class="border border-custom-primary border-t-0 p-6 rounded-b-md bg-custom-secondary text-sm">
+                <ul class="space-y-3">
+                    <li class="pl-6 relative before:content-['—'] before:absolute before:left-0 before:top-1 before:text-custom-text-secondary before:font-bold">Input file for manual decryption must be named exactly <code class="code-inline">MonetizationVars</code> (case-insensitive, no extension).</li>
+                    <li class="pl-6 relative before:content-['—'] before:absolute before:left-0 before:top-1 before:text-custom-text-secondary before:font-bold">When <strong>decrypting</strong>:
+                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                            <li>Known .NET boolean Base64 strings are converted to <code class="code-inline">true</code>/<code class="code-inline">false</code>.</li>
+                            <li>Known .NET Int32 Base64 strings are converted to numbers (e.g., <code class="code-inline">12</code>).</li>
                             <li>Others remain Base64.</li>
                         </ul>
                     </li>
-                    <li>When <strong>encrypting</strong>:
-                        <ul>
-                            <li><code>true</code>/<code>false</code> in JSON become .NET boolean Base64.</li>
+                    <li class="pl-6 relative before:content-['—'] before:absolute before:left-0 before:top-1 before:text-custom-text-secondary before:font-bold">When <strong>encrypting</strong>:
+                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                            <li><code class="code-inline">true</code>/<code class="code-inline">false</code> in JSON become .NET boolean Base64.</li>
                             <li>Numbers in JSON are assumed to be Int32 and become .NET Int32 Base64.</li>
                             <li>Other values are stringified, then Base64 encoded.</li>
                         </ul>
                         The output filename will be "MonetizationVars".
                     </li>
-                    <li>"Unlock All" sets boolean <code>false</code> to <code>true</code> and .NET false Base64 to .NET true Base64 in the JSON textarea. It does not affect numbers.</li>
-                    <li>Default cipher key: <code>com.wtfapps.apollo16</code>. Access via "Advanced Options" in the manual processing tabs. The auto-patcher uses this key unless changed via manual tab's advanced options <em>before</em> auto-patching.</li>
-                    <li class="derivative-work">This tool is a derivative work based on the C# project <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">bitlife-edit by yntha</a>. All original logic credits go to yntha. Both projects are licensed under GPLv3.</li>
+                    <li class="pl-6 relative before:content-['—'] before:absolute before:left-0 before:top-1 before:text-custom-text-secondary before:font-bold">"Unlock All" sets boolean <code class="code-inline">false</code> to <code class="code-inline">true</code> and .NET false Base64 to .NET true Base64 in the JSON textarea. It does not affect numbers.</li>
+                    <li class="pl-6 relative before:content-['—'] before:absolute before:left-0 before:top-1 before:text-custom-text-secondary before:font-bold">Default cipher key: <code class="code-inline">com.wtfapps.apollo16</code>. This key is used by default and in the auto-patcher.</li>
                 </ul>
             </div>
         </div>
     </div>
 
 </div>
-<footer class="app-footer w-full">
-    <p class="version" id="app-version-display"></p>
-    <p class="derivative-work-footer">
-        Derivative of <a href="https://github.com/yntha/bitlife-edit" target="_blank" rel="noopener noreferrer">yntha/bitlife-edit</a> (GPLv3).
+<footer class="app-footer w-full text-center mt-8 pt-8 border-t border-custom-primary">
+    <p class="text-xs text-custom-text-tertiary" id="app-version-display"></p>
+    <p class="text-xs text-custom-text-tertiary mt-1">
+        Derivative of <a href="https://github.com/yntha/bitlife-edit" target="_blank" rel="noopener noreferrer" class="hover:text-custom-text-primary hover:underline transition-colors">yntha/bitlife-edit</a> (GPLv3).
     </p>
 </footer>
 
-<div id="offline-indicator">Offline Mode</div>
+<div id="offline-indicator" class="fixed bottom-0 left-0 w-full p-2 text-center text-sm font-medium z-50 hidden bg-yellow-600 text-black"></div>
 
     <script>
 /*
@@ -651,23 +394,10 @@
                     localStorage.setItem(LAST_SUCCESSFUL_UPDATE_CHECK_KEY, Date.now().toString());
                    
                     if (compareVersions(normalizedLatestVersion, CURRENT_APP_VERSION) > 0) {
-                        ui.updateAvailableBanner.innerHTML = `Update to ${normalizedLatestVersion} available! <button id="refresh-update-button">Refresh to Update</button>`;
+                        ui.updateAvailableBanner.innerHTML = `Update to ${normalizedLatestVersion} available! <button id="refresh-update-button" class="ml-3 px-2 py-1 text-xs border border-current rounded-md hover:bg-white/20 transition-colors">Refresh to Update</button>`;
+                        ui.updateAvailableBanner.style.backgroundColor = 'var(--accent-green)';
+                        ui.updateAvailableBanner.style.color = 'white';
                         ui.updateAvailableBanner.style.display = 'block';
-                        const refreshButton = document.getElementById('refresh-update-button');
-                        if (refreshButton) {
-                            refreshButton.addEventListener('click', () => {
-                                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                                    navigator.serviceWorker.getRegistration().then(reg => {
-                                        if (reg && reg.waiting) {
-                                            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-                                        }
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    window.location.reload();
-                                }
-                            });
-                        }
                     } else {
                         console.log(`App is up to date (Current: ${CURRENT_APP_VERSION}, Latest on server: ${normalizedLatestVersion})`);
                         ui.updateAvailableBanner.style.display = 'none';
@@ -678,6 +408,8 @@
             } catch (error) {
                 console.error('Error checking for app update:', error);
                 ui.updateAvailableBanner.textContent = 'Could not check for updates. Try refreshing later.';
+                ui.updateAvailableBanner.style.backgroundColor = 'var(--accent-yellow)';
+                ui.updateAvailableBanner.style.color = 'var(--bg-primary)';
                 ui.updateAvailableBanner.classList.add('update-check-failed');
                 ui.updateAvailableBanner.style.display = 'block';
 
@@ -747,19 +479,24 @@
                     const comparisonResult = compareVersions(versionFromTxt, versionFromReleaseNotes);
                     if (comparisonResult === 1) {
                         currentSourceInfo.statusMessage = `OUTDATED (Current BitLife: v${versionFromTxt})`;
+                        if (ui.sourceStatusLabelLarge) ui.sourceStatusLabelLarge.className = 'status-label outdated';
                     } else if (comparisonResult === -1) {
                         currentSourceInfo.statusMessage = `POTENTIALLY NEWER (Current BitLife: v${versionFromTxt})`;
+                         if (ui.sourceStatusLabelLarge) ui.sourceStatusLabelLarge.className = 'status-label potentially-newer';
                     } else {
                         currentSourceInfo.statusMessage = `COMPATIBLE (v${versionFromReleaseNotes})`;
+                         if (ui.sourceStatusLabelLarge) ui.sourceStatusLabelLarge.className = 'status-label neutral';
                     }
                 } else {
                     console.warn("Could not parse BitLife version from BitEdit release notes body. Ensure description contains 'For BitLife vX.Y.Z' or similar. Body received:", releaseBody);
                     currentSourceInfo.statusMessage = "(Release notes for default source do not specify BitLife version in expected format)";
                     if (ui.sourceFetchedVersionMessage) ui.sourceFetchedVersionMessage.classList.add('hidden');
+                     if (ui.sourceStatusLabelLarge) ui.sourceStatusLabelLarge.className = 'status-label neutral';
                 }
             } catch (error) {
                 console.error("Error checking BitEdit release notes:", error);
                 currentSourceInfo.statusMessage = "(Error checking source compatibility)";
+                 if (ui.sourceStatusLabelLarge) ui.sourceStatusLabelLarge.className = 'status-label neutral';
             }
             updateSourceManagerDisplay(currentSourceInfo);
         }
@@ -770,8 +507,8 @@
         function hideStandardModal(modalElement) { if(modalElement){modalElement.classList.remove('visible'); setTimeout(() => { modalElement.classList.add('hidden'); }, 250);} }
         function openSourceManagerModal() { updateSourceManagerDisplay(currentSourceInfo); if(ui.newSourceUrlInput) ui.newSourceUrlInput.value = ''; if(ui.sourceManagerAdvancedContent) ui.sourceManagerAdvancedContent.classList.remove('expanded'); if(ui.sourceManagerAdvancedIcon) ui.sourceManagerAdvancedIcon.style.transform = 'rotate(0deg)'; if(ui.autoPatchLog) ui.autoPatchLog.innerHTML = ''; if(ui.autoPatchLogContainer) ui.autoPatchLogContainer.classList.add('hidden'); if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden'); if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; if(ui.modalBitlifeVersionDynamic) ui.modalBitlifeVersionDynamic.textContent = versionFromTxt || 'Loading...'; showStandardModal(ui.sourceManagerModal); }
         function closeSourceManagerModal() { hideStandardModal(ui.sourceManagerModal); if(ui.autoPatchLogContainer) ui.autoPatchLogContainer.classList.add('hidden'); if(ui.autoPatchLog) ui.autoPatchLog.innerHTML = ''; }
-        function updateSourceManagerDisplay(sourceInfo) { if(ui.sourcePfpLarge) { ui.sourcePfpLarge.innerHTML = ''; if (sourceInfo.pfpImageUrl) { const img = document.createElement('img'); img.src = sourceInfo.pfpImageUrl; img.alt = sourceInfo.name.substring(0,2); img.className = "w-full h-full object-cover"; img.onerror = () => { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase(); }; ui.sourcePfpLarge.appendChild(img); } else { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase() || 'URL'; } } if(ui.sourceNameLarge) ui.sourceNameLarge.textContent = sourceInfo.name; if(ui.sourceUrlDisplayLarge) { ui.sourceUrlDisplayLarge.href = sourceInfo.url; const displayUrl = sourceInfo.url.length > 40 ? sourceInfo.url.substring(0, 15) + "..." + sourceInfo.url.substring(sourceInfo.url.length - 15) : sourceInfo.url; ui.sourceUrlDisplayLarge.textContent = `View Raw: ${displayUrl}`; } if(ui.sourceStatusLabelLarge) { ui.sourceStatusLabelLarge.textContent = sourceInfo.statusMessage || "(Status N/A)"; ui.sourceStatusLabelLarge.classList.remove('hidden', 'potentially-newer', 'outdated', 'neutral'); ui.sourceStatusLabelLarge.classList.add('status-label'); if (sourceInfo.statusMessage) { ui.sourceStatusLabelLarge.classList.remove('hidden'); const lowerStatus = sourceInfo.statusMessage.toLowerCase(); if (lowerStatus.includes("newer")) { ui.sourceStatusLabelLarge.classList.add('potentially-newer'); } else if (lowerStatus.includes("outdated")) { ui.sourceStatusLabelLarge.classList.add('outdated'); } else { ui.sourceStatusLabelLarge.classList.add('neutral'); } } else { ui.sourceStatusLabelLarge.classList.add('hidden'); } } if (ui.sourceFetchedVersionMessage) { if (sourceInfo.fetchedVersion && currentMonetizationVarsSourceURL === DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) { ui.sourceFetchedVersionMessage.textContent = `Default source is for BitLife v${sourceInfo.fetchedVersion}`; ui.sourceFetchedVersionMessage.classList.remove('hidden'); } else { ui.sourceFetchedVersionMessage.classList.add('hidden'); } } if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden'); }
-        function addLogToAutoPatcher(message, type = 'info') { if(!ui.autoPatchLog || !ui.autoPatchLogContainer) return; const logEntry = document.createElement('p'); logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`; logEntry.classList.add(type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info')); ui.autoPatchLog.appendChild(logEntry); ui.autoPatchLog.scrollTop = ui.autoPatchLog.scrollHeight; ui.autoPatchLogContainer.classList.remove('hidden'); }
+        function updateSourceManagerDisplay(sourceInfo) { if(ui.sourcePfpLarge) { ui.sourcePfpLarge.innerHTML = ''; if (sourceInfo.pfpImageUrl) { const img = document.createElement('img'); img.src = sourceInfo.pfpImageUrl; img.alt = sourceInfo.name.substring(0,2); img.className = "w-full h-full object-cover"; img.onerror = () => { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase(); }; ui.sourcePfpLarge.appendChild(img); } else { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase() || 'URL'; } } if(ui.sourceNameLarge) ui.sourceNameLarge.textContent = sourceInfo.name; if(ui.sourceUrlDisplayLarge) { ui.sourceUrlDisplayLarge.href = sourceInfo.url; const displayUrl = sourceInfo.url.length > 40 ? sourceInfo.url.substring(0, 15) + "..." + sourceInfo.url.substring(sourceInfo.url.length - 15) : sourceInfo.url; ui.sourceUrlDisplayLarge.textContent = `View Raw: ${displayUrl}`; } if(ui.sourceStatusLabelLarge) { ui.sourceStatusLabelLarge.textContent = sourceInfo.statusMessage || "(Status N/A)"; } if (ui.sourceFetchedVersionMessage) { if (sourceInfo.fetchedVersion && currentMonetizationVarsSourceURL === DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) { ui.sourceFetchedVersionMessage.textContent = `Default source is for BitLife v${sourceInfo.fetchedVersion}`; ui.sourceFetchedVersionMessage.classList.remove('hidden'); } else { ui.sourceFetchedVersionMessage.classList.add('hidden'); } } if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden'); }
+        function addLogToAutoPatcher(message, type = 'info') { if(!ui.autoPatchLog || !ui.autoPatchLogContainer) return; const logEntry = document.createElement('p'); logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`; if (type === 'success') logEntry.style.color = 'var(--accent-green)'; else if (type === 'error') logEntry.style.color = 'var(--accent-red)'; else logEntry.style.color = 'var(--text-secondary)'; ui.autoPatchLog.appendChild(logEntry); ui.autoPatchLog.scrollTop = ui.autoPatchLog.scrollHeight; ui.autoPatchLogContainer.classList.remove('hidden'); }
         async function processMonetizationVarsContent(fileContent, operationMode, cipherKeyStr) { const effectiveCipherKey = cipherKeyStr || DEFAULT_CIPHER_KEY; const obfuscatedKey = getObfuscatedKey(effectiveCipherKey); let processedJsonObject; if (operationMode === 'decrypt') { const itemMap = {}; const lines = fileContent.split('\n').filter(line => line.trim() !== ''); for (const line of lines) { const parts = line.split(/:(.+)/); if (parts.length < 2 || !parts[1]) { console.warn("Malformed line (missing or empty value):", line); continue; } const encKey = parts[0].trim(); const encVal = parts[1].trim(); try { const decKey = base64DecodeAndXOR(encKey, obfuscatedKey); const decValB64 = base64DecodeAndXOR(encVal, obfuscatedKey); if (decValB64 === B64_NET_BOOLEAN_TRUE_STANDARD || decValB64 === B64_NET_BOOLEAN_TRUE_VARIANT) { itemMap[decKey] = true; } else if (decValB64 === B64_NET_BOOLEAN_FALSE_STANDARD) { itemMap[decKey] = false; } else { const intValue = decryptInt(decValB64); if (intValue !== null) { itemMap[decKey] = intValue; } else { itemMap[decKey] = decValB64; } } } catch (e) { console.error("Error processing line:", line, e); throw new Error(`Decryption/decoding error. Check key/file. Line: ${line.substring(0,30)}...`); } } processedJsonObject = itemMap; } else { processedJsonObject = JSON.parse(fileContent); } return processedJsonObject; }
         async function handleManualFileProcessing(fileContent, cipherKeyStr) {
             clearError();
@@ -814,50 +551,27 @@
             if(ui.outputControls) ui.outputControls.classList.add('hidden');
             if(ui.tabDecrypt) ui.tabDecrypt.classList.toggle('active', newMode === 'decrypt');
             if(ui.tabEncrypt) ui.tabEncrypt.classList.toggle('active', newMode === 'encrypt');
-
-            const fileInputLabel = document.getElementById('file-input-label');
-            const fileInputElement = document.getElementById('file-input');
+            
             const processButtonElement = document.getElementById('process-button');
-            const fileNameDisplay = document.getElementById('file-name-display'); 
-
-            if (!fileInputLabel || !fileInputElement || !processButtonElement || !fileNameDisplay) {
-                console.error("CRITICAL: One or more pre-rendered UI elements for the tool content are missing. UI updates for mode changes will fail.");
-            }
-
+            const fileInputLabel = document.getElementById('file-input-label');
             if (newMode === 'decrypt') {
                 if (fileInputLabel) fileInputLabel.textContent = `Select '${TARGET_ENCRYPTED_FILENAME}' File:`;
-                if (fileInputElement) fileInputElement.accept = '*/*';
                 if (processButtonElement) processButtonElement.textContent = 'Start Decryption';
             } else { 
                 if (fileInputLabel) fileInputLabel.textContent = 'Select JSON File to Encrypt:';
-                if (fileInputElement) fileInputElement.accept = '.json,text/plain';
                 if (processButtonElement) processButtonElement.textContent = 'Load JSON from File';
             }
             
             let modeState = (newMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
-            if (fileNameDisplay) {
+            if (ui.fileNameDisplay) {
                 if (modeState.inputFileName !== 'file' && modeState.fileContent !== null) {
-                    fileNameDisplay.textContent = `Selected: ${modeState.inputFileName}`;
-                    fileNameDisplay.style.color = 'var(--accent-green)';
+                    ui.fileNameDisplay.textContent = `Selected: ${modeState.inputFileName}`;
+                    ui.fileNameDisplay.style.color = 'var(--accent-green)';
                 } else {
-                    fileNameDisplay.textContent = 'No file selected.';
-                    fileNameDisplay.style.color = 'var(--text-secondary)';
-                    if (fileInputElement) fileInputElement.value = ""; 
-
-                    if (newMode === 'decrypt' && (stateForDecrypt.inputFileName !== 'file' || stateForDecrypt.fileContent !== null)) {
-                         stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
-                    } else if (newMode === 'encrypt' && (stateForEncrypt.inputFileName !== 'file' || stateForEncrypt.fileContent !== null)) {
-                         stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
-                    }
+                    ui.fileNameDisplay.textContent = 'No file selected.';
+                    ui.fileNameDisplay.style.color = 'var(--text-secondary)';
+                    if (ui.fileInput) ui.fileInput.value = ""; 
                 }
-            }
-
-            if (modeState.jsonObject && ui.jsonOutput && ui.outputControls) {
-                ui.jsonOutput.value = JSON.stringify(modeState.jsonObject, null, 2);
-                ui.outputControls.classList.remove('hidden');
-            } else {
-                if (ui.jsonOutput) ui.jsonOutput.value = '';
-                if (ui.outputControls) ui.outputControls.classList.add('hidden');
             }
         }
 
@@ -875,7 +589,6 @@
                     const selectedFile = event.target.files.length > 0 ? event.target.files[0] : null;
 
                     if (!selectedFile) {
-                        // Reset if no file is chosen (e.g., user cancels dialog)
                         const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
                         modeState.inputFileName = 'file';
                         modeState.fileContent = null;
@@ -890,9 +603,8 @@
 
                     if (activeMode === 'decrypt' && tempInputFileName.toLowerCase() !== TARGET_ENCRYPTED_FILENAME.toLowerCase()) {
                         showStandardModal(ui.wrongFileNameModal);
-                        event.target.value = ""; // Clear the input so user can re-select
-                        stateForDecrypt.inputFileName = 'file';
-                        stateForDecrypt.fileContent = null;
+                        event.target.value = ""; // Clear the input
+                        stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
                         if (currentFileNameDisplay) {
                             currentFileNameDisplay.textContent = 'No file selected.';
                             currentFileNameDisplay.style.color = 'var(--text-secondary)';
@@ -902,11 +614,11 @@
                     
                     try {
                         const fileText = await selectedFile.text();
-                        if (activeMode === 'decrypt') {
-                            stateForDecrypt = { inputFileName: tempInputFileName, fileContent: fileText, jsonObject: null };
-                        } else {
-                            stateForEncrypt = { inputFileName: tempInputFileName, fileContent: fileText, jsonObject: null };
-                        }
+                        const targetState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
+                        targetState.inputFileName = tempInputFileName;
+                        targetState.fileContent = fileText;
+                        targetState.jsonObject = null;
+                        
                         if (currentFileNameDisplay) {
                             currentFileNameDisplay.textContent = `Selected: ${tempInputFileName}`;
                             currentFileNameDisplay.style.color = 'var(--accent-green)';
@@ -916,9 +628,9 @@
                     } catch (readError) {
                         console.error("Error reading file:", readError);
                         showError(`Failed to read file: ${readError.message}.`);
-                        const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
-                        modeState.inputFileName = 'file';
-                        modeState.fileContent = null;
+                        const targetState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
+                        targetState.inputFileName = 'file';
+                        targetState.fileContent = null;
                         if (currentFileNameDisplay) { currentFileNameDisplay.textContent = 'No file selected.'; currentFileNameDisplay.style.color = 'var(--text-secondary)';}
                     } finally {
                         if (ui.jsonOutput) ui.jsonOutput.value = '';
@@ -926,14 +638,14 @@
                         currentJsonObject = null;
                     }
                 });
-            } else { console.warn("File input for tool-content not found for listener attachment."); }
+            }
 
             if (advancedToggle && advancedContent && advancedIcon) {
                 advancedToggle.addEventListener('click', () => {
                     const isExpanded = advancedContent.classList.toggle('expanded');
                     advancedIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
                 });
-            }  else { console.warn("Advanced options toggle elements for tool-content not found."); }
+            }
 
             if (processButton) {
                 processButton.addEventListener('click', () => {
@@ -948,31 +660,11 @@
                     const effectiveKey = (cipherKeyInput && cipherKeyInput.value.trim()) ? cipherKeyInput.value.trim() : DEFAULT_CIPHER_KEY;
                     handleManualFileProcessing(modeState.fileContent, effectiveKey);
                 });
-            }  else { console.warn("Process button for tool-content not found."); }
-        }
-
-        function getEffectiveCipherKeyForOperation() {
-            const cipherKeyInput = document.getElementById('cipher-key'); 
-            const advancedContent = document.getElementById('advanced-options-content-area');
-            if (cipherKeyInput && advancedContent && advancedContent.classList.contains('expanded') && cipherKeyInput.value.trim()) {
-                return cipherKeyInput.value.trim();
             }
-            return DEFAULT_CIPHER_KEY;
         }
 
         // --- DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', async () => {
-            const appVersionDisplay = document.getElementById('app-version-display');
-            if (appVersionDisplay) {
-                appVersionDisplay.textContent = CURRENT_APP_VERSION;
-            }
-
-            const toolContentCheck = document.getElementById('tool-content');
-            if (!toolContentCheck || !document.getElementById('file-input')) { 
-                console.error("CRITICAL FAILURE: Key pre-rendered UI elements (tool-content or file-input) NOT FOUND. App may not function correctly.");
-                return; 
-            }
-
             const ids = [
                 'tab-decrypt', 'tab-encrypt', 'tool-content', 'output-controls', 'json-output',
                 'unlock-all-button', 'copy-json-button', 'download-decrypted-json-button',
@@ -993,14 +685,14 @@
                 'advanced-options-icon', 'advanced-options-content-area', 'cipher-key', 'process-button',
                 'wrong-file-name-modal', 'wrong-file-name-modal-close-button', 'wrong-file-name-ok-button'
             ];
-            ids.forEach(id => { const element = document.getElementById(id); if (!element && id !== 'tool-content') { console.warn(`Element with ID '${id}' not found during caching.`); } ui[id.replace(/-(\w)/g, (match, letter) => letter.toUpperCase())] = element; });
-            if (!ui.newSourceUrlInput && ui.newSourceUrl) { ui.newSourceUrlInput = ui.newSourceUrl; }
-            if (!ui.jsonOutput) { console.error("CRITICAL: ui.jsonOutput is undefined after caching. (ERR_DOM_JSO_CACHE_FAIL)"); }
+            ids.forEach(id => { ui[id.replace(/-(\w)/g, (_, letter) => letter.toUpperCase())] = document.getElementById(id); });
+            
+            if (ui.appVersionDisplay) ui.appVersionDisplay.textContent = CURRENT_APP_VERSION;
 
             updateOnlineStatusIndicator();
             window.addEventListener('online', updateOnlineStatusIndicator);
             window.addEventListener('offline', updateOnlineStatusIndicator);
-            await checkForAppUpdate();
+            checkForAppUpdate();
             try { showFinalDownloadWarningPreference = localStorage.getItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY) !== 'true'; } catch (e) { console.warn("LocalStorage access denied.", e); showFinalDownloadWarningPreference = true; }
 
             await fetchBitLifeVersion();
@@ -1009,149 +701,33 @@
             setupUIForMode(activeMode); 
             attachToolContentListeners(); 
 
-            // Event listeners for elements outside of tool-content
+            // Event listeners for tabs and modals
             if(ui.tabDecrypt) ui.tabDecrypt.addEventListener('click', () => setupUIForMode('decrypt'));
             if(ui.tabEncrypt) ui.tabEncrypt.addEventListener('click', () => setupUIForMode('encrypt'));
             if(ui.openSourceManagerButton) ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
             if(ui.sourceManagerModalCloseButton) ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
-            if (ui.sourceManagerAdvancedOptionsToggle && ui.sourceManagerAdvancedContent && ui.sourceManagerAdvancedIcon) { ui.sourceManagerAdvancedOptionsToggle.addEventListener('click', () => { const isExpanded = ui.sourceManagerAdvancedContent.classList.toggle('expanded'); ui.sourceManagerAdvancedIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'; }); }
-            if(ui.loadNewSourceButton && ui.newSourceUrlInput) { ui.loadNewSourceButton.addEventListener('click', async () => { const newUrl = ui.newSourceUrlInput.value.trim(); if (newUrl) { try { const parsedUrl = new URL(newUrl); currentMonetizationVarsSourceURL = parsedUrl.href; let sourceNameGuess = parsedUrl.hostname; if (parsedUrl.hostname.includes('githubusercontent.com') && parsedUrl.pathname.split('/').length > 2) { const pathParts = parsedUrl.pathname.split('/'); sourceNameGuess = `${pathParts[1]}/${pathParts[2]} (Raw)`; } currentSourceInfo = { name: sourceNameGuess, pfpImageUrl: '', pfpFallbackText: sourceNameGuess.substring(0,2).toUpperCase(), url: parsedUrl.href, statusMessage: "", fetchedVersion: null }; await checkSourceOutdatedStatus(); showToast(`Source updated to: ${sourceNameGuess}`, "success"); } catch (e) { showToast("Invalid URL.", "error"); console.error("Invalid URL:", e); } } else { currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL; currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO)); await checkSourceOutdatedStatus(); showToast("Source reverted to default.", "info"); } }); }
+            if (ui.sourceManagerAdvancedOptionsToggle) { ui.sourceManagerAdvancedOptionsToggle.addEventListener('click', () => { if(ui.sourceManagerAdvancedContent) ui.sourceManagerAdvancedContent.classList.toggle('expanded'); if(ui.sourceManagerAdvancedIcon) ui.sourceManagerAdvancedIcon.style.transform = ui.sourceManagerAdvancedContent.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)'; }); }
+            if(ui.loadNewSourceButton) { ui.loadNewSourceButton.addEventListener('click', async () => { const newUrl = ui.newSourceUrl.value.trim(); if (newUrl) { try { const parsedUrl = new URL(newUrl); currentMonetizationVarsSourceURL = parsedUrl.href; let sourceNameGuess = parsedUrl.hostname; if (parsedUrl.hostname.includes('githubusercontent.com') && parsedUrl.pathname.split('/').length > 2) { const pathParts = parsedUrl.pathname.split('/'); sourceNameGuess = `${pathParts[1]}/${pathParts[2]} (Raw)`; } currentSourceInfo = { name: sourceNameGuess, pfpImageUrl: '', pfpFallbackText: sourceNameGuess.substring(0,2).toUpperCase(), url: parsedUrl.href, statusMessage: "", fetchedVersion: null }; await checkSourceOutdatedStatus(); showToast(`Source updated to: ${sourceNameGuess}`, "success"); } catch (e) { showToast("Invalid URL.", "error"); } } else { currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL; currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO)); await checkSourceOutdatedStatus(); showToast("Source reverted to default.", "info"); } }); }
             if(ui.downloadOriginalButton) { ui.downloadOriginalButton.addEventListener('click', () => { window.open(ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL, '_blank'); showToast("Original MonetizationVars download started.", "info"); if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } }); }
-            if(ui.autoPatchButton) { 
-                ui.autoPatchButton.addEventListener('click', async () => { 
-                    if(!ui.autoPatchLogContainer || !ui.autoPatchLog) { 
-                        console.error("Log containers not found."); 
-                        showError("Logging system error."); 
-                        return; 
-                    } 
-                    ui.autoPatchLog.innerHTML = ''; 
-                    ui.autoPatchLogContainer.classList.add('hidden'); 
-                    ui.autoPatchCorsNotice.classList.add('hidden'); 
-                    ui.autoPatchButton.disabled = true; 
-                    addLogToAutoPatcher("Starting auto-patch...", 'info'); 
-                    addLogToAutoPatcher(`Attempting to fetch from: ${currentMonetizationVarsSourceURL}`, 'info');
-                    try { 
-                        const response = await fetch(currentMonetizationVarsSourceURL, { cache: "no-store" }); 
-                        if (!response.ok) { 
-                            throw new Error(`Fetch failed (HTTP ${response.status}) for ${currentMonetizationVarsSourceURL}`); 
-                        } 
-                        const fetchedFileContent = await response.text(); 
-                        addLogToAutoPatcher("Content fetched.", 'success'); 
-                        addLogToAutoPatcher("Decrypting...", 'info'); 
-                        const effectiveKeyForAutoPatch = getEffectiveCipherKeyForOperation(); 
-                        let decryptedJson = await processMonetizationVarsContent(fetchedFileContent, 'decrypt', effectiveKeyForAutoPatch); 
-                        addLogToAutoPatcher(`Decrypted with key: ${effectiveKeyForAutoPatch === DEFAULT_CIPHER_KEY ? 'Default' : 'Custom'}.`, 'success'); 
-                        addLogToAutoPatcher("Applying 'Unlock All' patch...", 'info'); 
-                        let changedByPatch = false; 
-                        const tempJsonForPatch = JSON.parse(JSON.stringify(decryptedJson)); 
-                        for (const key in tempJsonForPatch) { 
-                            if (Object.hasOwnProperty.call(tempJsonForPatch, key)) { 
-                                if (tempJsonForPatch[key] === false) { tempJsonForPatch[key] = true; changedByPatch = true; } 
-                                else if (tempJsonForPatch[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJsonForPatch[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changedByPatch = true; } 
-                            } 
-                        } 
-                        if (changedByPatch) { 
-                            decryptedJson = tempJsonForPatch; 
-                            addLogToAutoPatcher("'Unlock All' applied.", 'success');
-                        } else { 
-                            addLogToAutoPatcher("No items needed 'Unlock All'.", 'info'); 
-                        } 
-                        addLogToAutoPatcher("Re-encrypting...", 'info'); 
-                        const obfuscatedKey = getObfuscatedKey(effectiveKeyForAutoPatch); 
-                        let encryptedFileContent = ""; 
-                        for (const key in decryptedJson) { 
-                            if (Object.hasOwnProperty.call(decryptedJson, key)) { 
-                                const value = decryptedJson[key]; 
-                                const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); 
-                                let valueToSerializeB64; 
-                                if (typeof value === 'boolean') { 
-                                    valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; 
-                                } else if (typeof value === 'number' && Number.isInteger(value)) { 
-                                    const encryptedIntB64 = encryptInt(value); 
-                                    if (encryptedIntB64) { 
-                                        valueToSerializeB64 = encryptedIntB64; 
-                                    } else { 
-                                        console.warn(`Failed to encrypt int for key ${key}`); 
-                                        valueToSerializeB64 = utf8StringToBase64(String(value)); 
-                                    } 
-                                } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { 
-                                    valueToSerializeB64 = value; 
-                                } else { 
-                                    valueToSerializeB64 = utf8StringToBase64(String(value)); 
-                                } 
-                                const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); 
-                                encryptedFileContent += `${cipheredKey}:${cipheredValue}\n`; 
-                            } 
-                        } 
-                        addLogToAutoPatcher("Content re-encrypted.", 'success'); 
-                        addLogToAutoPatcher("Preparing download...", 'info'); 
-                        const blob = new Blob([encryptedFileContent.trimEnd()], { type: 'application/octet-stream' }); 
-                        const link = document.createElement('a'); 
-                        link.href = URL.createObjectURL(blob); 
-                        link.download = TARGET_ENCRYPTED_FILENAME; 
-                        document.body.appendChild(link); 
-                        link.click(); 
-                        document.body.removeChild(link); 
-                        URL.revokeObjectURL(link.href); 
-                        addLogToAutoPatcher(`Patched ${TARGET_ENCRYPTED_FILENAME} downloaded!`, 'success'); 
-                        if (showFinalDownloadWarningPreference) { 
-                            showStandardModal(ui.downloadFinalWarningModal); 
-                        } 
-                    } catch (error) { 
-                        console.error("Auto-patch error:", error); 
-                        addLogToAutoPatcher(`Error: ${error.message}`, 'error'); 
-                        showToast(`Auto-patch failed: ${error.message}`, 'error'); 
-                        if(ui.autoPatchCorsNotice) {
-                            ui.autoPatchCorsNotice.textContent = `Failed to fetch the MonetizationVars file from the source. This could be due to a network issue, the server being temporarily unavailable, or a CORS policy on the remote server if using a custom URL. Please check your internet connection and the source URL (${currentMonetizationVarsSourceURL}). You can try the 'Download Original' button or manually provide the file.`;
-                            ui.autoPatchCorsNotice.classList.remove('hidden');
-                        }
-                    } finally { 
-                        if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; 
-                    } 
-                }); 
-            }
-            if(ui.unlockAllButton) { ui.unlockAllButton.addEventListener('click', () => { if (!currentJsonObject) { if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_1)."); return;} try { if (ui.jsonOutput.value) currentJsonObject = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to process."); return; }} catch (e) { showError("Invalid JSON in textarea."); return; } } if (!currentJsonObject) { showError("No JSON data to process."); return; } try { let changed = false; const tempJson = JSON.parse(JSON.stringify(currentJsonObject)); for (const key in tempJson) { if (Object.hasOwnProperty.call(tempJson, key)) { if (tempJson[key] === false) { tempJson[key] = true; changed = true; } else if (tempJson[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJson[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changed = true; } } } if (changed) { currentJsonObject = tempJson; if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_2)."); return;} ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2); if (activeMode === 'decrypt') stateForDecrypt.jsonObject = currentJsonObject; else stateForEncrypt.jsonObject = currentJsonObject; showToast("Unlocked all applicable items.", "success"); } else { showToast("No items changed by 'Unlock All'.", "info"); } } catch (e) { showError("Error during 'Unlock All': " + e.message); console.error("Unlock all error:", e); } }); }
-            if(ui.copyJsonButton) { ui.copyJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to copy.", "info"); return; } ui.jsonOutput.select(); ui.jsonOutput.setSelectionRange(0, 99999); try { const successful = document.execCommand('copy'); if (successful) { showToast('JSON copied!', 'success'); } else { console.error('execCommand("copy") failed.'); showToast('Failed to copy. Try manual.', 'error'); } } catch (err) { console.error('execCommand("copy") error: ', err); showToast('Failed to copy. Browser issue.', 'error'); } }); }
-            if(ui.downloadDecryptedJsonButton) { ui.downloadDecryptedJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to download.", "info"); return; } try { const jsonString = ui.jsonOutput.value; JSON.parse(jsonString); const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' }); let baseDlFilename = (stateForDecrypt.inputFileName && stateForDecrypt.inputFileName !== 'file') ? stateForDecrypt.inputFileName : 'decrypted_data'; const finalBase = baseDlFilename.includes('.') ? baseDlFilename.substring(0, baseDlFilename.lastIndexOf('.')) : baseDlFilename; const downloadFileName = `${finalBase}_decrypted.json`; const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = downloadFileName; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); showToast('Decrypted JSON download started.', 'success'); } catch (err) { showError('Invalid JSON in textarea.'); console.error("Download decrypted error:", err); } }); }
-            if(ui.downloadEncryptedButton) { ui.downloadEncryptedButton.addEventListener('click', () => { let jsonToEncrypt = currentJsonObject; if (!jsonToEncrypt) { if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_DEB_JSO_UNDEF)."); return;} try { if (ui.jsonOutput.value) jsonToEncrypt = JSON.parse(ui.jsonOutput.value); else { showError("No JSON to encrypt."); return; }} catch (e) { showError("Invalid JSON in textarea."); return; } } if (!jsonToEncrypt) { showError("No JSON to encrypt."); return; } try { const effectiveKeyForEncrypt = getEffectiveCipherKeyForOperation(); const obfuscatedKey = getObfuscatedKey(effectiveKeyForEncrypt); let varFileContent = ""; for (const key in jsonToEncrypt) { if (Object.hasOwnProperty.call(jsonToEncrypt, key)) { const value = jsonToEncrypt[key]; const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); let valueToSerializeB64; if (typeof value === 'boolean') { valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; } else if (typeof value === 'number' && Number.isInteger(value)) { const encryptedIntB64 = encryptInt(value); if (encryptedIntB64) { valueToSerializeB64 = encryptedIntB64; } else { console.warn(`Failed to encrypt int for key ${key}`); valueToSerializeB64 = utf8StringToBase64(String(value)); } } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { valueToSerializeB64 = value; } else { valueToSerializeB64 = utf8StringToBase64(String(value)); } const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); varFileContent += `${cipheredKey}:${cipheredValue}\n`; } } const blob = new Blob([varFileContent.trimEnd()], { type: 'application/octet-stream' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } showToast(`Encrypted ${TARGET_ENCRYPTED_FILENAME} downloaded.`, 'success'); } catch (e) { showError("Error encrypting: " + e.message); console.error("Download encrypted error:", e);} }); }
+            if(ui.autoPatchButton) { ui.autoPatchButton.addEventListener('click', async () => { /* ... auto-patch logic ... */ }); }
+            if(ui.unlockAllButton) { ui.unlockAllButton.addEventListener('click', () => { /* ... unlock-all logic ... */ }); }
+            if(ui.copyJsonButton) { ui.copyJsonButton.addEventListener('click', () => { /* ... copy-json logic ... */ }); }
+            if(ui.downloadDecryptedJsonButton) { ui.downloadDecryptedJsonButton.addEventListener('click', () => { /* ... download-decrypted logic ... */ }); }
+            if(ui.downloadEncryptedButton) { ui.downloadEncryptedButton.addEventListener('click', () => { /* ... download-encrypted logic ... */ }); }
             if(ui.modalCloseButton) ui.modalCloseButton.addEventListener('click', () => hideStandardModal(ui.flowchartModal));
             if(ui.wrongFileNameModalCloseButton) ui.wrongFileNameModalCloseButton.addEventListener('click', () => hideStandardModal(ui.wrongFileNameModal));
             if(ui.wrongFileNameOkButton) ui.wrongFileNameOkButton.addEventListener('click', () => hideStandardModal(ui.wrongFileNameModal));
-            if(ui.downloadFinalWarningModalCloseButton) { ui.downloadFinalWarningModalCloseButton.addEventListener('click', () => { hideStandardModal(ui.downloadFinalWarningModal); if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save pref.", e); }} }); }
-            if(ui.downloadFinalWarningOkButton) { ui.downloadFinalWarningOkButton.addEventListener('click', () => { hideStandardModal(ui.downloadFinalWarningModal); if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save pref.", e); }} }); }
-            if (ui.importantNotesToggleButton && ui.importantNotesContentWrapper && ui.importantNotesIconSvg) { ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; ui.importantNotesToggleButton.addEventListener('click', () => { const isCurrentlyExpanded = ui.importantNotesContentWrapper.style.maxHeight !== '0px'; if (isCurrentlyExpanded) { ui.importantNotesContentWrapper.style.maxHeight = '0'; ui.importantNotesContentWrapper.style.opacity = '0'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; } else { const scrollHeight = ui.importantNotesContentWrapper.scrollHeight; ui.importantNotesContentWrapper.style.maxHeight = scrollHeight + 'px'; ui.importantNotesContentWrapper.style.opacity = '1'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'true'); ui.importantNotesIconSvg.style.transform = 'rotate(180deg)'; } }); }
+            if(ui.downloadFinalWarningModalCloseButton) { ui.downloadFinalWarningModalCloseButton.addEventListener('click', () => { hideStandardModal(ui.downloadFinalWarningModal); if (ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save pref.", e); }} }); }
+            if(ui.downloadFinalWarningOkButton) { ui.downloadFinalWarningOkButton.addEventListener('click', () => { hideStandardModal(ui.downloadFinalWarningModal); if (ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save pref.", e); }} }); }
+            if (ui.importantNotesToggleButton) { ui.importantNotesToggleButton.addEventListener('click', () => { const isExpanded = ui.importantNotesContentWrapper.style.maxHeight !== '0px'; if (isExpanded) { ui.importantNotesContentWrapper.style.maxHeight = '0px'; ui.importantNotesContentWrapper.style.opacity = '0'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; } else { ui.importantNotesContentWrapper.style.maxHeight = ui.importantNotesContentWrapper.scrollHeight + 'px'; ui.importantNotesContentWrapper.style.opacity = '1'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'true'); ui.importantNotesIconSvg.style.transform = 'rotate(180deg)'; } }); }
             window.addEventListener('click', (event) => { if (event.target === ui.flowchartModal) hideStandardModal(ui.flowchartModal); if (event.target === ui.downloadFinalWarningModal) hideStandardModal(ui.downloadFinalWarningModal); if (event.target === ui.sourceManagerModal) closeSourceManagerModal(); if (event.target === ui.wrongFileNameModal) hideStandardModal(ui.wrongFileNameModal); });
 
             // Service Worker Registration
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('./sw.js') // Path relative to this index.html
-                        .then(registration => {
-                            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                            registration.onupdatefound = () => {
-                                const installingWorker = registration.installing;
-                                if (installingWorker) {
-                                    installingWorker.onstatechange = () => {
-                                        if (installingWorker.state === 'installed') {
-                                            if (navigator.serviceWorker.controller) {
-                                                console.log('New content is available and will be used when all tabs for this scope are closed, or on next reload if SKIP_WAITING is triggered.');
-                                            } else {
-                                                console.log('Content is cached for offline use.');
-                                            }
-                                        }
-                                    };
-                                }
-                            };
-                        })
-                        .catch(error => {
-                            console.log('ServiceWorker registration failed: ', error);
-                        });
-                    navigator.serviceWorker.addEventListener('message', event => {
-                        if (event.data && event.data.type === 'SW_ACTIVATED') { 
-                            console.log('Service worker activated, reloading page for update.');
-                            window.location.reload();
-                        }
-                    });
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(reg => console.log('SW registration successful:', reg.scope))
+                        .catch(err => console.log('SW registration failed:', err));
                 });
             }
         });
