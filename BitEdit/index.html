@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BitEdit - MonetizationVars Editor</title>
+    <script src="output.css"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="output.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <style>
@@ -386,6 +386,7 @@
         </div>
     </div>
 
+    <!-- Modals Section -->
     <div id="flowchart-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -393,6 +394,22 @@
                 <span id="modal-close-button" class="modal-close">&times;</span>
             </div>
             <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="wrong-file-name-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Incorrect File Selected</h2>
+                <span id="wrong-file-name-modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>For decryption, you must select the file named exactly <strong>MonetizationVars</strong> (without any file extension).</p>
+                <p>Please select the correct file to continue.</p>
+            </div>
+            <div class="modal-footer justify-end">
+                <button id="wrong-file-name-ok-button" class="button button-primary px-4 py-2 text-sm">OK</button>
+            </div>
         </div>
     </div>
 
@@ -480,7 +497,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
         </button>
-        <div id="important-notes-content-wrapper" class="overflow-hidden transition-all duration-300 ease-out">
+        <div id="important-notes-content-wrapper" class="overflow-hidden transition-all duration-300 ease-out" style="max-height: 0px; opacity: 0;">
             <div class="important-notes-block" style="border: 1px solid var(--border-color-primary); border-top: none; padding: 1.5rem; border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); background-color: var(--bg-secondary);">
                 <h2 class="sr-only">Important Notes Details</h2> <ul>
                     <li>Input file for manual decryption must be named exactly <code>MonetizationVars</code> (case-insensitive, no extension).</li>
@@ -543,7 +560,7 @@
 
         // --- App Version (Manually update this when releasing a new version) ---
         // GITHUB_ACTION_MARKER_APP_VERSION (Do not remove or alter this line)
-        const CURRENT_APP_VERSION = "v1.4.8"; 
+        const CURRENT_APP_VERSION = "v1.4.9"; 
 
         // --- Constants ---
         const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
@@ -756,7 +773,36 @@
         function updateSourceManagerDisplay(sourceInfo) { if(ui.sourcePfpLarge) { ui.sourcePfpLarge.innerHTML = ''; if (sourceInfo.pfpImageUrl) { const img = document.createElement('img'); img.src = sourceInfo.pfpImageUrl; img.alt = sourceInfo.name.substring(0,2); img.className = "w-full h-full object-cover"; img.onerror = () => { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase(); }; ui.sourcePfpLarge.appendChild(img); } else { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase() || 'URL'; } } if(ui.sourceNameLarge) ui.sourceNameLarge.textContent = sourceInfo.name; if(ui.sourceUrlDisplayLarge) { ui.sourceUrlDisplayLarge.href = sourceInfo.url; const displayUrl = sourceInfo.url.length > 40 ? sourceInfo.url.substring(0, 15) + "..." + sourceInfo.url.substring(sourceInfo.url.length - 15) : sourceInfo.url; ui.sourceUrlDisplayLarge.textContent = `View Raw: ${displayUrl}`; } if(ui.sourceStatusLabelLarge) { ui.sourceStatusLabelLarge.textContent = sourceInfo.statusMessage || "(Status N/A)"; ui.sourceStatusLabelLarge.classList.remove('hidden', 'potentially-newer', 'outdated', 'neutral'); ui.sourceStatusLabelLarge.classList.add('status-label'); if (sourceInfo.statusMessage) { ui.sourceStatusLabelLarge.classList.remove('hidden'); const lowerStatus = sourceInfo.statusMessage.toLowerCase(); if (lowerStatus.includes("newer")) { ui.sourceStatusLabelLarge.classList.add('potentially-newer'); } else if (lowerStatus.includes("outdated")) { ui.sourceStatusLabelLarge.classList.add('outdated'); } else { ui.sourceStatusLabelLarge.classList.add('neutral'); } } else { ui.sourceStatusLabelLarge.classList.add('hidden'); } } if (ui.sourceFetchedVersionMessage) { if (sourceInfo.fetchedVersion && currentMonetizationVarsSourceURL === DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) { ui.sourceFetchedVersionMessage.textContent = `Default source is for BitLife v${sourceInfo.fetchedVersion}`; ui.sourceFetchedVersionMessage.classList.remove('hidden'); } else { ui.sourceFetchedVersionMessage.classList.add('hidden'); } } if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden'); }
         function addLogToAutoPatcher(message, type = 'info') { if(!ui.autoPatchLog || !ui.autoPatchLogContainer) return; const logEntry = document.createElement('p'); logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`; logEntry.classList.add(type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info')); ui.autoPatchLog.appendChild(logEntry); ui.autoPatchLog.scrollTop = ui.autoPatchLog.scrollHeight; ui.autoPatchLogContainer.classList.remove('hidden'); }
         async function processMonetizationVarsContent(fileContent, operationMode, cipherKeyStr) { const effectiveCipherKey = cipherKeyStr || DEFAULT_CIPHER_KEY; const obfuscatedKey = getObfuscatedKey(effectiveCipherKey); let processedJsonObject; if (operationMode === 'decrypt') { const itemMap = {}; const lines = fileContent.split('\n').filter(line => line.trim() !== ''); for (const line of lines) { const parts = line.split(/:(.+)/); if (parts.length < 2 || !parts[1]) { console.warn("Malformed line (missing or empty value):", line); continue; } const encKey = parts[0].trim(); const encVal = parts[1].trim(); try { const decKey = base64DecodeAndXOR(encKey, obfuscatedKey); const decValB64 = base64DecodeAndXOR(encVal, obfuscatedKey); if (decValB64 === B64_NET_BOOLEAN_TRUE_STANDARD || decValB64 === B64_NET_BOOLEAN_TRUE_VARIANT) { itemMap[decKey] = true; } else if (decValB64 === B64_NET_BOOLEAN_FALSE_STANDARD) { itemMap[decKey] = false; } else { const intValue = decryptInt(decValB64); if (intValue !== null) { itemMap[decKey] = intValue; } else { itemMap[decKey] = decValB64; } } } catch (e) { console.error("Error processing line:", line, e); throw new Error(`Decryption/decoding error. Check key/file. Line: ${line.substring(0,30)}...`); } } processedJsonObject = itemMap; } else { processedJsonObject = JSON.parse(fileContent); } return processedJsonObject; }
-        async function handleManualFileProcessing(fileContent, inputFileName, cipherKeyStr) { clearError(); if (!ui.jsonOutput) { console.error("CRITICAL ERROR in handleManualFileProcessing: ui.jsonOutput is undefined. Cannot clear or set value."); showError("Internal error: Output area not found (ERR_HMFP_JSO_UNDEF_1)."); return; } ui.jsonOutput.value = ''; if (!ui.outputControls) { console.error("ERROR in handleManualFileProcessing: ui.outputControls is undefined."); } else { ui.outputControls.classList.add('hidden'); } if (activeMode === 'decrypt' && inputFileName.toLowerCase() !== TARGET_ENCRYPTED_FILENAME.toLowerCase()) { showError(`Invalid input for decryption. Must be '${TARGET_ENCRYPTED_FILENAME}'. Provided: '${inputFileName}'`); return; } try { const processedJson = await processMonetizationVarsContent(fileContent, activeMode, cipherKeyStr); if (activeMode === 'decrypt') { stateForDecrypt.jsonObject = processedJson; } else { stateForEncrypt.jsonObject = processedJson; } currentJsonObject = processedJson; if (!ui.jsonOutput) { console.error("CRITICAL ERROR in handleManualFileProcessing: ui.jsonOutput is undefined before setting final JSON. (ERR_HMFP_JSO_UNDEF_2)"); showError("Internal error: Output area disappeared (ERR_HMFP_JSO_UNDEF_2)."); return; } ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2); if (ui.outputControls) ui.outputControls.classList.remove('hidden'); } catch (error) { console.error("Manual Processing error:", error); showError(`Error: ${error.message}.`); currentJsonObject = null; if (activeMode === 'decrypt') stateForDecrypt.jsonObject = null; else stateForEncrypt.jsonObject = null; } }
+        async function handleManualFileProcessing(fileContent, cipherKeyStr) {
+            clearError();
+            if (!ui.jsonOutput) { 
+                console.error("CRITICAL ERROR: ui.jsonOutput is undefined.");
+                showError("Internal error: Output area not found.");
+                return;
+            }
+            ui.jsonOutput.value = ''; 
+            if (ui.outputControls) {
+                ui.outputControls.classList.add('hidden');
+            }
+
+            try {
+                const processedJson = await processMonetizationVarsContent(fileContent, activeMode, cipherKeyStr);
+                if (activeMode === 'decrypt') {
+                    stateForDecrypt.jsonObject = processedJson;
+                } else {
+                    stateForEncrypt.jsonObject = processedJson;
+                }
+                currentJsonObject = processedJson;
+                ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2);
+                if (ui.outputControls) ui.outputControls.classList.remove('hidden');
+            } catch (error) {
+                console.error("Manual Processing error:", error);
+                showError(`Error: ${error.message}.`);
+                currentJsonObject = null;
+                if (activeMode === 'decrypt') stateForDecrypt.jsonObject = null;
+                else stateForEncrypt.jsonObject = null;
+            }
+        }
         
         function setupUIForMode(newMode) {
             activeMode = newMode;
@@ -817,7 +863,6 @@
 
         function attachToolContentListeners() {
             const fileInput = document.getElementById('file-input');
-            const fileNameDisplay = document.getElementById('file-name-display'); 
             const processButton = document.getElementById('process-button');
             const advancedToggle = document.getElementById('advanced-options-toggle-container');
             const advancedContent = document.getElementById('advanced-options-content-area');
@@ -827,39 +872,58 @@
                 fileInput.addEventListener('change', async (event) => {
                     clearError();
                     const currentFileNameDisplay = ui.fileNameDisplay || document.getElementById('file-name-display'); 
-                    if (event.target.files.length > 0) {
-                        const selectedFile = event.target.files[0];
-                        const tempInputFileName = selectedFile.name;
-                        try {
-                            const fileText = await selectedFile.text();
-                            if (activeMode === 'decrypt') {
-                                stateForDecrypt = { inputFileName: tempInputFileName, fileContent: fileText, jsonObject: null };
-                            } else {
-                                stateForEncrypt = { inputFileName: tempInputFileName, fileContent: fileText, jsonObject: null };
-                            }
-                            if (currentFileNameDisplay) {
-                                currentFileNameDisplay.textContent = `Selected: ${tempInputFileName}`;
-                                currentFileNameDisplay.style.color = 'var(--accent-green)';
-                                currentFileNameDisplay.classList.add('file-selected-text-anim');
-                                setTimeout(() => currentFileNameDisplay.classList.remove('file-selected-text-anim'), 300);
-                            }
-                        } catch (readError) {
-                            console.error("Error reading file:", readError);
-                            showError(`Failed to read file: ${readError.message}.`);
-                            if (activeMode === 'decrypt') { stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
-                            else { stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
-                            if (currentFileNameDisplay) { currentFileNameDisplay.textContent = 'No file selected.'; currentFileNameDisplay.style.color = 'var(--text-secondary)';}
-                        }
-                        if (ui.jsonOutput) ui.jsonOutput.value = '';
-                        if (ui.outputControls) ui.outputControls.classList.add('hidden');
-                        currentJsonObject = null;
-                    } else {
-                        if (activeMode === 'decrypt') { stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
-                        else { stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null }; }
+                    const selectedFile = event.target.files.length > 0 ? event.target.files[0] : null;
+
+                    if (!selectedFile) {
+                        // Reset if no file is chosen (e.g., user cancels dialog)
+                        const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
+                        modeState.inputFileName = 'file';
+                        modeState.fileContent = null;
                         if (currentFileNameDisplay) {
                             currentFileNameDisplay.textContent = 'No file selected.';
                             currentFileNameDisplay.style.color = 'var(--text-secondary)';
                         }
+                        return;
+                    }
+
+                    const tempInputFileName = selectedFile.name;
+
+                    if (activeMode === 'decrypt' && tempInputFileName.toLowerCase() !== TARGET_ENCRYPTED_FILENAME.toLowerCase()) {
+                        showStandardModal(ui.wrongFileNameModal);
+                        event.target.value = ""; // Clear the input so user can re-select
+                        stateForDecrypt.inputFileName = 'file';
+                        stateForDecrypt.fileContent = null;
+                        if (currentFileNameDisplay) {
+                            currentFileNameDisplay.textContent = 'No file selected.';
+                            currentFileNameDisplay.style.color = 'var(--text-secondary)';
+                        }
+                        return;
+                    }
+                    
+                    try {
+                        const fileText = await selectedFile.text();
+                        if (activeMode === 'decrypt') {
+                            stateForDecrypt = { inputFileName: tempInputFileName, fileContent: fileText, jsonObject: null };
+                        } else {
+                            stateForEncrypt = { inputFileName: tempInputFileName, fileContent: fileText, jsonObject: null };
+                        }
+                        if (currentFileNameDisplay) {
+                            currentFileNameDisplay.textContent = `Selected: ${tempInputFileName}`;
+                            currentFileNameDisplay.style.color = 'var(--accent-green)';
+                            currentFileNameDisplay.classList.add('file-selected-text-anim');
+                            setTimeout(() => currentFileNameDisplay.classList.remove('file-selected-text-anim'), 300);
+                        }
+                    } catch (readError) {
+                        console.error("Error reading file:", readError);
+                        showError(`Failed to read file: ${readError.message}.`);
+                        const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
+                        modeState.inputFileName = 'file';
+                        modeState.fileContent = null;
+                        if (currentFileNameDisplay) { currentFileNameDisplay.textContent = 'No file selected.'; currentFileNameDisplay.style.color = 'var(--text-secondary)';}
+                    } finally {
+                        if (ui.jsonOutput) ui.jsonOutput.value = '';
+                        if (ui.outputControls) ui.outputControls.classList.add('hidden');
+                        currentJsonObject = null;
                     }
                 });
             } else { console.warn("File input for tool-content not found for listener attachment."); }
@@ -874,13 +938,15 @@
             if (processButton) {
                 processButton.addEventListener('click', () => {
                     const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
-                    if (modeState.fileContent !== null && modeState.inputFileName !== 'file') {
-                        const cipherKeyInput = document.getElementById('cipher-key'); 
-                        const effectiveKey = (cipherKeyInput && cipherKeyInput.value.trim()) ? cipherKeyInput.value.trim() : DEFAULT_CIPHER_KEY;
-                        handleManualFileProcessing(modeState.fileContent, modeState.inputFileName, effectiveKey);
-                    } else {
+                    
+                    if (modeState.fileContent === null || modeState.inputFileName === 'file') {
                         showError('Please select a file first.');
+                        return;
                     }
+                    
+                    const cipherKeyInput = document.getElementById('cipher-key'); 
+                    const effectiveKey = (cipherKeyInput && cipherKeyInput.value.trim()) ? cipherKeyInput.value.trim() : DEFAULT_CIPHER_KEY;
+                    handleManualFileProcessing(modeState.fileContent, effectiveKey);
                 });
             }  else { console.warn("Process button for tool-content not found."); }
         }
@@ -924,7 +990,8 @@
                 'important-notes-toggle-button', 'important-notes-content-wrapper', 'important-notes-icon-svg',
                 'offline-indicator', 'update-available-banner', 'app-version-display',
                 'file-input-label', 'file-input', 'file-name-display', 'advanced-options-toggle-container', 
-                'advanced-options-icon', 'advanced-options-content-area', 'cipher-key', 'process-button'
+                'advanced-options-icon', 'advanced-options-content-area', 'cipher-key', 'process-button',
+                'wrong-file-name-modal', 'wrong-file-name-modal-close-button', 'wrong-file-name-ok-button'
             ];
             ids.forEach(id => { const element = document.getElementById(id); if (!element && id !== 'tool-content') { console.warn(`Element with ID '${id}' not found during caching.`); } ui[id.replace(/-(\w)/g, (match, letter) => letter.toUpperCase())] = element; });
             if (!ui.newSourceUrlInput && ui.newSourceUrl) { ui.newSourceUrlInput = ui.newSourceUrl; }
@@ -1048,10 +1115,12 @@
             if(ui.downloadDecryptedJsonButton) { ui.downloadDecryptedJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to download.", "info"); return; } try { const jsonString = ui.jsonOutput.value; JSON.parse(jsonString); const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' }); let baseDlFilename = (stateForDecrypt.inputFileName && stateForDecrypt.inputFileName !== 'file') ? stateForDecrypt.inputFileName : 'decrypted_data'; const finalBase = baseDlFilename.includes('.') ? baseDlFilename.substring(0, baseDlFilename.lastIndexOf('.')) : baseDlFilename; const downloadFileName = `${finalBase}_decrypted.json`; const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = downloadFileName; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); showToast('Decrypted JSON download started.', 'success'); } catch (err) { showError('Invalid JSON in textarea.'); console.error("Download decrypted error:", err); } }); }
             if(ui.downloadEncryptedButton) { ui.downloadEncryptedButton.addEventListener('click', () => { let jsonToEncrypt = currentJsonObject; if (!jsonToEncrypt) { if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_DEB_JSO_UNDEF)."); return;} try { if (ui.jsonOutput.value) jsonToEncrypt = JSON.parse(ui.jsonOutput.value); else { showError("No JSON to encrypt."); return; }} catch (e) { showError("Invalid JSON in textarea."); return; } } if (!jsonToEncrypt) { showError("No JSON to encrypt."); return; } try { const effectiveKeyForEncrypt = getEffectiveCipherKeyForOperation(); const obfuscatedKey = getObfuscatedKey(effectiveKeyForEncrypt); let varFileContent = ""; for (const key in jsonToEncrypt) { if (Object.hasOwnProperty.call(jsonToEncrypt, key)) { const value = jsonToEncrypt[key]; const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); let valueToSerializeB64; if (typeof value === 'boolean') { valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; } else if (typeof value === 'number' && Number.isInteger(value)) { const encryptedIntB64 = encryptInt(value); if (encryptedIntB64) { valueToSerializeB64 = encryptedIntB64; } else { console.warn(`Failed to encrypt int for key ${key}`); valueToSerializeB64 = utf8StringToBase64(String(value)); } } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { valueToSerializeB64 = value; } else { valueToSerializeB64 = utf8StringToBase64(String(value)); } const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); varFileContent += `${cipheredKey}:${cipheredValue}\n`; } } const blob = new Blob([varFileContent.trimEnd()], { type: 'application/octet-stream' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } showToast(`Encrypted ${TARGET_ENCRYPTED_FILENAME} downloaded.`, 'success'); } catch (e) { showError("Error encrypting: " + e.message); console.error("Download encrypted error:", e);} }); }
             if(ui.modalCloseButton) ui.modalCloseButton.addEventListener('click', () => hideStandardModal(ui.flowchartModal));
+            if(ui.wrongFileNameModalCloseButton) ui.wrongFileNameModalCloseButton.addEventListener('click', () => hideStandardModal(ui.wrongFileNameModal));
+            if(ui.wrongFileNameOkButton) ui.wrongFileNameOkButton.addEventListener('click', () => hideStandardModal(ui.wrongFileNameModal));
             if(ui.downloadFinalWarningModalCloseButton) { ui.downloadFinalWarningModalCloseButton.addEventListener('click', () => { hideStandardModal(ui.downloadFinalWarningModal); if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save pref.", e); }} }); }
             if(ui.downloadFinalWarningOkButton) { ui.downloadFinalWarningOkButton.addEventListener('click', () => { hideStandardModal(ui.downloadFinalWarningModal); if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) { try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch(e) { console.warn("Could not save pref.", e); }} }); }
-            if (ui.importantNotesToggleButton && ui.importantNotesContentWrapper && ui.importantNotesIconSvg) { ui.importantNotesContentWrapper.style.maxHeight = '0'; ui.importantNotesContentWrapper.style.opacity = '0'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; ui.importantNotesToggleButton.addEventListener('click', () => { const isCurrentlyExpanded = ui.importantNotesContentWrapper.style.maxHeight !== '0px'; if (isCurrentlyExpanded) { ui.importantNotesContentWrapper.style.maxHeight = '0'; ui.importantNotesContentWrapper.style.opacity = '0'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; } else { ui.importantNotesContentWrapper.style.maxHeight = 'auto'; const scrollHeight = ui.importantNotesContentWrapper.scrollHeight; ui.importantNotesContentWrapper.style.maxHeight = '0'; ui.importantNotesContentWrapper.offsetHeight; ui.importantNotesContentWrapper.style.maxHeight = scrollHeight + 'px'; ui.importantNotesContentWrapper.style.opacity = '1'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'true'); ui.importantNotesIconSvg.style.transform = 'rotate(180deg)'; } }); }
-            window.addEventListener('click', (event) => { if (event.target === ui.flowchartModal) hideStandardModal(ui.flowchartModal); if (event.target === ui.downloadFinalWarningModal) hideStandardModal(ui.downloadFinalWarningModal); if (event.target === ui.sourceManagerModal) closeSourceManagerModal(); });
+            if (ui.importantNotesToggleButton && ui.importantNotesContentWrapper && ui.importantNotesIconSvg) { ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; ui.importantNotesToggleButton.addEventListener('click', () => { const isCurrentlyExpanded = ui.importantNotesContentWrapper.style.maxHeight !== '0px'; if (isCurrentlyExpanded) { ui.importantNotesContentWrapper.style.maxHeight = '0'; ui.importantNotesContentWrapper.style.opacity = '0'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'false'); ui.importantNotesIconSvg.style.transform = 'rotate(0deg)'; } else { const scrollHeight = ui.importantNotesContentWrapper.scrollHeight; ui.importantNotesContentWrapper.style.maxHeight = scrollHeight + 'px'; ui.importantNotesContentWrapper.style.opacity = '1'; ui.importantNotesToggleButton.setAttribute('aria-expanded', 'true'); ui.importantNotesIconSvg.style.transform = 'rotate(180deg)'; } }); }
+            window.addEventListener('click', (event) => { if (event.target === ui.flowchartModal) hideStandardModal(ui.flowchartModal); if (event.target === ui.downloadFinalWarningModal) hideStandardModal(ui.downloadFinalWarningModal); if (event.target === ui.sourceManagerModal) closeSourceManagerModal(); if (event.target === ui.wrongFileNameModal) hideStandardModal(ui.wrongFileNameModal); });
 
             // Service Worker Registration
             if ('serviceWorker' in navigator) {
