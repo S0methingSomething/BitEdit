@@ -49,7 +49,7 @@ jobs:
             exit 1
           fi
           VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
-          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
+          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"$$[^"]*$$".*/\1/p')
           
           if [ -z "$VERSION_STRING" ]; then
             echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
@@ -89,72 +89,25 @@ jobs:
           single-commit: true
           commit-message: "deploy: BitEdit ${{ steps.get_version.outputs.version_original }}"
 
-      # Ensure Cloudflare Pages project exists; create it if missing
-      - name: Ensure Cloudflare Pages project exists
-        env:
-          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CF_API_TOKEN:-}" ] || [ -z "${CF_ACCOUNT_ID:-}" ] || [ -z "${CF_PROJECT:-}" ]; then
-            echo "Missing Cloudflare config. Set secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and variable CLOUDFLARE_PAGES_PROJECT."
-            exit 1
-          fi
-          BASE_URL="https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/pages/projects"
+      # Verify Cloudflare credentials (helps debug Account ID/token issues)
+      - name: Verify Cloudflare credentials with Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3'
+          command: whoami
 
-          # Verify account exists and is accessible
-          ACCOUNT_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_account.json \
-            -H "Authorization: Bearer ${CF_API_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}")
-
-          if [ "$ACCOUNT_STATUS" != "200" ]; then
-            echo "Failed to access account ${CF_ACCOUNT_ID}. HTTP $ACCOUNT_STATUS. Likely invalid Account ID, incorrect API token, or insufficient permissions. Response:"
-            cat /tmp/cf_account.json || true
-            exit 1
-          fi
-          echo "Account ${CF_ACCOUNT_ID} verified."
-
-          # Check if project exists
-          STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_get.json \
-            -H "Authorization: Bearer ${CF_API_TOKEN}" \
-            "${BASE_URL}/${CF_PROJECT}")
-
-          if [ "$STATUS" = "200" ]; then
-            echo "Cloudflare Pages project '${CF_PROJECT}' exists."
-          elif [ "$STATUS" = "404" ]; then
-            echo "Project '${CF_PROJECT}' not found. Creating..."
-            CREATE_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_create.json \
-              -H "Authorization: Bearer ${CF_API_TOKEN}" \
-              -H "Content-Type: application/json" \
-              -X POST "${BASE_URL}" \
-              --data "{\"name\":\"${CF_PROJECT}\",\"production_branch\":\"main\"}")
-
-            if [ "$CREATE_STATUS" != "200" ] && [ "$CREATE_STATUS" != "201" ]; then
-              echo "Failed to create Cloudflare Pages project '${CF_PROJECT}'. HTTP $CREATE_STATUS. Response:"
-              cat /tmp/cf_create.json
-              exit 1
-            fi
-            echo "Created Cloudflare Pages project '${CF_PROJECT}'."
-            sleep 2
-          else
-            echo "Unexpected response when checking project (HTTP $STATUS):"
-            cat /tmp/cf_get.json || true
-            exit 1
-          fi
+      # Create Cloudflare Pages project if missing (continue if it already exists)
+      - name: Create Cloudflare Pages project if missing
+        uses: cloudflare/wrangler-action@v3
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3'
+          command: pages project create ${{ vars.CLOUDFLARE_PAGES_PROJECT }} --production-branch main
 
       # Deploy BitEdit/ to Cloudflare Pages (production)
       - name: Deploy to Cloudflare Pages (production)
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
-        run: |
-          set -euo pipefail
-          # Note: The original provided script was cut off here. Assuming you intended to use Wrangler or similar for deployment.
-          # Install Wrangler if needed
-          npm install -g wrangler
-          # Publish the BitEdit directory to Cloudflare Pages
-          wrangler pages deploy BitEdit --project-name "${CF_PROJECT}"
-          # If this is not the intended deployment command, replace with the correct one (e.g., curl for direct upload API).
-          # For direct upload via API, you would need to use the upload endpoint, but Wrangler is recommended for simplicity.
+       
