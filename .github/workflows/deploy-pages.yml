@@ -34,7 +34,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20' 
           cache: 'npm'
 
       - name: Install dependencies
@@ -64,7 +64,7 @@ jobs:
         id: normalize_version
         run: |
           RAW_VERSION="${{ steps.get_version.outputs.version_original }}"
-          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//')
+          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//') 
           echo "value=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Create/Update BitEdit_version.txt locally
@@ -96,8 +96,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
       # ---------- Cloudflare Pages deployment via Wrangler ----------
-      # One-time setup: create the Pages project if it doesn't exist.
-      # Uses repository variable CLOUDFLARE_PAGES_PROJECT (e.g., "bitguides" or "bitedit").
+      # Uses repository variable CLOUDFLARE_PAGES_PROJECT and your Cloudflare secrets.
       - name: Create Cloudflare Pages project if missing
         uses: cloudflare/wrangler-action@v3
         continue-on-error: true
@@ -121,7 +120,10 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Add all potentially generated or modified files to the staging area.
+          # This includes the newly built CSS and any updated version files.
           git add BitEdit/output.css BitEdit/BitEdit_version.txt BitEdit/sw.js
+          
+          # Check for staged changes. If there are changes, commit and push.
           if ! git diff --staged --quiet; then
-            echo "Detected changes in generated files. Committing..."
-            git commit -m "build: Update generated files [skip ci]" -m "This commit includes the latest Tailwind CSS build (output.css) and any version
