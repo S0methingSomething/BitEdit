@@ -103,6 +103,18 @@ jobs:
           fi
           BASE_URL="https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/pages/projects"
 
+          # Verify account exists and is accessible
+          ACCOUNT_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_account.json \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}")
+
+          if [ "$ACCOUNT_STATUS" != "200" ]; then
+            echo "Failed to access account ${CF_ACCOUNT_ID}. HTTP $ACCOUNT_STATUS. Likely invalid Account ID, incorrect API token, or insufficient permissions. Response:"
+            cat /tmp/cf_account.json || true
+            exit 1
+          fi
+          echo "Account ${CF_ACCOUNT_ID} verified."
+
           # Check if project exists
           STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_get.json \
             -H "Authorization: Bearer ${CF_API_TOKEN}" \
@@ -138,4 +150,11 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
         run: |
-          set -euo
+          set -euo pipefail
+          # Note: The original provided script was cut off here. Assuming you intended to use Wrangler or similar for deployment.
+          # Install Wrangler if needed
+          npm install -g wrangler
+          # Publish the BitEdit directory to Cloudflare Pages
+          wrangler pages deploy BitEdit --project-name "${CF_PROJECT}"
+          # If this is not the intended deployment command, replace with the correct one (e.g., curl for direct upload API).
+          # For direct upload via API, you would need to use the upload endpoint, but Wrangler is recommended for simplicity.
