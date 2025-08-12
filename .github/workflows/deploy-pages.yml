@@ -1,14 +1,14 @@
-name: Build Tailwind, Deploy BitEdit, and Update Files
+name: Build Tailwind, Deploy BitEdit, GitHub Pages + Cloudflare Pages
 
 on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/index.html'         # For version extraction
-      - 'BitEdit/tailwind/input.css' # Path to your main Tailwind input CSS
-      - 'tailwind.config.js'         # Assumed to be at the root
-      - 'postcss.config.js'          # Assumed to be at the root
-      - 'BitEdit/**/*.js'            # If other JS files influence Tailwind classes
+      - 'BitEdit/index.html'
+      - 'BitEdit/tailwind/input.css'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'BitEdit/**/*.js'
   workflow_dispatch:
 
 permissions:
@@ -49,7 +49,7 @@ jobs:
             exit 1
           fi
           VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
-          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
+          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"$$[^"]*$$".*/\1/p')
           
           if [ -z "$VERSION_STRING" ]; then
             echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
@@ -78,19 +78,82 @@ jobs:
           sed -i.bak -E "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${{ steps.normalize_version.outputs.value }}\2/;}" "$SW_FILE_PATH"
           rm -f "${SW_FILE_PATH}.bak"
 
-      # Publish the built site to the gh-pages branch (root)
-      # Then set Settings → Pages → Deploy from a branch → gh-pages / (root)
+      # Publish BitEdit/ to gh-pages branch (GitHub Pages -> Settings → Pages → Deploy from a branch → gh-pages)
       - name: Publish BitEdit to gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages          # The branch GitHub Pages will serve from
-          folder: BitEdit           # Publish the contents of BitEdit/ to the branch root
-          clean: true               # Remove old files in gh-pages
-          single-commit: true       # Keep gh-pages history minimal
+          branch: gh-pages
+          folder: BitEdit
+          clean: true
+          single-commit: true
           commit-message: "deploy: BitEdit ${{ steps.get_version.outputs.version_original }}"
 
-      # Optionally still keep a versioned branch with generated files for review/audit
+      # Ensure Cloudflare Pages project exists; create it if missing
+      - name: Ensure Cloudflare Pages project exists
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CF_API_TOKEN:-}" ] || [ -z "${CF_ACCOUNT_ID:-}" ] || [ -z "${CF_PROJECT:-}" ]; then
+            echo "Missing Cloudflare config. Set secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and variable CLOUDFLARE_PAGES_PROJECT."
+            exit 1
+          fi
+          BASE_URL="https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/pages/projects"
+
+          # Check if project exists
+          STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_get.json \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            "${BASE_URL}/${CF_PROJECT}")
+
+          if [ "$STATUS" = "200" ]; then
+            echo "Cloudflare Pages project '${CF_PROJECT}' exists."
+          elif [ "$STATUS" = "404" ]; then
+            echo "Project '${CF_PROJECT}' not found. Creating..."
+            CREATE_STATUS=$(curl -sS -w "%{http_code}" -o /tmp/cf_create.json \
+              -H "Authorization: Bearer ${CF_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -X POST "${BASE_URL}" \
+              --data "{\"name\":\"${CF_PROJECT}\",\"production_branch\":\"main\"}")
+
+            if [ "$CREATE_STATUS" != "200" ] && [ "$CREATE_STATUS" != "201" ]; then
+              echo "Failed to create Cloudflare Pages project '${CF_PROJECT}'. HTTP $CREATE_STATUS. Response:"
+              cat /tmp/cf_create.json
+              exit 1
+            fi
+            echo "Created Cloudflare Pages project '${CF_PROJECT}'."
+            sleep 2
+          else
+            echo "Unexpected response when checking project (HTTP $STATUS):"
+            cat /tmp/cf_get.json || true
+            exit 1
+          fi
+
+      # Deploy BitEdit/ to Cloudflare Pages (production)
+      - name: Deploy to Cloudflare Pages (production)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CF_PROJECT:-}" ]; then
+            echo "CLOUDFLARE_PAGES_PROJECT variable is not set."
+            exit 1
+          fi
+
+          # Hardcoded Wrangler version (change here if you want a different pin)
+          WVER="3.80.0"
+          echo "Using Wrangler version: ${WVER}"
+
+          npx --yes "wrangler@${WVER}" pages deploy "BitEdit" \
+            --project-name "$CF_PROJECT" \
+            --branch "main" \
+            --commit-message "BitEdit ${{ steps.get_version.outputs.version_original }}"
+
+      # Keep a versioned branch with generated files for review/audit
       - name: Commit and push generated files to a versioned branch
         env:
           BRANCH_NAME: build/bitedit-${{ steps.normalize_version.outputs.value }}
@@ -103,24 +166,5 @@ jobs:
           # Create or update the versioned branch
           if git ls-remote --exit-code --heads origin "$BRANCH_NAME" > /dev/null 2>&1; then
             echo "Remote branch $BRANCH_NAME exists. Checking it out locally."
-            git fetch origin "$BRANCH_NAME:$BRANCH_NAME"
-            git checkout "$BRANCH_NAME"
-            git rebase origin/main || true
-          else
-            echo "Creating new branch $BRANCH_NAME from current HEAD."
-            git checkout -b "$BRANCH_NAME"
-          fi
-
-          # Stage generated/updated files
-          git add BitEdit/output.css BitEdit/BitEdit_version.txt BitEdit/sw.js
-
-          # Commit and push only if there are changes
-          if ! git diff --staged --quiet; then
-            echo "Detected changes in generated files. Committing to $BRANCH_NAME..."
-            git commit -m "build: Update generated files [skip ci]" \
-                        -m "BitEdit ${{ steps.get_version.outputs.version_original }} - Tailwind build (output.css), updated version file, and SW cache name."
-            git push --set-upstream origin "$BRANCH_NAME"
-            echo "Pushed updated generated files to branch $BRANCH_NAME."
-          else
-            echo "No changes in generated files to commit."
-          fi
+            git fetch origi n
+ 
