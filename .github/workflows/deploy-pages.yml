@@ -138,33 +138,4 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CF_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
         run: |
-          set -euo pipefail
-          if [ -z "${CF_PROJECT:-}" ]; then
-            echo "CLOUDFLARE_PAGES_PROJECT variable is not set."
-            exit 1
-          fi
-
-          # Hardcoded Wrangler version (change here if you want a different pin)
-          WVER="3.80.0"
-          echo "Using Wrangler version: ${WVER}"
-
-          npx --yes "wrangler@${WVER}" pages deploy "BitEdit" \
-            --project-name "$CF_PROJECT" \
-            --branch "main" \
-            --commit-message "BitEdit ${{ steps.get_version.outputs.version_original }}"
-
-      # Keep a versioned branch with generated files for review/audit
-      - name: Commit and push generated files to a versioned branch
-        env:
-          BRANCH_NAME: build/bitedit-${{ steps.normalize_version.outputs.value }}
-        run: |
-          set -euo pipefail
-
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-          # Create or update the versioned branch
-          if git ls-remote --exit-code --heads origin "$BRANCH_NAME" > /dev/null 2>&1; then
-            echo "Remote branch $BRANCH_NAME exists. Checking it out locally."
-            git fetch origi n
- 
+          set -euo
