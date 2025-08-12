@@ -49,7 +49,7 @@ jobs:
             exit 1
           fi
           VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
-          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"$$[^"]*$$".*/\1/p')
+          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
           
           if [ -z "$VERSION_STRING" ]; then
             echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
@@ -110,4 +110,9 @@ jobs:
 
       # Deploy BitEdit/ to Cloudflare Pages (production)
       - name: Deploy to Cloudflare Pages (production)
-       
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3'
+          command: pages deploy BitEdit --project-name ${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch main --commit-dirty=true
