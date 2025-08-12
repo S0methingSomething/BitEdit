@@ -12,28 +12,118 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # To push updated version files and output.css
-  pages: write      # To deploy to GitHub Pages
-  id-token: write   # For OIDC token for GitHub Pages deployment
+  contents: write   # Needed to push to branches (build branch + gh-pages)
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  build_deploy_and_commit:
+  build_publish_and_commit:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # allow creating/switching branches and pushing
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Tailwind CSS
+        run: npx @tailwindcss/cli -i ./BitEdit/tailwind/input.css -o ./BitEdit/output.css --minify
+
+      - name: Extract version from BitEdit/index.html
+        id: get_version
+        run: |
+          INDEX_FILE_PATH="BitEdit/index.html"
+          if [ ! -f "$INDEX_FILE_PATH" ]; then
+            echo "Error: $INDEX_FILE_PATH not found."
+            exit 1
+          fi
+          VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
+          VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
+          
+          if [ -z "$VERSION_STRING" ]; then
+            echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
+            exit 1
+          fi
+          echo "version_original=$VERSION_STRING" >> "$GITHUB_OUTPUT"
+
+      - name: Normalize version string for CACHE_NAME
+        id: normalize_version
+        run: |
+          RAW_VERSION="${{ steps.get_version.outputs.version_original }}"
+          NORMALIZED_VERSION=$(echo "$RAW_VERSION" | sed 's/^v//')
+          echo "value=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create/Update BitEdit_version.txt locally
+        run: |
+          echo "${{ steps.get_version.outputs.version_original }}" > BitEdit/BitEdit_version.txt
+
+      - name: Update CACHE_NAME in sw.js locally
+        run: |
+          SW_FILE_PATH="BitEdit/sw.js"
+          if [ ! -f "$SW_FILE_PATH" ]; then
+            echo "Error: $SW_FILE_PATH not found."
+            exit 1
+          fi
+          sed -i.bak -E "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${{ steps.normalize_version.outputs.value }}\2/;}" "$SW_FILE_PATH"
+          rm -f "${SW_FILE_PATH}.bak"
+
+      # Publish the built site to the gh-pages branch (root)
+      # Then set Settings → Pages → Deploy from a branch → gh-pages / (root)
+      - name: Publish BitEdit to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages          # The branch GitHub Pages will serve from
+          folder: BitEdit           # Publish the contents of BitEdit/ to the branch root
+          clean: true               # Remove old files in gh-pages
+          single-commit: true       # Keep gh-pages history minimal
+          commit-message: "deploy: BitEdit ${{ steps.get_version.outputs.version_original }}"
+
+      # Optionally still keep a versioned branch with generated files for review/audit
+      - name: Commit and push generated files to a versioned branch
+        env:
+          BRANCH_NAME: build/bitedit-${{ steps.normalize_version.outputs.value }}
+        run: |
+          set -euo pipefail
+
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Create or update the versioned branch
+          if git ls-remote --exit-code --heads origin "$BRANCH_NAME" > /dev/null 2>&1; then
+            echo "Remote branch $BRANCH_NAME exists. Checking it out locally."
+            git fetch origin "$BRANCH_NAME:$BRANCH_NAME"
+            git checkout "$BRANCH_NAME"
+            git rebase origin/main || true
+          else
+            echo "Creating new branch $BRANCH_NAME from current HEAD."
+            git checkout -b "$BRANCH_NAME"
+          fi
+
+          # Stage generated/updated files
+          git add BitEdit/output.css BitEdit/BitEdit_version.txt BitEdit/sw.js
+
+          # Commit and push only if there are changes
+          if ! git diff --staged --quiet; then
+            echo "Detected changes in generated files. Committing to $BRANCH_NAME..."
+            git commit -m "build: Update generated files [skip ci]" \
+                        -m "BitEdit ${{ steps.get_version.outputs.version_original }} - Tailwind build (output.css), updated version file, and SW cache name."
+            git push --set-upstream origin "$BRANCH_NAME"
+            echo "Pushed updated generated files to branch $BRANCH_NAME."
+          else
+            echo "No changes in generated files to commit."
+          fi
           node-version: '20'
           cache: 'npm'
 
