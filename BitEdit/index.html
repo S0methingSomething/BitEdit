@@ -312,6 +312,7 @@
     <div class="main-container p-4 sm:p-6 md:p-8 w-full max-w-2xl">
         <div class="page-title-container">
             <h1 class="page-title">BitEdit</h1>
+            <p class="ai-attribution-top">Made by u/C1oudyLol</p>
             <p class="ai-attribution-top">Made with AI (Gemini)</p>
             <p class="derivative-attribution-top">
                 Based on <a href="https://github.com/yntha/bitlife-edit/blob/master/Program.cs" target="_blank" rel="noopener noreferrer">yntha's bitlife-edit</a> (GPLv3).
@@ -560,7 +561,7 @@
 
         // --- App Version (Manually update this when releasing a new version) ---
         // GITHUB_ACTION_MARKER_APP_VERSION (Do not remove or alter this line)
-        const CURRENT_APP_VERSION = "v1.4.9"; 
+        const CURRENT_APP_VERSION = "v1.5.0"; 
 
         // --- Constants ---
         const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
@@ -649,7 +650,7 @@
                 if (latestVersionMatch && latestVersionMatch[2]) {
                     const normalizedLatestVersion = latestVersionMatch[2];
                     localStorage.setItem(LAST_SUCCESSFUL_UPDATE_CHECK_KEY, Date.now().toString());
-                   
+
                     if (compareVersions(normalizedLatestVersion, CURRENT_APP_VERSION) > 0) {
                         ui.updateAvailableBanner.innerHTML = `Update to ${normalizedLatestVersion} available! <button id="refresh-update-button">Refresh to Update</button>`;
                         ui.updateAvailableBanner.style.display = 'block';
@@ -803,7 +804,7 @@
                 else stateForEncrypt.jsonObject = null;
             }
         }
-        
+
         function setupUIForMode(newMode) {
             activeMode = newMode;
             clearError();
@@ -833,7 +834,7 @@
                 if (fileInputElement) fileInputElement.accept = '.json,text/plain';
                 if (processButtonElement) processButtonElement.textContent = 'Load JSON from File';
             }
-            
+
             let modeState = (newMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
             if (fileNameDisplay) {
                 if (modeState.inputFileName !== 'file' && modeState.fileContent !== null) {
@@ -899,7 +900,7 @@
                         }
                         return;
                     }
-                    
+
                     try {
                         const fileText = await selectedFile.text();
                         if (activeMode === 'decrypt') {
@@ -938,12 +939,12 @@
             if (processButton) {
                 processButton.addEventListener('click', () => {
                     const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
-                    
+
                     if (modeState.fileContent === null || modeState.inputFileName === 'file') {
                         showError('Please select a file first.');
                         return;
                     }
-                    
+
                     const cipherKeyInput = document.getElementById('cipher-key'); 
                     const effectiveKey = (cipherKeyInput && cipherKeyInput.value.trim()) ? cipherKeyInput.value.trim() : DEFAULT_CIPHER_KEY;
                     handleManualFileProcessing(modeState.fileContent, effectiveKey);
@@ -1005,7 +1006,7 @@
 
             await fetchBitLifeVersion();
             await checkSourceOutdatedStatus();
-            
+
             setupUIForMode(activeMode); 
             attachToolContentListeners(); 
 
