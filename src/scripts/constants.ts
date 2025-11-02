@@ -1,4 +1,4 @@
-export const CURRENT_APP_VERSION = "v1.5.0";
+export const CURRENT_APP_VERSION = "v1.6.0";
 export const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
 export const B64_NET_BOOLEAN_TRUE_STANDARD = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs=";
 export const B64_NET_BOOLEAN_TRUE_VARIANT  = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAs=";
@@ -12,8 +12,8 @@ export const HIDE_FINAL_DOWNLOAD_WARNING_KEY = 'bitEditHideFinalDownloadWarning'
 export const DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL = "https://raw.githubusercontent.com/S0methingSomething/BitEdit/refs/heads/main/MonetizationVars.txt";
 export const GITHUB_API_LATEST_TAG_URL = "https://api.github.com/repos/S0methingSomething/BitEdit/releases/tags/Latest";
 export const ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL = "https://github.com/S0methingSomething/BitEdit/releases/download/Latest/MonetizationVars";
-export const BITLIFE_VERSION_TXT_URL = 'https://raw.githubusercontent.com/S0methingSomething/BitEdit/refs/heads/main/BitEdit/Get_Bitlife_Version/version.txt';
-export const APP_VERSION_CHECK_URL = 'https://raw.githubusercontent.com/S0methingSomething/BitEdit/main/BitEdit/BitEdit_version.txt';
+export const BITLIFE_VERSION_TXT_URL = '/version.txt';
+export const APP_VERSION_CHECK_URL = '/BitEdit_version.txt';
 export const LAST_SUCCESSFUL_UPDATE_CHECK_KEY = 'bitEditLastSuccessfulUpdateCheck';
 export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
