@@ -1,18 +1,19 @@
-name: Build Tailwind, Deploy BitEdit, GitHub Pages + Cloudflare Pages
+name: Build and Deploy Astro, GitHub Pages + Cloudflare Pages
 
 on:
   push:
     branches: ["main"]
     paths:
-      - 'BitEdit/index.html'
-      - 'BitEdit/tailwind/input.css'
-      - 'tailwind.config.js'
-      - 'postcss.config.js'
-      - 'BitEdit/**/*.js'
+      - 'src/**'
+      - 'public/**'
+      - 'astro.config.mjs'
+      - 'tailwind.config.mjs'
+      - 'tsconfig.json'
+      - 'package.json'
   workflow_dispatch:
 
 permissions:
-  contents: write   # Needed to push to branches (build branch + gh-pages)
+  contents: write
 
 concurrency:
   group: "pages"
@@ -26,7 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # allow creating/switching branches and pushing
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -37,22 +38,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Tailwind CSS
-        run: npx @tailwindcss/cli -i ./BitEdit/tailwind/input.css -o ./BitEdit/output.css --minify
+      - name: Build Astro project
+        run: npm run build
 
-      - name: Extract version from BitEdit/index.html
+      - name: Extract version from src/scripts/constants.ts
         id: get_version
         run: |
-          INDEX_FILE_PATH="BitEdit/index.html"
-          if [ ! -f "$INDEX_FILE_PATH" ]; then
-            echo "Error: $INDEX_FILE_PATH not found."
+          CONSTANTS_FILE_PATH="src/scripts/constants.ts"
+          if [ ! -f "$CONSTANTS_FILE_PATH" ]; then
+            echo "Error: $CONSTANTS_FILE_PATH not found."
             exit 1
           fi
-          VERSION_LINE=$(grep 'GITHUB_ACTION_MARKER_APP_VERSION' -A 1 "$INDEX_FILE_PATH" | tail -n1)
+          VERSION_LINE=$(grep 'CURRENT_APP_VERSION' "$CONSTANTS_FILE_PATH")
           VERSION_STRING=$(echo "$VERSION_LINE" | sed -n 's/.*CURRENT_APP_VERSION[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p')
           
           if [ -z "$VERSION_STRING" ]; then
-            echo "Error: Version string not found or invalid format in $INDEX_FILE_PATH."
+            echo "Error: Version string not found or invalid format in $CONSTANTS_FILE_PATH."
             exit 1
           fi
           echo "version_original=$VERSION_STRING" >> "$GITHUB_OUTPUT"
@@ -66,11 +67,11 @@ jobs:
 
       - name: Create/Update BitEdit_version.txt locally
         run: |
-          echo "${{ steps.get_version.outputs.version_original }}" > BitEdit/BitEdit_version.txt
+          echo "${{ steps.get_version.outputs.version_original }}" > public/BitEdit_version.txt
 
       - name: Update CACHE_NAME in sw.js locally
         run: |
-          SW_FILE_PATH="BitEdit/sw.js"
+          SW_FILE_PATH="public/sw.js"
           if [ ! -f "$SW_FILE_PATH" ]; then
             echo "Error: $SW_FILE_PATH not found."
             exit 1
@@ -78,18 +79,16 @@ jobs:
           sed -i.bak -E "/\/\/ GITHUB_ACTION_MARKER_SW_CACHE_NAME/{n;s/(const CACHE_NAME = *')[^']*(' *;.*)/\1${{ steps.normalize_version.outputs.value }}\2/;}" "$SW_FILE_PATH"
           rm -f "${SW_FILE_PATH}.bak"
 
-      # Publish BitEdit/ to gh-pages branch (GitHub Pages -> Settings → Pages → Deploy from a branch → gh-pages)
-      - name: Publish BitEdit to gh-pages
+      - name: Publish dist to gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: BitEdit
+          folder: dist
           clean: true
           single-commit: true
           commit-message: "deploy: BitEdit ${{ steps.get_version.outputs.version_original }}"
 
-      # Verify Cloudflare credentials (helps debug Account ID/token issues)
       - name: Verify Cloudflare credentials with Wrangler
         uses: cloudflare/wrangler-action@v3
         with:
@@ -98,7 +97,6 @@ jobs:
           wranglerVersion: '3'
           command: whoami
 
-      # Create Cloudflare Pages project if missing (continue if it already exists)
       - name: Create Cloudflare Pages project if missing
         uses: cloudflare/wrangler-action@v3
         continue-on-error: true
@@ -108,11 +106,10 @@ jobs:
           wranglerVersion: '3'
           command: pages project create ${{ vars.CLOUDFLARE_PAGES_PROJECT }} --production-branch main
 
-      # Deploy BitEdit/ to Cloudflare Pages (production)
       - name: Deploy to Cloudflare Pages (production)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3'
-          command: pages deploy BitEdit --project-name ${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch main --commit-dirty=true
+          command: pages deploy dist --project-name ${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch main --commit-dirty=true

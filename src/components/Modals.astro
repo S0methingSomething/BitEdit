@@ -1,0 +1,102 @@
+---
+---
+<div id="flowchart-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title" class="modal-title">Step Details</h2>
+            <span id="modal-close-button" class="modal-close">&times;</span>
+        </div>
+        <div id="modal-body" class="modal-body"></div>
+    </div>
+</div>
+
+<div id="wrong-file-name-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Incorrect File Selected</h2>
+            <span id="wrong-file-name-modal-close-button" class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>For decryption, you must select the file named exactly <strong>MonetizationVars</strong> (without any file extension).</p>
+            <p>Please select the correct file to continue.</p>
+        </div>
+        <div class="modal-footer justify-end">
+            <button id="wrong-file-name-ok-button" class="button button-primary px-4 py-2 text-sm">OK</button>
+        </div>
+    </div>
+</div>
+
+<div id="download-final-warning-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">File Downloaded</h2>
+            <span id="download-final-warning-modal-close-button" class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Please check the downloaded file. If it has an extension, remove it to use on BitLife.</p>
+        </div>
+        <div class="modal-footer">
+            <label for="dont-show-final-warning-again">
+                <input type="checkbox" id="dont-show-final-warning-again">
+                Don't show this again
+            </label>
+            <button id="download-final-warning-ok-button" class="button button-primary px-4 py-2 text-sm">OK</button>
+        </div>
+    </div>
+</div>
+
+<div id="source-manager-modal" class="modal hidden"> <div class="source-manager-modal-content"> <span id="source-manager-modal-close-button" class="source-manager-modal-close">&times;</span>
+        <div class="source-manager-header">
+            <h2 class="source-manager-title">MonetizationVars Source</h2>
+        </div>
+
+        <div class="current-source-info-card">
+            <div class="current-source-pfp-container">
+                <div id="source-pfp-large">S0</div>
+            </div>
+            <h3 id="source-name-large" class="truncate">Default Source Name</h3>
+            <span id="source-status-label-large" class="status-label neutral">(Status Loading...)</span>
+            <p id="source-fetched-version-message" class="hidden">Successfully fetched (vX.Y.Z)</p>
+            <a id="source-url-display-large" href="#" target="_blank" rel="noopener noreferrer" class="block text-xs mt-1">View Raw File</a>
+            <p id="modal-bitlife-version-info" class="mt-2">Latest BitLife Ver: <span id="modal-bitlife-version-dynamic">Loading...</span></p>
+        </div>
+
+        <div id="source-manager-advanced-options-toggle" class="advanced-options-toggle">
+            <svg id="source-manager-advanced-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+            <span>Advanced: Change Source URL</span>
+        </div>
+        <div id="source-manager-advanced-content" class="advanced-options-content">
+             <div class="advanced-options-inner-wrapper">
+                <label for="new-source-url" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">New Source (Raw File URL):</label>
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="url" id="new-source-url" placeholder="https://example.com/path/to/MonetizationVars" class="flex-grow min-w-0"> <button id="load-new-source-button" class="button button-primary px-3 py-2 text-xs sm:text-sm flex-shrink-0">Load</button>
+                </div>
+                <p class="text-xs" style="color: var(--text-secondary);">Use a `raw.githubusercontent.com` link or a URL with open CORS permissions for auto-patching.</p>
+             </div>
+        </div>
+
+        <div class="mt-6 pt-6 border-t" style="border-color: var(--border-color-primary);">
+            <h3 class="text-lg font-semibold mb-3 text-center" style="color: var(--text-primary);">Actions</h3>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="auto-patch-button" class="w-full sm:w-auto button button-action-green py-2.5 text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Download & Auto-Patch
+                </button>
+                <button id="download-original-button" class="w-full sm:w-auto button button-secondary py-2.5 text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Original
+                </button>
+            </div>
+            <div id="auto-patch-cors-notice" class="hidden text-center mt-3">
+            </div>
+            <div id="auto-patch-log-container" class="mt-4 hidden w-full">
+                <p class="text-xs font-medium mb-1 text-left" style="color: var(--text-secondary);">Patching Log:</p>
+                <div id="auto-patch-log" class="w-full"></div>
+            </div>
+        </div>
+    </div>
+</div>

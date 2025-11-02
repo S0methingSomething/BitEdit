@@ -23,11 +23,11 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r BitEdit/Get_Bitlife_Version/requirements.txt
+        run: pip install -r scripts/Get_Bitlife_Version/requirements.txt
 
       - name: Scrape for current version
         id: scrape # ID to reference output in later steps
-        run: echo "current_version=$(python BitEdit/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
+        run: echo "current_version=$(python scripts/Get_Bitlife_Version/Get_version.py)" >> $GITHUB_OUTPUT
 
       - name: Debug Print Scraped Version
         run: echo "Raw scraped version output by script is --->${{ steps.scrape.outputs.current_version }}<---"
@@ -36,7 +36,7 @@ jobs:
         id: validation # ID to reference output in later steps
         run: |
           scraped_version="${{ steps.scrape.outputs.current_version }}"
-          version_file="BitEdit/Get_Bitlife_Version/version.txt"
+          version_file="public/version.txt"
           should_write_new_version="false" # Default: do not update file
 
           echo "Starting validation for scraped version: '$scraped_version'"
@@ -76,13 +76,13 @@ jobs:
       - name: Create or Update version.txt
         if: steps.validation.outputs.should_write == 'true'
         run: |
-          echo "Writing version ${{ steps.scrape.outputs.current_version }} to BitEdit/Get_Bitlife_Version/version.txt"
-          echo "${{ steps.scrape.outputs.current_version }}" > BitEdit/Get_Bitlife_Version/version.txt
+          echo "Writing version ${{ steps.scrape.outputs.current_version }} to public/version.txt"
+          echo "${{ steps.scrape.outputs.current_version }}" > public/version.txt
 
       - name: Commit version.txt
         if: steps.validation.outputs.should_write == 'true' 
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update BitLife version to ${{ steps.scrape.outputs.current_version }}"
-          file_pattern: 'BitEdit/Get_Bitlife_Version/version.txt'
+          file_pattern: 'public/version.txt'
 

@@ -1,0 +1,70 @@
+---
+---
+<div class="main-container p-4 sm:p-6 md:p-8 w-full max-w-2xl">
+    <div id="top-info-bar" class="rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-center p-3 sm:p-4">
+        <div class="text-center sm:text-left mb-3 sm:mb-0">
+            <p class="text-sm sm:text-base font-semibold mb-1">Don't have a MonetizationVars?</p>
+            <button id="open-source-manager-button" class="button button-primary py-2 px-3 text-xs sm:text-sm w-full sm:w-auto">
+                Download or auto patch MonetizationVars
+            </button>
+            <p style="font-size: 0.65rem; line-height: 0.8rem;" class="opacity-60 mt-0.5">(from external source)</p>
+        </div>
+        <p class="text-xs text-center sm:text-right w-full sm:w-auto mt-2 sm:mt-0" style="color: var(--text-secondary);">
+            Latest BitLife Ver: <span id="bitlife-version" class="font-semibold" style="color: var(--text-primary);">Loading...</span>
+        </p>
+    </div>
+
+    <div class="mb-6 tab-navigation-container">
+        <nav class="flex space-x-1" aria-label="Tabs">
+            <button id="tab-decrypt" class="tab-button active">
+                Decrypt File
+            </button>
+            <button id="tab-encrypt" class="tab-button">
+                Encrypt JSON
+            </button>
+        </nav>
+    </div>
+
+    <div id="tool-content" class="mt-6">
+        <div class="space-y-4">
+            <label id="file-input-label" for="file-input" class="block text-sm font-medium" style="color: var(--text-secondary);">Select 'MonetizationVars' File:</label>
+            <input type="file" id="file-input" accept="*/*" class="block w-full text-sm button button-secondary"/>
+            <span id="file-name-display" class="block text-xs mt-1.5" style="color: var(--text-secondary);">No file selected.</span>
+
+            <div id="advanced-options-toggle-container" class="advanced-options-toggle">
+                <svg id="advanced-options-icon" class="transform transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem; height:1.25rem; margin-right:0.5rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                <span>Advanced Options (Cipher Key)</span>
+            </div>
+            <div id="advanced-options-content-area" class="advanced-options-content">
+               <div class="advanced-options-inner-wrapper">
+                    <label for="cipher-key" class="block text-sm font-medium mb-1" style="color: var(--text-secondary);">Cipher Key (Optional - Case Insensitive):</label>
+                    <input type="text" id="cipher-key" placeholder="Default: com.wtfapps.apollo16" class="w-full" />
+                </div>
+            </div>
+            <button id="process-button" class="w-full font-semibold py-2.5 px-4 button button-primary text-base">Start Decryption</button>
+        </div>
+        </div>
+
+    <div id="output-controls" class="mt-6 hidden">
+         <button id="unlock-all-button" class="w-full mb-4 px-4 py-3 font-semibold button button-action-yellow text-base">
+            Unlock All / Set All to True
+        </button>
+        <div id="json-output-container" class="mb-4">
+            <label for="json-output" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">JSON Data:</label>
+            <textarea id="json-output" rows="10" class="w-full p-3 resize-y"></textarea>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <button id="download-encrypted-button" class="w-full sm:w-auto px-4 py-3 sm:px-6 font-semibold order-1 button button-action-green text-base">
+                Download Encrypted "MonetizationVars"
+            </button>
+            <div class="flex flex-col xs:flex-row gap-2 order-2 sm:order-3 mt-2 sm:mt-0 w-full sm:w-auto">
+                <button id="copy-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium button button-action-indigo text-sm">Copy JSON</button>
+                <button id="download-decrypted-json-button" class="flex-grow xs:flex-grow-0 px-4 py-2 font-medium button button-action-sky text-sm">Download Decrypted JSON</button>
+            </div>
+        </div>
+    </div>
+       <div id="error-message" class="mt-4 p-3 rounded-md hidden text-sm" style="background-color: rgba(var(--accent-red-rgb),0.9); color: white; border: 1px solid rgba(var(--accent-red-rgb), 0.7);"></div>
+
+    <div id="progress-flowchart-container" class="flowchart-container-outer flowchart mt-4 hidden">
+    </div>
+</div>
