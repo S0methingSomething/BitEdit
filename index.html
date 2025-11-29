@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitEdit - MonetizationVars Editor</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'enter': 'enter 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                        'enter-delay': 'enter 0.4s cubic-bezier(0.25, 1, 0.5, 1) 0.1s forwards',
+                        'snap': 'snap 0.2s cubic-bezier(0.25, 1, 0.5, 1)',
+                        'led-pulse': 'ledPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'led-blink': 'ledBlink 1s infinite step-end',
+                        'led-flicker': 'ledFlicker 0.1s infinite',
+                    },
+                    keyframes: {
+                        enter: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        snap: {
+                            '0%': { transform: 'scale(0.98)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        ledPulse: {
+                            '0%, 100%': { opacity: '1', filter: 'brightness(1)' },
+                            '50%': { opacity: '0.5', filter: 'brightness(0.7)' },
+                        },
+                        ledBlink: {
+                            '0%, 50%': { opacity: '1' },
+                            '51%, 100%': { opacity: '0.2' },
+                        },
+                        ledFlicker: {
+                            '0%': { opacity: '1' },
+                            '50%': { opacity: '0.6' },
+                            '100%': { opacity: '0.9' },
+                        }
+                    },
+                    colors: {
+                        'retro-black': '#050505',
+                        'retro-panel': '#0c0c0c',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+
+    <style>
+        /* --- CORE TEXTURE & PHYSICS --- */
+        body {
+            background-color: #050505;
+            color: #ededed;
+            overflow-x: hidden;
+        }
+
+        /* Background Grid - Fixed, No Mask (Full Screen) */
+        .bg-grid-full {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Texture Overlay (Noise) */
+        .texture-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            mix-blend-mode: hard-light;
+        }
+
+        /* --- COMPONENTS --- */
+
+        /* Panel Styling */
+        .panel-textured {
+            background-color: rgba(12, 12, 12, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        /* Drop Zone Styling */
+        .drop-zone {
+            background-color: #080808;
+            border: 2px dashed #333;
+            transition: border-color 0.1s ease, background-color 0.1s ease; /* Faster transition */
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+            cursor: pointer;
+        }
+        .drop-zone:hover {
+            border-color: #555;
+            background-color: #0d0d0d;
+        }
+        .drop-zone.drag-over {
+            border-color: #6366f1; /* Indigo */
+            background-color: rgba(99, 102, 241, 0.1);
+            box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+
+        /* LED Status Dot */
+        #status-led {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 2px;
+            position: relative;
+            top: -4px; /* Align slightly up */
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px currentColor;
+        }
+        .led-online { background-color: #10b981; color: #10b981; animation: led-pulse 2s infinite; }
+        .led-offline { background-color: #f59e0b; color: #f59e0b; }
+        .led-update { background-color: #ef4444; color: #ef4444; animation: led-blink 1s infinite; }
+        .led-busy { background-color: #3b82f6; color: #3b82f6; animation: led-flicker 0.1s infinite; }
+
+        /* Buttons - Mechanical Feel */
+        .btn-tactile {
+            transition: transform 0.05s linear, filter 0.05s linear; /* Instant snap */
+        }
+        .btn-tactile:active:not(:disabled) {
+            transform: scale(0.98) translateY(1px);
+            filter: brightness(0.85);
+        }
+
+        /* Inputs */
+        .input-cutout {
+            background-color: #050505;
+            border: 1px solid #222;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            transition: border-color 0.1s ease;
+        }
+        .input-cutout:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        /* Tabs */
+        .tab-btn {
+            position: relative;
+            transition: color 0.1s ease;
+        }
+        .tab-btn::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px;
+            background: #fff; transform: scaleX(0); transform-origin: left;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .tab-btn.active { color: #fff; }
+        .tab-btn.active::after { transform: scaleX(1); }
+
+
+        /* Modals */
+        .modal-glass {
+            background-color: rgba(8, 8, 8, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 1px #000, 0 25px 50px -12px rgba(0,0,0,0.9);
+        }
+        .modal { transition: opacity 0.15s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        .modal.hidden { opacity: 0; pointer-events: none; transform: scale(0.98) translateY(5px); }
+        .modal.visible { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+
+        /* Modal Overlay Pattern (Stripes) */
+        .modal-stripes {
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 4px,
+                rgba(255, 255, 255, 0.03) 4px,
+                rgba(255, 255, 255, 0.03) 8px
+            );
+        }
+
+        /* Checkbox */
+        input[type="checkbox"] {
+            appearance: none; background-color: #111; width: 1.2em; height: 1.2em;
+            border: 1px solid #444; border-radius: 2px; display: grid; place-content: center;
+        }
+        input[type="checkbox"]::before {
+            content: ""; width: 0.65em; height: 0.65em; transform: scale(0);
+            transition: 100ms transform ease-in-out; background-color: white;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        input[type="checkbox"]:checked { background-color: #fff; border-color: #fff; }
+        input[type="checkbox"]:checked::before { transform: scale(1); background-color: black; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+    
+    <!-- Analytics -->
+    <script src="https://cdn.counter.dev/script.js" data-id="74520b76-a519-45cc-9a4c-891f2c59a0e4" data-utcoffset="8"></script>
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "52269c15b3504cd5a2a5960b53017486"}'></script>
+</head>
+<body class="min-h-screen flex flex-col items-center relative">
+
+    <!-- Backgrounds -->
+    <div class="bg-grid-full"></div>
+    <div class="texture-overlay"></div>
+
+    <div class="content-wrapper w-full flex flex-col items-center max-w-3xl mx-auto px-4 py-10 sm:py-16 z-10">
+        
+        <!-- Header -->
+        <div class="text-center mb-10 opacity-0 animate-enter">
+            <div class="inline-flex items-baseline justify-center relative group cursor-help" id="logo-container">
+                <h1 class="font-display text-6xl font-bold tracking-tighter text-white drop-shadow-md select-none">
+                    BitEdit
+                </h1>
+                <!-- THE STATUS DOT -->
+                <div id="status-led" class="led-online" title="System Status: Online"></div>
+                
+                <!-- Tooltip -->
+                <div id="status-tooltip" class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-zinc-900 border border-zinc-700 text-zinc-200 text-[10px] font-mono py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl">
+                    System Online
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center gap-2 mt-4">
+                <p class="text-[11px] font-mono text-zinc-500 uppercase tracking-[0.2em] border border-zinc-800 px-3 py-1 rounded-full bg-black/50">MonetizationVars Editor</p>
+                <div class="flex gap-3 text-[10px] text-zinc-600 font-mono mt-1 opacity-60 hover:opacity-100 transition-opacity duration-300">
+                    <span>u/C1oudyLol</span>
+                    <span>&bull;</span>
+                    <span>AI Assisted</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-container w-full panel-textured rounded-xl overflow-hidden opacity-0 animate-enter-delay relative">
+            
+            <!-- Top Bar Info -->
+            <div id="top-info-bar" class="bg-black/20 border-b border-white/5 p-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                    <button id="open-source-manager-button" class="btn-tactile group relative w-full sm:w-auto overflow-hidden rounded bg-[#1a1a1a] px-4 py-2 text-xs font-mono text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 transition-colors shadow-sm">
+                        <span class="relative flex items-center justify-center gap-2">
+                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                            Import / Patch Source
+                        </span>
+                    </button>
+                    <span class="hidden sm:inline text-zinc-800 text-xs">|</span>
+                    <span class="text-[10px] text-zinc-600 uppercase tracking-wide">External Source</span>
+                </div>
+                <div class="font-mono text-xs text-zinc-500">
+                    BitLife Ver: <span id="bitlife-version" class="text-zinc-300 font-bold">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-navigation-container grid grid-cols-2 border-b border-white/5 bg-black/20">
+                <button id="tab-decrypt" class="tab-btn active py-4 text-sm font-semibold text-zinc-500 hover:text-zinc-300 font-mono tracking-tight transition-all">
+                    DECRYPT FILE
+                </button>
+                <button id="tab-encrypt" class="tab-btn py-4 text-sm font-semibold text-zinc-500 hover:text-zinc-300 font-mono tracking-tight transition-all">
+                    ENCRYPT JSON
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-6 sm:p-8 space-y-6">
+                <div id="tool-content">
+                    <div class="space-y-4">
+                        <label id="file-input-label" class="block text-[10px] font-bold font-mono text-zinc-500 uppercase tracking-widest mb-2 pl-1">Input File</label>
+                        
+                        <!-- NEW DROP ZONE -->
+                        <div id="drop-zone" class="drop-zone w-full rounded-xl h-32 flex flex-col items-center justify-center group relative">
+                            <!-- Hidden Input -->
+                            <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            
+                            <!-- Visuals -->
+                            <div class="flex flex-col items-center pointer-events-none transition-transform duration-200 group-hover:scale-105">
+                                <svg class="w-8 h-8 text-zinc-600 mb-3 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="text-sm font-mono text-zinc-400 font-medium group-hover:text-white">Click or Drag File Here</p>
+                                <p class="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">MonetizationVars</p>
+                            </div>
+                        </div>
+
+                        <div class="h-5 pl-1 flex items-center">
+                            <!-- REMOVED TRANSITION HERE -->
+                            <span id="file-name-display" class="block text-xs font-mono text-zinc-600">No file selected.</span>
+                        </div>
+
+                        <!-- Advanced Options -->
+                        <div class="pt-2">
+                            <div id="advanced-options-toggle-container" class="advanced-options-toggle flex items-center gap-2 cursor-pointer text-xs text-zinc-500 hover:text-zinc-300 transition-colors w-max select-none group">
+                                <div class="w-4 h-4 flex items-center justify-center border border-zinc-700 rounded bg-zinc-900 group-hover:border-zinc-500 transition-colors">
+                                    <svg id="advanced-options-icon" class="w-3 h-3 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                </div>
+                                <span class="font-mono uppercase tracking-wide font-medium">Cipher Key</span>
+                            </div>
+                            <div id="advanced-options-content-area" class="advanced-options-content h-0 overflow-hidden transition-all duration-300 opacity-0">
+                                <div class="pt-3 pb-1">
+                                    <input type="text" id="cipher-key" placeholder="Default: com.wtfapps.apollo16" class="input-cutout w-full rounded-md px-3 py-2.5 text-sm font-mono text-zinc-300 placeholder-zinc-700" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="process-button" class="btn-tactile w-full px-6 py-3.5 mt-4 bg-white text-black font-bold rounded-lg hover:bg-zinc-200 transition-colors shadow-[0_4px_15px_rgba(255,255,255,0.05)] hover:shadow-[0_4px_20px_rgba(255,255,255,0.1)]">
+                            <span class="font-display tracking-tight text-sm">EXECUTE PROCESS</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Controls (Hidden by default) -->
+                <div id="output-controls" class="hidden space-y-6 pt-6 border-t border-zinc-800 animate-snap">
+                    <button id="unlock-all-button" class="btn-tactile w-full px-4 py-3 bg-amber-500/10 border border-amber-500/30 text-amber-500 hover:bg-amber-500 hover:text-black font-mono text-xs font-bold rounded-md transition-all uppercase tracking-wide">
+                        Initialize "Unlock All" Patch
+                    </button>
+                    
+                    <div id="json-output-container">
+                        <label for="json-output" class="block text-[10px] font-bold font-mono text-zinc-500 uppercase tracking-widest mb-2 pl-1">Data Stream</label>
+                        <textarea id="json-output" rows="12" class="input-cutout w-full rounded-md p-3 font-mono text-[11px] leading-relaxed text-zinc-300 resize-y"></textarea>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <div class="flex gap-3">
+                            <button id="download-decrypted-json-button" class="btn-tactile flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 rounded-md text-xs font-mono font-bold uppercase transition-all">
+                                DOWNLOAD JSON
+                            </button>
+                            <button id="copy-json-button" class="btn-tactile w-14 flex items-center justify-center bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 rounded-md transition-all" title="Copy to Clipboard">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- ENCRYPT BUTTON WITH RECOMMENDED TAG -->
+                        <button id="download-encrypted-button" class="btn-tactile w-full px-6 py-3.5 bg-indigo-600 text-white font-bold font-display rounded-lg hover:bg-indigo-500 transition-all text-sm relative group overflow-hidden">
+                            <div class="flex flex-col items-center leading-tight">
+                                <span class="text-sm font-bold font-display tracking-wide">COMPILE & DOWNLOAD</span>
+                                <span class="text-[10px] font-mono font-bold text-indigo-200 bg-indigo-700/50 px-2 py-0.5 rounded mt-1 group-hover:bg-indigo-600/50 transition-colors">RECOMMENDED FOR BITLIFE</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error-message" class="hidden p-4 rounded-md bg-red-500/10 border border-red-500/40 text-red-400 text-xs font-mono animate-snap"></div>
+            </div>
+        </div>
+
+        <!-- Important Notes Accordion -->
+        <div class="w-full max-w-2xl mx-auto mt-6 opacity-0 animate-enter-delay">
+            <button id="important-notes-toggle-button" class="btn-tactile w-full flex justify-between items-center p-4 bg-black/20 border border-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-all group">
+                <span class="font-mono text-[10px] uppercase tracking-widest font-bold">Documentation & Notes</span>
+                <svg id="important-notes-icon-svg" class="w-4 h-4 transition-transform duration-300 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div id="important-notes-content-wrapper" class="overflow-hidden transition-all duration-500 max-h-0 opacity-0">
+                <div class="p-6 mt-2 bg-black/40 border border-zinc-800 rounded-lg text-xs text-zinc-400 font-mono leading-relaxed space-y-4">
+                    <ul class="space-y-2 list-disc list-outside pl-4 marker:text-zinc-600">
+                        <li>Input file MUST be named <code class="bg-white/10 px-1 rounded text-zinc-200">MonetizationVars</code> (no extension).</li>
+                        <li>Decryption converts .NET Base64 values to readable JSON. Encryption reverses this process.</li>
+                        <li>"Unlock All" sets booleans to <code class="text-emerald-400">true</code>. Integers are unaffected.</li>
+                        <li>Default Key: <code class="text-zinc-300">com.wtfapps.apollo16</code>.</li>
+                    </ul>
+                    <p class="text-[10px] text-zinc-600 pt-2 border-t border-zinc-800/50">Derivative of bitlife-edit (yntha). GPLv3.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer w-full py-8 text-center border-t border-white/5 bg-black/40 mt-auto backdrop-blur-sm z-10">
+        <div class="flex flex-col items-center gap-2">
+            <p class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">System Version <span id="app-version-display" class="text-zinc-400">Loading</span></p>
+            <a href="https://github.com/yntha/bitlife-edit" target="_blank" rel="noopener noreferrer" class="text-[10px] text-zinc-700 hover:text-zinc-500 transition-colors font-mono">Original Logic: yntha/bitlife-edit</a>
+        </div>
+    </footer>
+
+    <!-- Offline Indicator (Hidden by default, status handled by LED) -->
+    <div id="offline-indicator" class="hidden"></div>
+
+    <!-- MODALS -->
+    
+    <!-- Flowchart Modal -->
+    <div id="flowchart-modal" class="modal hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-[4px] p-4">
+        <div class="modal-content modal-glass rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div class="modal-header flex justify-between items-center p-4 border-b border-white/10 bg-black/40 modal-stripes">
+                <h2 id="modal-title" class="text-lg font-display font-bold text-white tracking-wide">Details</h2>
+                <span id="modal-close-button" class="text-zinc-500 hover:text-white cursor-pointer text-2xl leading-none transition-colors">&times;</span>
+            </div>
+            <div id="modal-body" class="p-5 text-zinc-300 text-sm font-mono leading-relaxed"></div>
+        </div>
+    </div>
+
+    <!-- Wrong File Modal -->
+    <div id="wrong-file-name-modal" class="modal hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-[4px] p-4">
+        <div class="modal-content modal-glass rounded-xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]"></div>
+            <h2 class="text-xl font-display font-bold text-white mb-2">Invalid File Input</h2>
+            <p class="text-zinc-400 text-sm mb-6 font-medium">Target file must be named exactly <code class="text-red-400 font-mono bg-red-900/20 px-1.5 py-0.5 rounded border border-red-500/20">MonetizationVars</code>.</p>
+            <div class="flex justify-end">
+                <button id="wrong-file-name-ok-button" class="btn-tactile px-5 py-2 bg-white text-black font-bold text-xs uppercase tracking-wide rounded hover:bg-zinc-200 transition-all">Acknowledge</button>
+            </div>
+            <span id="wrong-file-name-modal-close-button" class="absolute top-4 right-4 text-zinc-600 hover:text-white cursor-pointer text-xl">&times;</span>
+        </div>
+    </div>
+
+    <!-- Download Warning Modal -->
+    <div id="download-final-warning-modal" class="modal hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-[4px] p-4">
+        <div class="modal-content modal-glass rounded-xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]"></div>
+            <h2 class="text-xl font-display font-bold text-white mb-2">Download Initiated</h2>
+            <p class="text-zinc-400 text-sm mb-4 font-medium">Ensure the file has <span class="text-white underline decoration-wavy decoration-emerald-500/50">no extension</span> before moving it to the BitLife folder.</p>
+            
+            <!-- New Support Link -->
+            <p class="text-zinc-500 text-xs mb-6 border-t border-white/5 pt-3">
+                For support, please visit <a href="https://www.reddit.com/r/bitliferebels/" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors">r/BitLifeRebels</a>
+            </p>
+
+            <div class="flex justify-between items-center">
+                <label class="flex items-center gap-2 text-xs text-zinc-500 cursor-pointer select-none hover:text-zinc-300 transition-colors font-mono">
+                    <input type="checkbox" id="dont-show-final-warning-again">
+                    Don't warn again
+                </label>
+                <button id="download-final-warning-ok-button" class="btn-tactile px-5 py-2 bg-emerald-600 text-white font-bold text-xs uppercase tracking-wide rounded hover:bg-emerald-500 transition-all">Understood</button>
+            </div>
+            <span id="download-final-warning-modal-close-button" class="absolute top-4 right-4 text-zinc-600 hover:text-white cursor-pointer text-xl">&times;</span>
+        </div>
+    </div>
+
+    <!-- Source Manager Modal -->
+    <div id="source-manager-modal" class="modal hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-[6px] p-4">
+        <div class="source-manager-modal-content modal-glass rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative overflow-hidden">
+            <span id="source-manager-modal-close-button" class="absolute top-5 right-5 text-zinc-500 hover:text-white cursor-pointer text-2xl z-20 transition-colors">&times;</span>
+            
+            <div class="p-6 border-b border-white/10 text-center bg-black/40 modal-stripes">
+                <h2 class="text-lg font-display font-bold text-white tracking-wide">Source Manager</h2>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar relative z-10">
+                <!-- Current Source Card -->
+                <div class="bg-[#0a0a0a] border border-zinc-800 rounded-lg p-6 mb-6 flex flex-col items-center shadow-inner">
+                    <div class="relative mb-4">
+                         <div id="source-pfp-large" class="w-20 h-20 rounded-full bg-black border border-zinc-700 flex items-center justify-center text-2xl font-display font-bold text-zinc-500 overflow-hidden"></div>
+                         <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a0a] shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                    </div>
+                    
+                    <h3 id="source-name-large" class="text-lg font-bold text-white mb-1">Source Name</h3>
+                    <span id="source-status-label-large" class="text-[10px] font-bold font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 mb-2 uppercase tracking-wider">Status Checking...</span>
+                    <p id="source-fetched-version-message" class="hidden text-xs text-emerald-400 font-mono mb-2">Verified</p>
+                    <a id="source-url-display-large" href="#" target="_blank" class="text-[10px] text-indigo-400 hover:text-white hover:underline font-mono transition-colors">View Raw</a>
+                    <p class="mt-4 text-[10px] text-zinc-600 font-mono uppercase tracking-wide">Target: <span id="modal-bitlife-version-dynamic" class="text-zinc-400">...</span></p>
+                </div>
+
+                <!-- Advanced Source Input -->
+                <div class="mb-6">
+                    <div id="source-manager-advanced-options-toggle" class="flex items-center gap-2 cursor-pointer text-xs text-zinc-500 hover:text-zinc-300 w-max mb-2 group select-none">
+                        <div class="w-4 h-4 flex items-center justify-center border border-zinc-800 rounded bg-zinc-900 group-hover:border-zinc-600 transition-colors">
+                            <svg id="source-manager-advanced-icon" class="w-3 h-3 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" width="2" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        </div>
+                        <span class="font-mono uppercase tracking-wide font-bold text-[10px]">Custom URL</span>
+                    </div>
+                    <div id="source-manager-advanced-content" class="h-0 overflow-hidden transition-all duration-300 opacity-0 bg-black/20 border-l border-indigo-500/30 pl-4">
+                        <div class="py-3">
+                            <div class="flex gap-2">
+                                <input type="url" id="new-source-url" placeholder="https://raw.githubusercontent.com/..." class="input-cutout flex-grow rounded px-3 py-2 text-xs font-mono text-zinc-300">
+                                <button id="load-new-source-button" class="btn-tactile px-3 py-2 bg-indigo-600 text-white text-[10px] font-bold rounded hover:bg-indigo-500 border border-indigo-400/30 font-mono uppercase">LOAD</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="space-y-4 pt-4 border-t border-zinc-800">
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button id="auto-patch-button" class="btn-tactile flex items-center justify-center gap-2 px-4 py-3 bg-emerald-700/80 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-lg shadow-emerald-900/10 border border-emerald-500/20 transition-all font-mono uppercase tracking-tight">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                            Auto-Patch
+                        </button>
+                        <button id="download-original-button" class="btn-tactile flex items-center justify-center gap-2 px-4 py-3 bg-[#151515] hover:bg-[#222] text-zinc-300 text-xs font-bold rounded-lg border border-zinc-800 transition-all font-mono uppercase tracking-tight">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Get Original
+                        </button>
+                    </div>
+                    
+                    <div id="auto-patch-cors-notice" class="hidden p-3 bg-amber-900/20 border border-amber-500/30 rounded text-xs text-amber-200 text-center font-mono"></div>
+                    
+                    <div id="auto-patch-log-container" class="hidden">
+                        <p class="text-[10px] font-mono text-zinc-600 mb-1 uppercase tracking-widest font-bold">System Log</p>
+                        <div id="auto-patch-log" class="bg-black/60 border border-zinc-800 p-3 rounded font-mono text-[10px] h-32 overflow-y-auto text-zinc-400 space-y-1 shadow-inner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/*
+ * BitEdit - MonetizationVars Editor
+ * Copyright (C) 2025 S0methingSomething
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (in the LICENSE file). If not,
+ * see <https://www.gnu.org/licenses/>.
+ *
+ * This project is a JavaScript/HTML reimplementation of the logic from
+ * the C# bitlife-edit project by yntha (https://github.com/yntha/bitlife-edit),
+ * which is also licensed under GPLv3.
+ */
+
+        // --- App Version (Manually update this when releasing a new version) ---
+        // GITHUB_ACTION_MARKER_APP_VERSION (Do not remove or alter this line)
+        const CURRENT_APP_VERSION = "v1.8.5"; 
+
+        // --- Constants ---
+        const DEFAULT_CIPHER_KEY = "com.wtfapps.apollo16";
+        const B64_NET_BOOLEAN_TRUE_STANDARD = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs=";
+        const B64_NET_BOOLEAN_TRUE_VARIANT  = "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAs=";
+        const B64_NET_BOOLEAN_FALSE_STANDARD= "AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAw=";
+        const USER_SERIALIZED_INT32_PREFIX = new Uint8Array([0, 1, 0, 0, 0, 255, 255, 255, 255, 1, 0, 0, 0, 0, 0, 0, 0, 4, 1, 0, 0, 0, 12, 83, 121, 115, 116, 101, 109, 46, 73, 110, 116, 51, 50, 1, 0, 0, 0, 7, 109, 95, 118, 97, 108, 117, 101, 0, 8]);
+        const USER_SERIALIZED_INT32_SUFFIX = new Uint8Array([11]);
+        const USER_INT32_VALUE_OFFSET = 48;
+        const USER_SERIALIZED_INT32_TOTAL_LENGTH = USER_SERIALIZED_INT32_PREFIX.length + 4 + USER_SERIALIZED_INT32_SUFFIX.length;
+        const TARGET_ENCRYPTED_FILENAME = "MonetizationVars";
+        const HIDE_FINAL_DOWNLOAD_WARNING_KEY = 'bitEditHideFinalDownloadWarning';
+        const DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL = "https://raw.githubusercontent.com/S0methingSomething/BitEdit/refs/heads/main/MonetizationVars.txt";
+        const GITHUB_API_LATEST_TAG_URL = "https://api.github.com/repos/S0methingSomething/BitEdit/releases/tags/Latest";
+        const ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL = "https://github.com/S0methingSomething/BitEdit/releases/download/Latest/MonetizationVars";
+        const BITLIFE_VERSION_TXT_URL = 'https://raw.githubusercontent.com/S0methingSomething/BitEdit/refs/heads/main/BitEdit/Get_Bitlife_Version/version.txt';
+        const APP_VERSION_CHECK_URL = 'https://raw.githubusercontent.com/S0methingSomething/BitEdit/main/BitEdit/BitEdit_version.txt';
+        const LAST_SUCCESSFUL_UPDATE_CHECK_KEY = 'bitEditLastSuccessfulUpdateCheck';
+        const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+
+        // --- Source Info ---
+        const DEFAULT_SOURCE_INFO = {
+            name: "S0methingSomething",
+            pfpImageUrl: "https://avatars.githubusercontent.com/S0methingSomething?v=4&s=128",
+            pfpFallbackText: "S0",
+            url: DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL,
+            statusMessage: "",
+            fetchedVersion: null
+        };
+        let currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL;
+        let currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO));
+
+        // --- Obfuscation Map ---
+        const obfCharMap = {0x61:0x7a,0x62:0x6d,0x63:0x79,0x64:0x6c,0x65:0x78,0x66:0x6b,0x67:0x77,0x68:0x6a,0x69:0x76,0x6a:0x69,0x6b:0x75,0x6c:0x68,0x6d:0x74,0x6e:0x67,0x6f:0x73,0x70:0x66,0x71:0x72,0x72:0x65,0x73:0x71,0x74:0x64,0x75:0x70,0x76:0x63,0x77:0x6f,0x78:0x62,0x79:0x6e,0x7a:0x61};
+
+        // --- UI Elements Cache ---
+        const ui = {};
+
+        // --- State Variables ---
+        let activeMode = 'decrypt'; 
+        let currentJsonObject = null;
+        let stateForDecrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
+        let stateForEncrypt = { inputFileName: 'file', fileContent: null, jsonObject: null };
+        let showFinalDownloadWarningPreference;
+        let versionFromTxt = null; 
+
+        // --- Utility Functions ---
+        function arraysEqual(a, b) { if (!a || !b || a.length !== b.length) return false; for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return false; } return true; }
+        function escapeRegExp(string) { return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
+        function getObfuscatedKey(key) {let oKey = ""; for (const char of key.toLowerCase()) { const c = char.charCodeAt(0); oKey += String.fromCharCode(obfCharMap[c] || c); } return oKey;}
+        function utf8StringToBase64(str) {try { const uBytes = new TextEncoder().encode(str); const binStr = String.fromCharCode.apply(null, uBytes); return btoa(binStr); } catch (e) { console.error("utf8StringToBase64 failed:", e); throw new Error("Base64 encode error."); }}
+        function base64ToUtf8String(b64) {try { const binStr = atob(b64); const uBytes = new Uint8Array(binStr.length); for (let i = 0; i < binStr.length; i++) { uBytes[i] = binStr.charCodeAt(i); } return new TextDecoder("utf-8", {fatal:true}).decode(uBytes); } catch (e) { console.error("base64ToUtf8String failed:", e); if (e.name === 'InvalidCharacterError') throw new Error("Invalid Base64."); else if (e.message.includes("decode")) throw new Error("Invalid UTF-8 in Base64."); throw new Error("Base64 process error.");}}
+        function xorAndBase64Encode(txt, key) { let x = ""; for (let i=0; i<txt.length; i++) {x += String.fromCharCode(txt.charCodeAt(i) ^ key.charCodeAt(i % key.length));} return utf8StringToBase64(x); }
+        function base64DecodeAndXOR(b64, key) { let dec; try { dec = base64ToUtf8String(b64); } catch (e) { throw e; } let x = ""; for (let i=0; i<dec.length; i++) {x += String.fromCharCode(dec.charCodeAt(i) ^ key.charCodeAt(i % key.length));} return x; }
+        function decryptInt(base64String) { try { const binaryString = atob(base64String); const bytes = new Uint8Array(binaryString.length); for (let i = 0; i < binaryString.length; i++) { bytes[i] = binaryString.charCodeAt(i); } if (bytes.length !== USER_SERIALIZED_INT32_TOTAL_LENGTH) return null; const prefixBytesFromFile = bytes.slice(0, USER_SERIALIZED_INT32_PREFIX.length); const suffixByteFromFile = bytes[bytes.length - 1]; if (!arraysEqual(prefixBytesFromFile, USER_SERIALIZED_INT32_PREFIX) || suffixByteFromFile !== USER_SERIALIZED_INT32_SUFFIX[0]) return null; const dataView = new DataView(bytes.buffer, bytes.byteOffset + USER_SERIALIZED_INT32_PREFIX.length, 4); return dataView.getInt32(0, true); } catch (e) { return null; } }
+        function encryptInt(value) { if (typeof value !== 'number' || !Number.isInteger(value)) return null; const valueBuffer = new ArrayBuffer(4); const dataView = new DataView(valueBuffer); dataView.setInt32(0, value, true); const valueBytes = Array.from(new Uint8Array(valueBuffer)); const fullByteArray = new Uint8Array(USER_SERIALIZED_INT32_TOTAL_LENGTH); fullByteArray.set(USER_SERIALIZED_INT32_PREFIX, 0); fullByteArray.set(new Uint8Array(valueBytes), USER_SERIALIZED_INT32_PREFIX.length); fullByteArray.set(USER_SERIALIZED_INT32_SUFFIX, USER_SERIALIZED_INT32_PREFIX.length + 4); let binaryString = ''; fullByteArray.forEach(byte => { binaryString += String.fromCharCode(byte); }); return btoa(binaryString); }
+        function compareVersions(v1, v2) { if (!v1 || !v2) return 0; const normalize = (v) => String(v).trim().startsWith('v') ? String(v).trim().substring(1) : String(v).trim(); const parts1 = normalize(v1).split('.').map(p => parseInt(p, 10)); const parts2 = normalize(v2).split('.').map(p => parseInt(p, 10)); const len = Math.max(parts1.length, parts2.length); for (let i = 0; i < len; i++) { const p1 = parts1[i] || 0; const p2 = parts2[i] || 0; if (Number.isNaN(p1) || Number.isNaN(p2)) return 0; if (p1 > p2) return 1; if (p1 < p2) return -1; } return 0; }
+
+
+        // --- Status LED Logic ---
+        const ledElement = document.getElementById('status-led');
+        const statusTooltip = document.getElementById('status-tooltip');
+
+        function setLedStatus(status) {
+            if (!ledElement) return;
+            ledElement.className = ''; // Reset
+            
+            switch(status) {
+                case 'online':
+                    ledElement.classList.add('led-online');
+                    if(statusTooltip) statusTooltip.textContent = "System Online";
+                    break;
+                case 'offline':
+                    ledElement.classList.add('led-offline');
+                    if(statusTooltip) statusTooltip.textContent = "Offline Mode";
+                    break;
+                case 'update':
+                    ledElement.classList.add('led-update');
+                    if(statusTooltip) statusTooltip.textContent = "Update Available";
+                    break;
+                case 'busy':
+                    ledElement.classList.add('led-busy');
+                    if(statusTooltip) statusTooltip.textContent = "Processing...";
+                    break;
+            }
+        }
+
+        // --- Network Status and Update Check ---
+        function updateOnlineStatusIndicator() {
+            if (navigator.onLine) {
+                const isUpdateAvailable = localStorage.getItem('updateAvailable') === 'true';
+                if (isUpdateAvailable) {
+                    setLedStatus('update');
+                } else {
+                    setLedStatus('online');
+                }
+            } else {
+                setLedStatus('offline');
+            }
+        }
+
+        async function checkForAppUpdate() {
+            try {
+                const response = await fetch(APP_VERSION_CHECK_URL, { cache: "no-store" });
+                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                
+                const latestVersionText = (await response.text()).trim();
+                const latestVersionMatch = latestVersionText.match(/^(v)?(\d+\.\d+\.\d+(\.\d+)?)$/);
+
+                if (latestVersionMatch && latestVersionMatch[2]) {
+                    const normalizedLatestVersion = latestVersionMatch[2];
+                    localStorage.setItem(LAST_SUCCESSFUL_UPDATE_CHECK_KEY, Date.now().toString());
+
+                    if (compareVersions(normalizedLatestVersion, CURRENT_APP_VERSION) > 0) {
+                        localStorage.setItem('updateAvailable', 'true');
+                        setLedStatus('update');
+                    } else {
+                        localStorage.setItem('updateAvailable', 'false');
+                        setLedStatus('online');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for app update:', error);
+            }
+        }
+
+
+        // --- Core App Logic ---
+        async function fetchBitLifeVersion() {
+            if (!ui.bitlifeVersion) return null;
+            try {
+                const response = await fetch(BITLIFE_VERSION_TXT_URL, { cache: "no-store" });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const versionText = (await response.text()).trim();
+                versionFromTxt = versionText;
+                ui.bitlifeVersion.textContent = versionFromTxt;
+                if(ui.modalBitlifeVersionDynamic) ui.modalBitlifeVersionDynamic.textContent = versionFromTxt;
+                return versionFromTxt;
+            } catch (error) {
+                ui.bitlifeVersion.textContent = 'Error';
+                if(ui.modalBitlifeVersionDynamic) ui.modalBitlifeVersionDynamic.textContent = 'Error';
+                versionFromTxt = null;
+                return null;
+            }
+        }
+
+        async function checkSourceOutdatedStatus() {
+            currentSourceInfo.fetchedVersion = null;
+            if (ui.sourceFetchedVersionMessage) ui.sourceFetchedVersionMessage.classList.add('hidden');
+
+            if (!versionFromTxt) {
+                currentSourceInfo.statusMessage = "(BitLife version unknown)";
+                updateSourceManagerDisplay(currentSourceInfo);
+                return;
+            }
+            if (currentMonetizationVarsSourceURL !== DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) {
+                currentSourceInfo.statusMessage = "(Custom source, version status unknown)";
+                updateSourceManagerDisplay(currentSourceInfo);
+                return;
+            }
+
+            try {
+                const response = await fetch(GITHUB_API_LATEST_TAG_URL, { cache: "no-store" });
+                if (!response.ok) {
+                    currentSourceInfo.statusMessage = "(Could not verify BitEdit release notes)";
+                    updateSourceManagerDisplay(currentSourceInfo);
+                    return;
+                }
+                const releaseData = await response.json();
+                const releaseBody = releaseData.body || "";
+                const versionRegex = /(?:for BitLife\s*v?|compatible with BitLife\s*v?|BitLife version\s*v?)(\d+\.\d+(?:\.\d+)?)/i;
+                const match = releaseBody.match(versionRegex);
+
+                if (match && match[1]) {
+                    const versionFromReleaseNotes = match[1];
+                    currentSourceInfo.fetchedVersion = versionFromReleaseNotes;
+                    if (ui.sourceFetchedVersionMessage) {
+                        ui.sourceFetchedVersionMessage.textContent = `Default source is for BitLife v${versionFromReleaseNotes}`;
+                        ui.sourceFetchedVersionMessage.classList.remove('hidden');
+                    }
+                    const comparisonResult = compareVersions(versionFromTxt, versionFromReleaseNotes);
+                    if (comparisonResult === 1) {
+                        currentSourceInfo.statusMessage = `OUTDATED (Current BitLife: v${versionFromTxt})`;
+                    } else if (comparisonResult === -1) {
+                        currentSourceInfo.statusMessage = `POTENTIALLY NEWER (Current BitLife: v${versionFromTxt})`;
+                    } else {
+                        currentSourceInfo.statusMessage = `COMPATIBLE (v${versionFromReleaseNotes})`;
+                    }
+                } else {
+                    currentSourceInfo.statusMessage = "(Release notes for default source do not specify BitLife version in expected format)";
+                    if (ui.sourceFetchedVersionMessage) ui.sourceFetchedVersionMessage.classList.add('hidden');
+                }
+            } catch (error) {
+                currentSourceInfo.statusMessage = "(Error checking source compatibility)";
+            }
+            updateSourceManagerDisplay(currentSourceInfo);
+        }
+
+        function showToast(message, type = 'info') { 
+            const toast = document.createElement('div'); 
+            toast.textContent = message; 
+            toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 py-2.5 px-5 rounded shadow-2xl text-[11px] font-mono font-bold uppercase tracking-wide border z-[200] transition-all duration-300 opacity-0 translate-y-8 scale-95'; 
+            if (type === 'success') { 
+                toast.style.backgroundColor = '#052e16'; toast.style.borderColor = '#047857'; toast.style.color = '#ecfdf5'; 
+            } else if (type === 'error') { 
+                toast.style.backgroundColor = '#450a0a'; toast.style.borderColor = '#b91c1c'; toast.style.color = '#fef2f2'; 
+            } else { 
+                toast.style.backgroundColor = '#18181b'; toast.style.borderColor = '#3f3f46'; toast.style.color = '#fff';
+            } 
+            document.body.appendChild(toast); 
+            requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'translate-y-8', 'scale-95'); });
+            setTimeout(() => { 
+                toast.classList.add('opacity-0', 'translate-y-8', 'scale-95');
+                setTimeout(() => { if (toast.parentNode) { document.body.removeChild(toast);}}, 300); 
+            }, 3000); 
+        }
+
+        function showError(message) { if(ui.errorMessage) {ui.errorMessage.textContent = message; ui.errorMessage.classList.remove('hidden');} if(ui.outputControls) {ui.outputControls.classList.add('hidden');} }
+        function clearError() { if(ui.errorMessage) {ui.errorMessage.classList.add('hidden'); ui.errorMessage.textContent = '';} }
+        function showStandardModal(modalElement) { if(modalElement){modalElement.classList.remove('hidden'); setTimeout(() => { modalElement.classList.add('visible'); }, 10);} }
+        function hideStandardModal(modalElement) { if(modalElement){modalElement.classList.remove('visible'); setTimeout(() => { modalElement.classList.add('hidden'); }, 250);} }
+        function openSourceManagerModal() { updateSourceManagerDisplay(currentSourceInfo); if(ui.newSourceUrlInput) ui.newSourceUrlInput.value = ''; if(ui.sourceManagerAdvancedContent) { ui.sourceManagerAdvancedContent.style.height = '0px'; ui.sourceManagerAdvancedContent.style.opacity = '0'; } if(ui.sourceManagerAdvancedIcon) ui.sourceManagerAdvancedIcon.style.transform = 'rotate(0deg)'; if(ui.autoPatchLog) ui.autoPatchLog.innerHTML = ''; if(ui.autoPatchLogContainer) ui.autoPatchLogContainer.classList.add('hidden'); if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden'); if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; if(ui.modalBitlifeVersionDynamic) ui.modalBitlifeVersionDynamic.textContent = versionFromTxt || 'Loading...'; showStandardModal(ui.sourceManagerModal); }
+        function closeSourceManagerModal() { hideStandardModal(ui.sourceManagerModal); if(ui.autoPatchLogContainer) ui.autoPatchLogContainer.classList.add('hidden'); if(ui.autoPatchLog) ui.autoPatchLog.innerHTML = ''; }
+        function updateSourceManagerDisplay(sourceInfo) { 
+            if(ui.sourcePfpLarge) { ui.sourcePfpLarge.innerHTML = ''; if (sourceInfo.pfpImageUrl) { const img = document.createElement('img'); img.src = sourceInfo.pfpImageUrl; img.alt = sourceInfo.name.substring(0,2); img.className = "w-full h-full object-cover"; img.onerror = () => { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase(); }; ui.sourcePfpLarge.appendChild(img); } else { ui.sourcePfpLarge.textContent = sourceInfo.pfpFallbackText || sourceInfo.name.substring(0,2).toUpperCase() || 'URL'; } } if(ui.sourceNameLarge) ui.sourceNameLarge.textContent = sourceInfo.name; if(ui.sourceUrlDisplayLarge) { ui.sourceUrlDisplayLarge.href = sourceInfo.url; const displayUrl = sourceInfo.url.length > 40 ? sourceInfo.url.substring(0, 15) + "..." + sourceInfo.url.substring(sourceInfo.url.length - 15) : sourceInfo.url; ui.sourceUrlDisplayLarge.textContent = `View Raw: ${displayUrl}`; } if(ui.sourceStatusLabelLarge) { ui.sourceStatusLabelLarge.textContent = sourceInfo.statusMessage || "(Status N/A)"; ui.sourceStatusLabelLarge.className = "text-[10px] font-bold font-mono px-2 py-1 rounded border uppercase tracking-wider mb-2"; if (sourceInfo.statusMessage) { const lowerStatus = sourceInfo.statusMessage.toLowerCase(); if (lowerStatus.includes("newer")) { ui.sourceStatusLabelLarge.classList.add("bg-emerald-900", "border-emerald-700", "text-emerald-200"); } else if (lowerStatus.includes("outdated")) { ui.sourceStatusLabelLarge.classList.add("bg-red-900", "border-red-700", "text-red-200"); } else { ui.sourceStatusLabelLarge.classList.add("bg-zinc-900", "border-zinc-700", "text-zinc-400"); } } else { ui.sourceStatusLabelLarge.classList.add("hidden"); } } if (ui.sourceFetchedVersionMessage) { if (sourceInfo.fetchedVersion && currentMonetizationVarsSourceURL === DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL) { ui.sourceFetchedVersionMessage.textContent = `Default source is for BitLife v${sourceInfo.fetchedVersion}`; ui.sourceFetchedVersionMessage.classList.remove('hidden'); } else { ui.sourceFetchedVersionMessage.classList.add('hidden'); } } if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; if(ui.autoPatchCorsNotice) ui.autoPatchCorsNotice.classList.add('hidden');
+        }
+        function addLogToAutoPatcher(message, type = 'info') { if(!ui.autoPatchLog || !ui.autoPatchLogContainer) return; const logEntry = document.createElement('p'); logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`; logEntry.className = type === 'success' ? 'text-emerald-400' : (type === 'error' ? 'text-red-400' : 'text-zinc-400'); ui.autoPatchLog.appendChild(logEntry); ui.autoPatchLog.scrollTop = ui.autoPatchLog.scrollHeight; ui.autoPatchLogContainer.classList.remove('hidden'); }
+        
+        async function processMonetizationVarsContent(fileContent, operationMode, cipherKeyStr) { const effectiveCipherKey = cipherKeyStr || DEFAULT_CIPHER_KEY; const obfuscatedKey = getObfuscatedKey(effectiveCipherKey); let processedJsonObject; if (operationMode === 'decrypt') { const itemMap = {}; const lines = fileContent.split('\n').filter(line => line.trim() !== ''); for (const line of lines) { const parts = line.split(/:(.+)/); if (parts.length < 2 || !parts[1]) { console.warn("Malformed line (missing or empty value):", line); continue; } const encKey = parts[0].trim(); const encVal = parts[1].trim(); try { const decKey = base64DecodeAndXOR(encKey, obfuscatedKey); const decValB64 = base64DecodeAndXOR(encVal, obfuscatedKey); if (decValB64 === B64_NET_BOOLEAN_TRUE_STANDARD || decValB64 === B64_NET_BOOLEAN_TRUE_VARIANT) { itemMap[decKey] = true; } else if (decValB64 === B64_NET_BOOLEAN_FALSE_STANDARD) { itemMap[decKey] = false; } else { const intValue = decryptInt(decValB64); if (intValue !== null) { itemMap[decKey] = intValue; } else { itemMap[decKey] = decValB64; } } } catch (e) { console.error("Error processing line:", line, e); throw new Error(`Decryption/decoding error. Check key/file. Line: ${line.substring(0,30)}...`); } } processedJsonObject = itemMap; } else { processedJsonObject = JSON.parse(fileContent); } return processedJsonObject; }
+        
+        async function handleManualFileProcessing(fileContent, cipherKeyStr) {
+            setLedStatus('busy'); 
+            clearError();
+            
+            await new Promise(r => setTimeout(r, 200)); // UX delay
+
+            if (!ui.jsonOutput) { showError("Internal error: Output area not found."); updateOnlineStatusIndicator(); return; }
+            ui.jsonOutput.value = ''; 
+            if (ui.outputControls) ui.outputControls.classList.add('hidden');
+
+            try {
+                const processedJson = await processMonetizationVarsContent(fileContent, activeMode, cipherKeyStr);
+                if (activeMode === 'decrypt') stateForDecrypt.jsonObject = processedJson;
+                else stateForEncrypt.jsonObject = processedJson;
+                
+                currentJsonObject = processedJson;
+                ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2);
+                if (ui.outputControls) ui.outputControls.classList.remove('hidden');
+                
+                updateOnlineStatusIndicator(); 
+            } catch (error) {
+                console.error("Manual Processing error:", error);
+                showError(`Error: ${error.message}.`);
+                updateOnlineStatusIndicator(); 
+            }
+        }
+
+        function setupUIForMode(newMode) {
+            activeMode = newMode;
+            clearError();
+            if (ui.jsonOutput) ui.jsonOutput.value = '';
+            if(ui.outputControls) ui.outputControls.classList.add('hidden');
+            
+            // Tab Styles
+            if(ui.tabDecrypt) { 
+                ui.tabDecrypt.classList.toggle('active', newMode === 'decrypt'); 
+                ui.tabDecrypt.classList.toggle('border-white', newMode === 'decrypt'); 
+                ui.tabDecrypt.classList.toggle('border-transparent', newMode !== 'decrypt'); 
+            }
+            if(ui.tabEncrypt) { 
+                ui.tabEncrypt.classList.toggle('active', newMode === 'encrypt'); 
+                ui.tabEncrypt.classList.toggle('border-white', newMode === 'encrypt'); 
+                ui.tabEncrypt.classList.toggle('border-transparent', newMode !== 'encrypt');
+            }
+
+            const fileInputLabel = document.getElementById('file-input-label');
+            const fileInputElement = document.getElementById('file-input');
+            const processButtonElement = document.getElementById('process-button');
+            const fileNameDisplay = document.getElementById('file-name-display'); 
+
+            if (newMode === 'decrypt') {
+                if (fileInputLabel) fileInputLabel.textContent = `Select '${TARGET_ENCRYPTED_FILENAME}' File:`;
+                if (fileInputElement) fileInputElement.accept = '*/*';
+                if (processButtonElement) processButtonElement.querySelector('span').textContent = 'DECRYPT FILE';
+            } else { 
+                if (fileInputLabel) fileInputLabel.textContent = 'Select JSON File to Encrypt:';
+                if (fileInputElement) fileInputElement.accept = '.json,text/plain';
+                if (processButtonElement) processButtonElement.querySelector('span').textContent = 'LOAD JSON FROM FILE';
+            }
+
+            let modeState = (newMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
+            if (fileNameDisplay) {
+                if (modeState.inputFileName !== 'file' && modeState.fileContent !== null) {
+                    fileNameDisplay.textContent = `Selected: ${modeState.inputFileName}`;
+                    fileNameDisplay.style.color = '#10b981'; 
+                } else {
+                    fileNameDisplay.textContent = 'No file selected.';
+                    fileNameDisplay.style.color = '#52525b'; 
+                    if (fileInputElement) fileInputElement.value = ""; 
+                }
+            }
+        }
+
+        function attachToolContentListeners() {
+            const fileInput = document.getElementById('file-input');
+            const dropZone = document.getElementById('drop-zone');
+            const processButton = document.getElementById('process-button');
+            const advancedToggle = document.getElementById('advanced-options-toggle-container');
+            const advancedContent = document.getElementById('advanced-options-content-area');
+            const advancedIcon = document.getElementById('advanced-options-icon');
+
+            // --- Drop Zone & File Input Logic ---
+            const handleFile = async (file) => {
+                if (!file) return;
+                clearError();
+                const currentFileNameDisplay = document.getElementById('file-name-display');
+                
+                if (activeMode === 'decrypt' && file.name.toLowerCase() !== TARGET_ENCRYPTED_FILENAME.toLowerCase()) {
+                    showStandardModal(ui.wrongFileNameModal);
+                    if (fileInput) fileInput.value = "";
+                    return;
+                }
+
+                try {
+                    const fileText = await file.text();
+                    if (activeMode === 'decrypt') {
+                        stateForDecrypt = { inputFileName: file.name, fileContent: fileText, jsonObject: null };
+                    } else {
+                        stateForEncrypt = { inputFileName: file.name, fileContent: fileText, jsonObject: null };
+                    }
+                    if (currentFileNameDisplay) {
+                        currentFileNameDisplay.textContent = `Selected: ${file.name}`;
+                        currentFileNameDisplay.style.color = '#10b981';
+                    }
+                } catch (err) {
+                    showError("Failed to read file.");
+                }
+            };
+
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+            }
+            
+            if (dropZone) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, preventDefaults, false);
+                });
+                function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    handleFile(files[0]);
+                });
+            }
+
+            if (advancedToggle) {
+                advancedToggle.addEventListener('click', () => {
+                    const isExpanded = advancedContent.style.height === 'auto' || advancedContent.clientHeight > 0;
+                    if (isExpanded) {
+                        advancedContent.style.height = '0px';
+                        advancedContent.style.opacity = '0';
+                        advancedIcon.style.transform = 'rotate(0deg)';
+                    } else {
+                        advancedContent.style.height = advancedContent.scrollHeight + 'px';
+                        advancedContent.style.opacity = '1';
+                        advancedIcon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            }
+
+            if (processButton) {
+                processButton.addEventListener('click', () => {
+                    const modeState = (activeMode === 'decrypt') ? stateForDecrypt : stateForEncrypt;
+                    if (modeState.fileContent === null) {
+                        showError('Please select a file first.');
+                        return;
+                    }
+                    const cipherKeyInput = document.getElementById('cipher-key'); 
+                    const effectiveKey = (cipherKeyInput && cipherKeyInput.value.trim()) ? cipherKeyInput.value.trim() : DEFAULT_CIPHER_KEY;
+                    handleManualFileProcessing(modeState.fileContent, effectiveKey);
+                });
+            }
+        }
+
+        function getEffectiveCipherKeyForOperation() {
+            const cipherKeyInput = document.getElementById('cipher-key'); 
+            if (cipherKeyInput && cipherKeyInput.value.trim()) return cipherKeyInput.value.trim();
+            return DEFAULT_CIPHER_KEY;
+        }
+
+        // --- DOMContentLoaded ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const appVersionDisplay = document.getElementById('app-version-display');
+            if (appVersionDisplay) appVersionDisplay.textContent = CURRENT_APP_VERSION;
+
+            // Initialize UI Cache
+            const ids = [
+                'tab-decrypt', 'tab-encrypt', 'tool-content', 'output-controls', 'json-output',
+                'unlock-all-button', 'copy-json-button', 'download-decrypted-json-button',
+                'download-encrypted-button', 'error-message', 'flowchart-modal', 'modal-title',
+                'modal-body', 'modal-close-button', 'download-final-warning-modal',
+                'dont-show-final-warning-again', 'download-final-warning-modal-close-button',
+                'download-final-warning-ok-button', 'bitlife-version', 'open-source-manager-button',
+                'source-manager-modal', 'source-manager-modal-close-button', 'source-pfp-large',
+                'source-name-large', 'source-status-label-large', 'source-url-display-large',
+                'source-fetched-version-message', 'modal-bitlife-version-dynamic',
+                'source-manager-advanced-options-toggle', 'source-manager-advanced-content',
+                'source-manager-advanced-icon', 'new-source-url', 'load-new-source-button',
+                'download-original-button', 'auto-patch-button', 'auto-patch-cors-notice',
+                'auto-patch-log-container', 'auto-patch-log',
+                'important-notes-toggle-button', 'important-notes-content-wrapper', 'important-notes-icon-svg',
+                'offline-indicator', 'update-available-banner', 'app-version-display',
+                'file-input-label', 'file-input', 'file-name-display', 'advanced-options-toggle-container', 
+                'advanced-options-icon', 'advanced-options-content-area', 'cipher-key', 'process-button',
+                'wrong-file-name-modal', 'wrong-file-name-modal-close-button', 'wrong-file-name-ok-button'
+            ];
+            ids.forEach(id => ui[id.replace(/-(\w)/g, (match, letter) => letter.toUpperCase())] = document.getElementById(id));
+
+            if (!ui.newSourceUrlInput && ui.newSourceUrl) { ui.newSourceUrlInput = ui.newSourceUrl; }
+
+            updateOnlineStatusIndicator();
+            window.addEventListener('online', updateOnlineStatusIndicator);
+            window.addEventListener('offline', updateOnlineStatusIndicator);
+            
+            // Initial Checks
+            await checkForAppUpdate();
+            try { showFinalDownloadWarningPreference = localStorage.getItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY) !== 'true'; } catch (e) { showFinalDownloadWarningPreference = true; }
+
+            await fetchBitLifeVersion();
+            await checkSourceOutdatedStatus();
+            
+            setupUIForMode(activeMode); 
+            attachToolContentListeners(); 
+
+            // General Event Listeners
+            if(ui.tabDecrypt) ui.tabDecrypt.addEventListener('click', () => setupUIForMode('decrypt'));
+            if(ui.tabEncrypt) ui.tabEncrypt.addEventListener('click', () => setupUIForMode('encrypt'));
+            if(ui.openSourceManagerButton) ui.openSourceManagerButton.addEventListener('click', openSourceManagerModal);
+            if(ui.sourceManagerModalCloseButton) ui.sourceManagerModalCloseButton.addEventListener('click', closeSourceManagerModal);
+            
+            if (ui.sourceManagerAdvancedOptionsToggle && ui.sourceManagerAdvancedContent && ui.sourceManagerAdvancedIcon) { 
+                ui.sourceManagerAdvancedOptionsToggle.addEventListener('click', () => { 
+                    const isExpanded = ui.sourceManagerAdvancedContent.style.height === 'auto' || ui.sourceManagerAdvancedContent.clientHeight > 0;
+                    if (isExpanded) {
+                        ui.sourceManagerAdvancedContent.style.height = '0px';
+                        ui.sourceManagerAdvancedContent.style.opacity = '0';
+                        ui.sourceManagerAdvancedIcon.style.transform = 'rotate(0deg)';
+                    } else {
+                        ui.sourceManagerAdvancedContent.style.height = ui.sourceManagerAdvancedContent.scrollHeight + 'px';
+                        ui.sourceManagerAdvancedContent.style.opacity = '1';
+                        ui.sourceManagerAdvancedIcon.style.transform = 'rotate(180deg)';
+                    }
+                }); 
+            }
+
+            // --- FIXED ACCORDION LOGIC ---
+            if (ui.importantNotesToggleButton && ui.importantNotesContentWrapper) {
+                ui.importantNotesToggleButton.addEventListener('click', () => {
+                    const content = ui.importantNotesContentWrapper;
+                    const icon = ui.importantNotesIconSvg;
+                    
+                    // Check current state
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    
+                    if (isOpen) {
+                        // Close
+                        content.style.maxHeight = '0px';
+                        content.style.opacity = '0';
+                        if(icon) icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        // Open
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        content.style.opacity = '1';
+                        if(icon) icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            }
+
+            // --- RESTORED MODAL CLOSE HANDLERS ---
+            if (ui.modalCloseButton) ui.modalCloseButton.addEventListener('click', () => hideStandardModal(ui.flowchartModal));
+            
+            if (ui.wrongFileNameModalCloseButton) ui.wrongFileNameModalCloseButton.addEventListener('click', () => hideStandardModal(ui.wrongFileNameModal));
+            if (ui.wrongFileNameOkButton) ui.wrongFileNameOkButton.addEventListener('click', () => hideStandardModal(ui.wrongFileNameModal));
+
+            if (ui.downloadFinalWarningModalCloseButton) {
+                ui.downloadFinalWarningModalCloseButton.addEventListener('click', () => {
+                    hideStandardModal(ui.downloadFinalWarningModal);
+                    if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) {
+                        try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch (e) {}
+                    }
+                });
+            }
+            if (ui.downloadFinalWarningOkButton) {
+                ui.downloadFinalWarningOkButton.addEventListener('click', () => {
+                    hideStandardModal(ui.downloadFinalWarningModal);
+                    if (ui.dontShowFinalWarningAgain && ui.dontShowFinalWarningAgain.checked) {
+                        try { localStorage.setItem(HIDE_FINAL_DOWNLOAD_WARNING_KEY, 'true'); showFinalDownloadWarningPreference = false; } catch (e) {}
+                    }
+                });
+            }
+
+            if(ui.loadNewSourceButton && ui.newSourceUrlInput) { ui.loadNewSourceButton.addEventListener('click', async () => { const newUrl = ui.newSourceUrlInput.value.trim(); if (newUrl) { try { const parsedUrl = new URL(newUrl); currentMonetizationVarsSourceURL = parsedUrl.href; let sourceNameGuess = parsedUrl.hostname; if (parsedUrl.hostname.includes('githubusercontent.com') && parsedUrl.pathname.split('/').length > 2) { const pathParts = parsedUrl.pathname.split('/'); sourceNameGuess = `${pathParts[1]}/${pathParts[2]} (Raw)`; } currentSourceInfo = { name: sourceNameGuess, pfpImageUrl: '', pfpFallbackText: sourceNameGuess.substring(0,2).toUpperCase(), url: parsedUrl.href, statusMessage: "", fetchedVersion: null }; await checkSourceOutdatedStatus(); showToast(`Source updated to: ${sourceNameGuess}`, "success"); } catch (e) { showToast("Invalid URL.", "error"); console.error("Invalid URL:", e); } } else { currentMonetizationVarsSourceURL = DEFAULT_RAW_MONETIZATIONVARS_SOURCE_URL; currentSourceInfo = JSON.parse(JSON.stringify(DEFAULT_SOURCE_INFO)); await checkSourceOutdatedStatus(); showToast("Source reverted to default.", "info"); } }); }
+            if(ui.downloadOriginalButton) { ui.downloadOriginalButton.addEventListener('click', () => { window.open(ORIGINAL_GITHUB_RELEASE_DOWNLOAD_URL, '_blank'); showToast("Original MonetizationVars download started.", "info"); if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } }); }
+            
+            if(ui.autoPatchButton) { 
+                ui.autoPatchButton.addEventListener('click', async () => { 
+                    if(!ui.autoPatchLogContainer || !ui.autoPatchLog) { console.error("Log containers not found."); showError("Logging system error."); return; } 
+                    
+                    setLedStatus('busy');
+                    ui.autoPatchLog.innerHTML = ''; 
+                    ui.autoPatchLogContainer.classList.remove('hidden'); 
+                    ui.autoPatchCorsNotice.classList.add('hidden'); 
+                    ui.autoPatchButton.disabled = true; 
+                    addLogToAutoPatcher("Starting auto-patch...", 'info'); 
+                    addLogToAutoPatcher(`Attempting to fetch from: ${currentMonetizationVarsSourceURL}`, 'info');
+                    
+                    try { 
+                        const response = await fetch(currentMonetizationVarsSourceURL, { cache: "no-store" }); 
+                        if (!response.ok) { throw new Error(`Fetch failed (HTTP ${response.status}) for ${currentMonetizationVarsSourceURL}`); } 
+                        const fetchedFileContent = await response.text(); 
+                        addLogToAutoPatcher("Content fetched.", 'success'); 
+                        addLogToAutoPatcher("Decrypting...", 'info'); 
+                        const effectiveKeyForAutoPatch = getEffectiveCipherKeyForOperation(); 
+                        let decryptedJson = await processMonetizationVarsContent(fetchedFileContent, 'decrypt', effectiveKeyForAutoPatch); 
+                        addLogToAutoPatcher(`Decrypted with key: ${effectiveKeyForAutoPatch === DEFAULT_CIPHER_KEY ? 'Default' : 'Custom'}.`, 'success'); 
+                        addLogToAutoPatcher("Applying 'Unlock All' patch...", 'info'); 
+                        let changedByPatch = false; 
+                        const tempJsonForPatch = JSON.parse(JSON.stringify(decryptedJson)); 
+                        for (const key in tempJsonForPatch) { 
+                            if (Object.hasOwnProperty.call(tempJsonForPatch, key)) { 
+                                if (tempJsonForPatch[key] === false) { tempJsonForPatch[key] = true; changedByPatch = true; } 
+                                else if (tempJsonForPatch[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJsonForPatch[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changedByPatch = true; } 
+                            } 
+                        } 
+                        if (changedByPatch) { decryptedJson = tempJsonForPatch; addLogToAutoPatcher("'Unlock All' applied.", 'success');} 
+                        else { addLogToAutoPatcher("No items needed 'Unlock All'.", 'info'); } 
+                        addLogToAutoPatcher("Re-encrypting...", 'info'); 
+                        const obfuscatedKey = getObfuscatedKey(effectiveKeyForAutoPatch); 
+                        let encryptedFileContent = ""; 
+                        for (const key in decryptedJson) { 
+                            if (Object.hasOwnProperty.call(decryptedJson, key)) { 
+                                const value = decryptedJson[key]; 
+                                const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); 
+                                let valueToSerializeB64; 
+                                if (typeof value === 'boolean') { valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; } 
+                                else if (typeof value === 'number' && Number.isInteger(value)) { const encryptedIntB64 = encryptInt(value); if (encryptedIntB64) { valueToSerializeB64 = encryptedIntB64; } else { valueToSerializeB64 = utf8StringToBase64(String(value)); } } 
+                                else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { valueToSerializeB64 = value; } 
+                                else { valueToSerializeB64 = utf8StringToBase64(String(value)); } 
+                                const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); 
+                                encryptedFileContent += `${cipheredKey}:${cipheredValue}\n`; 
+                            } 
+                        } 
+                        addLogToAutoPatcher("Content re-encrypted.", 'success'); 
+                        addLogToAutoPatcher("Preparing download...", 'info'); 
+                        const blob = new Blob([encryptedFileContent.trimEnd()], { type: 'application/octet-stream' }); 
+                        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); 
+                        addLogToAutoPatcher(`Patched ${TARGET_ENCRYPTED_FILENAME} downloaded!`, 'success'); 
+                        if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } 
+                    } catch (error) { 
+                        console.error("Auto-patch error:", error); 
+                        addLogToAutoPatcher(`Error: ${error.message}`, 'error'); 
+                        showToast(`Auto-patch failed: ${error.message}`, 'error'); 
+                        if(ui.autoPatchCorsNotice) {
+                            ui.autoPatchCorsNotice.textContent = `Failed to fetch the MonetizationVars file from the source. This could be due to a network issue, the server being temporarily unavailable, or a CORS policy on the remote server if using a custom URL. Please check your internet connection and the source URL (${currentMonetizationVarsSourceURL}). You can try the 'Download Original' button or manually provide the file.`;
+                            ui.autoPatchCorsNotice.classList.remove('hidden');
+                        }
+                    } finally { 
+                        if(ui.autoPatchButton) ui.autoPatchButton.disabled = false; 
+                        updateOnlineStatusIndicator();
+                    } 
+                }); 
+            }
+            
+            if(ui.unlockAllButton) { ui.unlockAllButton.addEventListener('click', () => { if (!currentJsonObject) { if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_1)."); return;} try { if (ui.jsonOutput.value) currentJsonObject = JSON.parse(ui.jsonOutput.value); else { showError("No JSON data to process."); return; }} catch (e) { showError("Invalid JSON in textarea."); return; } } if (!currentJsonObject) { showError("No JSON data to process."); return; } try { let changed = false; const tempJson = JSON.parse(JSON.stringify(currentJsonObject)); for (const key in tempJson) { if (Object.hasOwnProperty.call(tempJson, key)) { if (tempJson[key] === false) { tempJson[key] = true; changed = true; } else if (tempJson[key] === B64_NET_BOOLEAN_FALSE_STANDARD) { tempJson[key] = B64_NET_BOOLEAN_TRUE_STANDARD; changed = true; } } } if (changed) { currentJsonObject = tempJson; if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_UAB_JSO_UNDEF_2)."); return;} ui.jsonOutput.value = JSON.stringify(currentJsonObject, null, 2); if (activeMode === 'decrypt') stateForDecrypt.jsonObject = currentJsonObject; else stateForEncrypt.jsonObject = currentJsonObject; showToast("Unlocked all applicable items.", "success"); } else { showToast("No items changed by 'Unlock All'.", "info"); } } catch (e) { showError("Error during 'Unlock All': " + e.message); console.error("Unlock all error:", e); } }); }
+            if(ui.copyJsonButton) { ui.copyJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to copy.", "info"); return; } ui.jsonOutput.select(); ui.jsonOutput.setSelectionRange(0, 99999); try { const successful = document.execCommand('copy'); if (successful) { showToast('JSON copied!', 'success'); } else { console.error('execCommand("copy") failed.'); showToast('Failed to copy. Try manual.', 'error'); } } catch (err) { console.error('execCommand("copy") error: ', err); showToast('Failed to copy. Browser issue.', 'error'); } }); }
+            if(ui.downloadDecryptedJsonButton) { ui.downloadDecryptedJsonButton.addEventListener('click', () => { if (!ui.jsonOutput || !ui.jsonOutput.value) { showToast("No JSON to download.", "info"); return; } try { const jsonString = ui.jsonOutput.value; JSON.parse(jsonString); const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' }); let baseDlFilename = (stateForDecrypt.inputFileName && stateForDecrypt.inputFileName !== 'file') ? stateForDecrypt.inputFileName : 'decrypted_data'; const finalBase = baseDlFilename.includes('.') ? baseDlFilename.substring(0, baseDlFilename.lastIndexOf('.')) : baseDlFilename; const downloadFileName = `${finalBase}_decrypted.json`; const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = downloadFileName; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); showToast('Decrypted JSON download started.', 'success'); } catch (err) { showError('Invalid JSON in textarea.'); console.error("Download decrypted error:", err); } }); }
+            
+            if(ui.downloadEncryptedButton) { ui.downloadEncryptedButton.addEventListener('click', () => { 
+                 let jsonToEncrypt = currentJsonObject; 
+                 if (!jsonToEncrypt) { if (!ui.jsonOutput) { showError("Internal Error: Output area missing (ERR_DEB_JSO_UNDEF)."); return;} try { if (ui.jsonOutput.value) jsonToEncrypt = JSON.parse(ui.jsonOutput.value); else { showError("No JSON to encrypt."); return; }} catch (e) { showError("Invalid JSON in textarea."); return; } } 
+                 if (!jsonToEncrypt) { showError("No JSON to encrypt."); return; } 
+                 try { 
+                     const effectiveKeyForEncrypt = getEffectiveCipherKeyForOperation(); const obfuscatedKey = getObfuscatedKey(effectiveKeyForEncrypt); let varFileContent = ""; 
+                     for (const key in jsonToEncrypt) { if (Object.hasOwnProperty.call(jsonToEncrypt, key)) { const value = jsonToEncrypt[key]; const cipheredKey = xorAndBase64Encode(key, obfuscatedKey); let valueToSerializeB64; if (typeof value === 'boolean') { valueToSerializeB64 = value ? B64_NET_BOOLEAN_TRUE_STANDARD : B64_NET_BOOLEAN_FALSE_STANDARD; } else if (typeof value === 'number' && Number.isInteger(value)) { const encryptedIntB64 = encryptInt(value); if (encryptedIntB64) { valueToSerializeB64 = encryptedIntB64; } else { valueToSerializeB64 = utf8StringToBase64(String(value)); } } else if (value === B64_NET_BOOLEAN_TRUE_STANDARD || value === B64_NET_BOOLEAN_TRUE_VARIANT || value === B64_NET_BOOLEAN_FALSE_STANDARD) { valueToSerializeB64 = value; } else { valueToSerializeB64 = utf8StringToBase64(String(value)); } const cipheredValue = xorAndBase64Encode(valueToSerializeB64, obfuscatedKey); varFileContent += `${cipheredKey}:${cipheredValue}\n`; } } 
+                     const blob = new Blob([varFileContent.trimEnd()], { type: 'application/octet-stream' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = TARGET_ENCRYPTED_FILENAME; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); 
+                     if (showFinalDownloadWarningPreference) { showStandardModal(ui.downloadFinalWarningModal); } showToast(`Encrypted ${TARGET_ENCRYPTED_FILENAME} downloaded.`, 'success'); 
+                 } catch (e) { showError("Error encrypting: " + e.message); console.error("Download encrypted error:", e);} 
+             });}
+
+            window.addEventListener('click', (event) => { if (event.target === ui.flowchartModal) hideStandardModal(ui.flowchartModal); if (event.target === ui.downloadFinalWarningModal) hideStandardModal(ui.downloadFinalWarningModal); if (event.target === ui.sourceManagerModal) closeSourceManagerModal(); if (event.target === ui.wrongFileNameModal) hideStandardModal(ui.wrongFileNameModal); });
+
+            // Service Worker Registration (Standard)
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(registration => {
+                             console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                             registration.onupdatefound = () => {
+                                 const installingWorker = registration.installing;
+                                 if (installingWorker) {
+                                     installingWorker.onstatechange = () => {
+                                         if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                             console.log('New content available.');
+                                         }
+                                     };
+                                 }
+                             };
+                        })
+                        .catch(error => console.log('ServiceWorker registration failed: ', error));
+                });
+            }
+        });
+    </script>
+</body>
+</html>
