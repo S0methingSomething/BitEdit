@@ -1,7 +1,7 @@
 name: 🐞 Bug Report
 description: Report a bug or issue in BitEdit.
-title: "[BUG] Short description of the problem"
-labels: ["bug", "needs-triage", "Website-issues", "Processing-issues", "misc"]
+title: '[BUG] Short description of the problem'
+labels: ['bug', 'needs-triage', 'Website-issues', 'Processing-issues', 'misc']
 assignees: []
 
 body:
@@ -18,11 +18,11 @@ body:
       label: Type of Bug
       description: Please select all categories that apply to the bug you are reporting.
       options:
-        - label: "UI / Layout / General Website Bug (Visual or functional problems with the website itself)"
+        - label: 'UI / Layout / General Website Bug (Visual or functional problems with the website itself)'
           required: false
-        - label: "Processing Bug (Issues with Encryption, Decryption, File Output, or specific parameter values)"
+        - label: 'Processing Bug (Issues with Encryption, Decryption, File Output, or specific parameter values)'
           required: false
-        - label: "Other Bug (Please describe in detail below)"
+        - label: 'Other Bug (Please describe in detail below)'
           required: false
     validations:
       required: true # Ensures at least one checkbox is selected.
@@ -117,7 +117,7 @@ body:
       placeholder: e.g., v1.3.13
     validations:
       required: true
-  
+
   - type: input
     id: monetizationvars-source
     attributes:

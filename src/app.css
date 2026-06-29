@@ -1,0 +1,217 @@
+/* Import Tailwind V4 elements */
+@import 'tailwindcss';
+
+/* 
+ * The 5 Pillars of Intentional UI:
+ * 1. Typography with Character: Space Grotesk Display & JetBrains Mono Code.
+ * 2. Committed Color & Theme: Crimson/Indigo Neon Accents over Deep Dark Carbon.
+ * 3. Purposeful Motion: Enter animations, pulse, step-based LED pulses.
+ * 4. Brave Spatial Layout & Atmosphere: Noise overlays, microgrid backgrounds, structural cyber borders.
+ */
+
+@theme {
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+  --color-retro-black: #050505;
+  --color-retro-panel: #0c0c0c;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-retro-black);
+    color: #ededed;
+    overflow-x: hidden;
+    font-family: var(--font-sans);
+  }
+
+  /* Scrollbars mimicking high-density control panels */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #050505;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
+  }
+}
+
+/* Background Grid Overlay */
+.bg-grid-full {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Hard-light SVG turbulent fractal noise texture overlay */
+.texture-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  mix-blend-mode: hard-light;
+}
+
+/* Cyber Bevel & Carbon panel texture */
+.panel-textured {
+  background-color: rgba(12, 12, 12, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Textured diagonal modal hazard stripes */
+.modal-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.02) 6px,
+    rgba(255, 255, 255, 0.02) 12px
+  );
+}
+
+/* Modals */
+.modal-glass {
+  background-color: rgba(8, 8, 8, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px #000,
+    0 25px 50px -12px rgba(0, 0, 0, 0.9);
+}
+.modal {
+  transition:
+    opacity 0.15s ease,
+    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.98) translateY(5px);
+}
+.modal.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+}
+
+/* Drag & Drop controls styling */
+.drop-zone {
+  background-color: #080808;
+  border: 2px dashed #27272a;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+.drop-zone:hover {
+  border-color: #4b5563;
+  background-color: #0b0b0b;
+}
+
+/* Mechanical clicks & tactile spring dynamics */
+.btn-tactile {
+  transition:
+    transform 0.06s cubic-bezier(0, 0, 0.2, 1),
+    filter 0.06s linear;
+}
+.btn-tactile:active:not(:disabled) {
+  transform: scale(0.985) translateY(1.5px);
+  filter: brightness(0.88);
+}
+
+/* Cutout styling mimicking old command line readouts */
+.input-cutout {
+  background-color: #040404;
+  border: 1px solid #1f2025;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.9);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.input-cutout:focus {
+  outline: none;
+  border-color: #3f3f46;
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(255, 255, 255, 0.02);
+}
+
+/* LED dot states */
+.led-online {
+  background-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: ledPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.led-offline {
+  background-color: #d97706;
+  color: #d97706;
+  box-shadow: 0 0 8px #d97706;
+}
+.led-update {
+  background-color: #dc2626;
+  color: #dc2626;
+  box-shadow: 0 0 12px #dc2626;
+  animation: ledBlink 1s infinite step-end;
+}
+.led-busy {
+  background-color: #2563eb;
+  color: #2563eb;
+  box-shadow: 0 0 12px #2563eb;
+  animation: ledFlicker 0.08s infinite;
+}
+
+/* Animations */
+@keyframes ledPulse {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.4;
+    filter: brightness(0.7);
+  }
+}
+
+@keyframes ledBlink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes ledFlicker {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0.85;
+  }
+}

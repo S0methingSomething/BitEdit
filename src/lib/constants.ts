@@ -1,0 +1,47 @@
+export const CURRENT_APP_VERSION = 'v1.8.5'
+export const DEFAULT_CIPHER_KEY = 'com.wtfapps.apollo16'
+export const TARGET_ENCRYPTED_FILENAME = 'MonetizationVars'
+
+export const B64_NET_BOOLEAN_TRUE =
+  'AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAQs='
+export const B64_NET_BOOLEAN_FALSE =
+  'AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAs='
+export const B64_NET_BOOLEAN_FALSE_LEGACY =
+  'AAEAAAD/////AQAAAAAAAAAEAQAAAA5TeXN0ZW0uQm9vbGVhbgEAAAAHbV92YWx1ZQABAAw='
+
+export const USER_SERIALIZED_INT32_PREFIX = new Uint8Array([
+  0, 1, 0, 0, 0, 255, 255, 255, 255, 1, 0, 0, 0, 0, 0, 0, 0, 4, 1, 0, 0, 0, 12, 83, 121, 115, 116,
+  101, 109, 46, 73, 110, 116, 51, 50, 1, 0, 0, 0, 7, 109, 95, 118, 97, 108, 117, 101, 0, 8
+])
+export const USER_SERIALIZED_INT32_SUFFIX = new Uint8Array([11])
+export const USER_SERIALIZED_INT32_TOTAL_LENGTH =
+  USER_SERIALIZED_INT32_PREFIX.length + 4 + USER_SERIALIZED_INT32_SUFFIX.length
+
+export const OBF_CHAR_MAP: Record<number, number> = {
+  97: 122,
+  98: 109,
+  99: 121,
+  100: 108,
+  101: 120,
+  102: 107,
+  103: 119,
+  104: 106,
+  105: 118,
+  106: 105,
+  107: 117,
+  108: 104,
+  109: 116,
+  110: 103,
+  111: 115,
+  112: 102,
+  113: 114,
+  114: 101,
+  115: 113,
+  116: 100,
+  117: 112,
+  118: 99,
+  119: 111,
+  120: 98,
+  121: 110,
+  122: 97
+}
